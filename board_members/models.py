@@ -24,5 +24,6 @@ class BoardMember(models.Model):
         ('U', 'Unknown')
     ]
     job_status = models.CharField(max_length=1, choices=GENDER_INFO)
+    # short summary of this board member's responsibility.
     job_description = models.CharField(max_length=255, null=True)
 
