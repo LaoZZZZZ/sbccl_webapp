@@ -18,12 +18,12 @@ class BoardMember(models.Model):
     gender = models.CharField(max_length=1, choices=GENDER_INFO)
     # include both first and last name.
     chinese_name = models.CharField(max_length=255, null=True)
-    JOB_STATUS = [
-        ('A', 'Active'),
-        ('L', 'Leave'),
-        ('U', 'Unknown')
+    ACCOUNT_STATUS = [
+        ('R', 'Registered'),
+        ('V', 'Verified'),  # every account must be verified before usage.
+        ('D', 'Deactivated')  # the account is de-activated by admin.
     ]
-    job_status = models.CharField(max_length=1, choices=JOB_STATUS)
+    account_status = models.CharField(max_length=1, choices=ACCOUNT_STATUS)
     # short summary of this board member's responsibility.
     job_description = models.CharField(max_length=255, null=True)
 
