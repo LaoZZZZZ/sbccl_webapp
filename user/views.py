@@ -14,13 +14,14 @@ def details(request, user_name, password):
     if user.password != password:
         template = loader.get_template('not_found.html')
         return HttpResponse()
-    students = models.
     template = loader.get_template('details.html')
     return HttpResponse(template.render())
 
 # TODO(Lu): Fill in the implementation
 def sign_up(request, user_name, password):
-    pass
+    user = models.User.objects.get(user_name=user_name)
+    if user is not None:
+        return HttpResponse()
 
 # TODO(Lu): Fill in the implementation
 def reset_password(request, user_name, recovery_email):
