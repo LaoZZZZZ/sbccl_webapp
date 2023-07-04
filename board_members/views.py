@@ -41,3 +41,15 @@ def sign_up(request, user_name, password):
 # TODO(Lu): Fill in the implementation
 def reset_password(request, user_name, recovery_email):
     pass
+
+# Add a new course for the school year
+def AddCourse(request, class_name, school_year):
+    pass
+
+# add a student to a class
+def AddStudent(request, student_id, course_id):
+    pass
+
+# Update the teacher assignemnt for a course.
+def UpdateTeacherForACourse(request, teacher_id, course_id):
+    pass
