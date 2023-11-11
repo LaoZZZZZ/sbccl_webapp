@@ -21,6 +21,6 @@ class EmailSender(object):
 
 
 if __name__ == '__main__':
-    message=message = "Subject: Hi there This message is sent from sbccl."
+    message = "Subject: Hi there This message is sent from sbccl."
     email_sender = EmailSender()
     email_sender.SendEmail("luzhao1986@gmail.com", message)
