@@ -10,7 +10,6 @@ class User(models.Model):
     joined_date = models.DateField(null=True)
     password = models.CharField(max_length=255)
     phone_number = models.IntegerField(null=True)
-    user_name = models.CharField(max_length=255, null=True)
 
 # A user might have multiple students. User must add each student
 # explicit to their user profile.
