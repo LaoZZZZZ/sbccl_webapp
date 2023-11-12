@@ -1,29 +1,39 @@
 from django.shortcuts import render
 from django.template import loader
 from django.http import HttpResponse
+from django.views.decorators.http import require_http_methods
 from . import models
-   
+
+@require_http_methods(["GET"])   
 def login(request):
     template = loader.get_template('login.html')
+    print("handle login request")
     return HttpResponse(template.render())
 
-def details(request, user_name, password):
-    user = models.User.objects.get(user_name=user_name)
-    if user is None:
-        return HttpResponse()
-    if user.password != password:
+@require_http_methods(["GET"])
+def details(request):
+    print("Handling student detail request")
+    email_address = request.GET.get('email_address')
+    password = request.GET.get('password')
+    try:
+        user = models.User.objects.get(email=email_address)
+        if user.password != password:
+            raise models.User.DoesNotExist("username and password does not match!")
+    except models.User.DoesNotExist:
         template = loader.get_template('not_found.html')
-        return HttpResponse()
+        return HttpResponse(template.render())
     template = loader.get_template('details.html')
     return HttpResponse(template.render())
 
 # TODO(Lu): Fill in the implementation
+@require_http_methods(["POST"])
 def sign_up(request, user_name, password):
     user = models.User.objects.get(user_name=user_name)
     if user is not None:
         return HttpResponse()
 
 # TODO(Lu): Fill in the implementation
+@require_http_methods(["POST"])
 def reset_password(request, user_name, recovery_email):
     pass
 
