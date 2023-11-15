@@ -21,16 +21,22 @@ def details(request):
             raise models.User.DoesNotExist("username and password does not match!")
     except models.User.DoesNotExist:
         template = loader.get_template('not_found.html')
-        return HttpResponse(template.render())
+        return HttpResponse(template.render({'email_address': email_address}))
     template = loader.get_template('details.html')
+    return HttpResponse(template.render())
+
+@require_http_methods(["GET"])
+def sign_up(request):
+    template = loader.get_template('signup.html')
+    print("handle signup request")
     return HttpResponse(template.render())
 
 # TODO(Lu): Fill in the implementation
 @require_http_methods(["POST"])
-def sign_up(request, user_name, password):
-    user = models.User.objects.get(user_name=user_name)
-    if user is not None:
-        return HttpResponse()
+def sign_up_confirmation(request):
+    template = loader.get_template('signup.html')
+    print("handle signup request")
+    return HttpResponse(template.render())
 
 # TODO(Lu): Fill in the implementation
 @require_http_methods(["POST"])
