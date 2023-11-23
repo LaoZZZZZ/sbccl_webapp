@@ -2,14 +2,20 @@ from django.db import models
 
 class User(models.Model):
     # User is uniquely identified by their email.
-    email = models.CharField(max_length=255, primary_key=True)
+    email = models.CharField(max_length=255, unique=True)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     middle_name = models.CharField(max_length=255, null=True)
-    recovery_email = models.CharField(max_length=255)
     joined_date = models.DateField(null=True)
     password = models.CharField(max_length=255)
     phone_number = models.IntegerField(null=True)
+    SIGN_UP_STATUS = [
+        ('S', 'SignedUp'),
+        ('V', 'Verified')
+    ]
+    sign_up_status = models.CharField(max_length=1, choices=SIGN_UP_STATUS, null=True)
+    verification_code = models.CharField(max_length=255, null=True)
+    last_sign_up_date = models.DateField(null=True)
 
 # A user might have multiple students. User must add each student
 # explicit to their user profile.
