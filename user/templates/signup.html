@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Signup</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 16px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #toggle-btn {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <form id="submission_form" onsubmit = "return CheckSubmission()" action="/user/sign_up_confirmation/" method="post">
+        {% csrf_token %}
+        <label for="email">Email:</label>
+        <input class='plain_input' type="email" id="email" name="email" required>
+       
+        <label for="confirm_email">Confirm email:</label>
+        <input class='plain_input' type="email" id="confirm_email" name="confirm_email" required>
+
+        <div class="password_container">
+            <label id="toggled_label">Password
+            <span id="toggle_btn" onclick="togglePasswordVisibility()">👁️:</span></label>
+        </div>
+        <input type="password" id="password_input" placeholder="Enter your password" required>
+        <input type="password" id="password_confirm" placeholder='Confirm your password' required>
+
+        <label for="first_name">First name: </label>
+        <input type="first_name" id="first_name" name="first_name" required>
+        <label for="last_name">Last name: </label>
+        <input type="last_name" id="last_name" name="last_name" required>
+        <label for="Phone number">Phone number: </label>
+        <input type="tel" id="phone_number" name="phone_number" required>
+
+        <button id='submission' submit>Sign Up</button>
+    </form>
+    <script>
+        function CheckSubmission() {
+            var email = document.getElementById("email");
+            var confirmed_email = document.getElementById("confirm_email")
+            if (email.value !== confirmed_email.value) {
+                alert("Provided emails do not match.");
+                return false
+            }
+            var password = document.getElementById("password_input")
+            var confirm_password = document.getElementById("password_confirm")
+            if (password.value != confirm_password.value) {
+                alert("Provided password does not match!")
+                return false
+            }
+            if (length(password.value) < 8 ) {
+                alert("The password is too short")
+                return false
+            }
+            email.textContent = btoa(email.value)
+            password.textContent =btoa(password.value)
+            document.getElementById("password_confirm").remove()
+            document.getAnimations("confirm_email").remove()
+            return true
+        }
+
+        function TogglePasswordVisibility() {
+            var password_input = document.getElementById('password_input');
+            var confirm_password_input = document.getElementById('password_confirm');
+            var toggle_btn = document.getElementById('toggle_btn');
+            console.log(toggled_label.innerHTML)
+
+            if (password_input.type === 'password') {
+                password_input.type = 'text';
+                confirm_password_input.type = 'text'
+                toggle_btn.textContent = '👀'; // Eye open icon
+            } else {
+                password_input.type = 'password';
+                confirm_password_input.type = 'password'
+                toggle_btn.textContent = '👁️'; // Eye closed icon
+            }
+        }
+    </script>
+</body>
+
+</html>
