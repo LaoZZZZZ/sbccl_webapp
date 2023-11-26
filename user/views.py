@@ -31,7 +31,6 @@ def details(request):
 @require_http_methods(["GET"])
 def sign_up(request):
     template = loader.get_template('signup.html')
-    print(request)
     return HttpResponse(template.render(request=request))
 
 @require_http_methods(["POST"])
@@ -80,8 +79,12 @@ def verify_user(request):
     return HttpResponse(template.render())
 
 # TODO(Lu): Fill in the implementation
+@require_http_methods(["GET"])
+def reset_password(request):
+    pass
+
 @require_http_methods(["POST"])
-def reset_password(request, user_name, recovery_email):
+def confirm_resetted_password(request):
     pass
 
 # Add a student 
@@ -89,9 +92,11 @@ def add_student(request, student_info):
     pass
 
 # add a student to a course
-def register_student(request, student_id, course_id):
+@require_http_methods(["POST"])
+def add_student(request):
     pass
 
 # Remove a student from a course
-def unregister_student(request, student_id, course_id):
+@require_http_methods(["POST"])
+def remove_student(request):
     pass
