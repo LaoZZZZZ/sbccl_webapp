@@ -109,23 +109,6 @@
                 confirm_password.type = 'password'
             }
         }
-
-        function TogglePasswordVisibility() {
-            var password_input = document.getElementById('password_input');
-            var confirm_password_input = document.getElementById('password_confirm');
-            var toggle_btn = document.getElementById('toggle_btn');
-            console.log(toggled_label.innerHTML)
-
-            if (password_input.type === 'password') {
-                password_input.type = 'text';
-                confirm_password_input.type = 'text'
-                toggle_btn.textContent = '👀'; // Eye open icon
-            } else {
-                password_input.type = 'password';
-                confirm_password_input.type = 'password'
-                toggle_btn.textContent = '👁️'; // Eye closed icon
-            }
-        }
     </script>
 </body>
 
