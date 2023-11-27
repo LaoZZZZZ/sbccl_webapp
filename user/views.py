@@ -8,14 +8,19 @@ from django.db import IntegrityError
 import uuid
 
 @require_http_methods(["GET"])   
+def user(request):
+    template = loader.get_template('index.html')
+    return HttpResponse(template.render(request=request))
+
+@require_http_methods(["GET"])   
 def login(request):
     template = loader.get_template('login.html')
-    return HttpResponse(template.render())
+    return HttpResponse(template.render(request=request))
 
-@require_http_methods(["GET"])
+@require_http_methods(["POST"])
 def details(request):
-    email_address = request.GET.get('email_address')
-    password = request.GET.get('password')
+    email_address = request.POST.get('email_address')
+    password = request.POST.get('password')
     try:
         user = models.User.objects.get(email=email_address)
         if user.password != password:
@@ -24,9 +29,9 @@ def details(request):
         user.save()
     except models.User.DoesNotExist:
         template = loader.get_template('not_found.html')
-        return HttpResponse(template.render({'email_address': email_address}))
+        return HttpResponse(template.render(request=request, context={'email_address': email_address}))
     template = loader.get_template('details.html')
-    return HttpResponse(template.render())
+    return HttpResponse(template.render(request=request))
 
 @require_http_methods(["GET"])
 def sign_up(request):

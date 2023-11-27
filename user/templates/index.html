@@ -1,57 +1,105 @@
-<!-- Home page for user related page, pointing to login, sign up, registration, etc. -->
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-  <title> SBCCL User page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login/Signup/Reset Password</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 8px;
+        }
+
+        input {
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: #fff;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .links {
+            margin-top: 20px;
+        }
+
+        .links a {
+            margin-right: 15px;
+            text-decoration: none;
+            color: #3498db;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
-
 <body>
-  <div id="content">
-    <a id="main-content"></a>
-    <h1 class="title" id="page-title"> User account </h1>
-    <div class="tabs">
-      <h2 class="element-invisible">Primary tabs</h2>
-      <ul class="tabs primary">
-        <li class="active">
-          <a href="/user" class="active">Log in<span class="element-invisible">(active tab)</span></a>
-        </li>
-        <li><a href="/user/password">Request new password</a></li>
-      </ul>
-    </div>
-    <div class="content-middle">
-      <div class="region region-content">
-        <div id="block-system-main" class="block block-system">
-          <div class="content">
-            <form action="/user" method="post" id="user-login" accept-charset="UTF-8">
-              <div>
-                <div class="form-item form-type-textfield form-item-name">
-                  <label for="edit-name">Username <span class="form-required"
-                      title="This field is required.">*</span></label>
-                  <input type="text" id="edit-name" name="name" value="" size="60" maxlength="60"
-                    class="form-text required" />
-                  <div class="description">Enter your SchoolNova username.</div>
-                </div>
-                <div class="form-item form-type-password form-item-pass">
-                  <label for="edit-pass">Password <span class="form-required"
-                      title="This field is required.">*</span></label>
-                  <input type="password" id="edit-pass" name="pass" size="60" maxlength="128"
-                    class="form-text required" />
-                  <div class="description">Enter the password that accompanies your username.</div>
-                </div>
-              </div>
-              <input type="hidden" name="form_build_id" value="form-7tb23HhiwDn610zFavehqL_AhXo5cR6U19a1kN__dDw" />
-              <input type="hidden" name="form_id" value="user_login" />
-              <div class="form-actions form-wrapper" id="edit-actions"><input type="submit" id="edit-submit" name="op"
-                  value="Log in" class="form-submit" />
-              </div>
-          </div>
-          </form>
-        </div> <!-- end block content -->
-      </div> <!-- end block -->
-    </div>
-  </div>
-  <div style="clear:both"></div>
-</body>
+    <div class="container">
+        <!-- Login Form -->
+        <form id="loginForm">
+            <h2>Login</h2>
+            <label for="loginEmail">Email:</label>
+            <input type="email" id="loginEmail" name="loginEmail" required>
+            <label for="loginPassword">Password:</label>
+            <input type="password" id="loginPassword" name="loginPassword" required>
+            <button type="submit">Login</button>
+        </form>
 
+        <!-- Signup Form -->
+        <form id="signupForm" style="display: none;">
+            <h2>Sign Up</h2>
+            <label for="signupName">Name:</label>
+            <input type="text" id="signupName" name="signupName" required>
+            <label for="signupEmail">Email:</label>
+            <input type="email" id="signupEmail" name="signupEmail" required>
+            <label for="signupPassword">Password:</label>
+            <input type="password" id="signupPassword" name="signupPassword" required>
+            <button type="submit">Sign Up</button>
+        </form>
+
+        <!-- Toggle between forms -->
+        <div class="links">
+            <a href="/user/login" onclick="showForm('loginForm')">Login</a>
+            <a href="/user/sign_up" onclick="showForm('signupForm')">Sign Up</a>
+            <a href="/user/reset_password" onclick="showForm('resetPasswordForm')">Reset Password</a>
+        </div>
+    </div>
+
+    <script>
+        function showForm(formId) {
+            const forms = ['loginForm', 'signupForm', 'resetPasswordForm'];
+            forms.forEach(form => {
+                document.getElementById(form).style.display = form === formId ? 'block' : 'none';
+            });
+        }
+    </script>
+</body>
 </html>

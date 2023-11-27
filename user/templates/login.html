@@ -5,51 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Page</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        form {
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-        }
-        input {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 16px;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: #4caf50;
-            color: #ffffff;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-    </style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+    }
+
+    form {
+        padding: 20px;
+        border-radius: 8px;
+        width: 300px;
+    }
+
+    input[type=text] {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 16px;
+        box-sizing: border-box;
+    }
+
+    input[type=password] {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 16px;
+        box-sizing: border-box;
+    }
+
+    .link {
+        padding-left: 16px;
+        display: flex;
+        justify-content: left;
+        align-items: left;
+    }
+
+    .link a:hover {
+        text-decoration: underline;
+    }
+
+</style>
 </head>
 <body>
-    <form action="/user/details" method="get">
-        <label for="email_address">Email Address:</label>
-        <input type="text" id="email_address" name="email_address" required>
-        <!--TODO: Does base64 encoding to the password-->
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-        <button type="submit">Login</button>
-    </form>
-
+    <div>
+        <form id='login_form' action="/user/details/" method="post">
+            {% csrf_token %}
+            <label for="email_address">Email Address:</label><br>
+            <input type="text" id="email_address" name="email_address" required><br>
+            <label for="password">Password:</label><br>
+            <input type="password" id="password" name="password" required><br>
+            <label class="checkbox_label" for="password_checkbox">
+                <input class='checkbox_input' type="checkbox" id='password_checkbox' name='password_checkbox' onclick="ShowOrHide()"> Show password
+            </label><br><br>
+            <input type="submit" value="Login" onclick="Login()">
+        </form>
+        <a class='link' href="/user/sign_up">Sign Up</a>
+        <a class='link' href="/user/reset_password">Forget Password</a>
+    </div> 
 </body>
+<script>
+    function ShowOrHide() {
+      var check_box = document.getElementById('password_checkbox')
+      var password_input = document.getElementById('password')
+      if (check_box.checked) {
+        password_input.type = 'text';
+      } else {
+        password_input.type = 'password'
+      }
+    }
+</script>
 </html>
