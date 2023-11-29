@@ -42,7 +42,7 @@ def sign_up(request):
 def sign_up_confirmation(request):
     email_address = request.POST.get('email')
     if email_address is None or email_address == '':
-        return HttpResponse()
+        return HttpResponseBadRequest("Invalid user email!")
     # TODO(lu): Validate these fields. The basic format and 
     first_name = request.POST.get("first_name")
     last_name = request.POST.get("last_name")
@@ -83,18 +83,33 @@ def verify_user(request):
     template = loader.get_template('details.html')
     return HttpResponse(template.render())
 
-# TODO(Lu): Fill in the implementation
 @require_http_methods(["GET"])
 def reset_password(request):
-    pass
+    template = loader.get_template('reset_password.html')
+    return HttpResponse(template.render(request=request))
 
 @require_http_methods(["POST"])
-def confirm_resetted_password(request):
-    pass
-
-# Add a student 
-def add_student(request, student_info):
-    pass
+def password_reset_confirmation(request):
+   user_email = request.POST.get('email_address')
+   if user_email is None or user_email == '':
+       return HttpResponseBadRequest("No email address is provided!")
+   old_password = request.POST.get('old_password')
+   if old_password is None or old_password == '':
+       return HttpResponseBadRequest("Invalid old password!")
+   new_password = request.POST.get("new_password")
+   if new_password is None or new_password == '':
+       return HttpResponseBadRequest("Invalid new password!")
+   try:
+        user = models.User.objects.get(email=user_email)
+        if user.password != old_password:
+            return HttpResponseBadRequest("Incorrect password is provided!")
+        user.password = new_password
+        user.save()
+   except models.User.DoesNotExist:
+        template = loader.get_template('not_found.html')
+        return HttpResponse(template.render({'email_address': user_email}))
+   template = loader.get_template('details.html')
+   return HttpResponse(template.render())
 
 # add a student to a course
 @require_http_methods(["POST"])
