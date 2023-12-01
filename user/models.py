@@ -17,6 +17,10 @@ class User(models.Model):
     verification_code = models.CharField(max_length=255, null=True)
     last_sign_up_date = models.DateField(null=True)
 
+    def __str__(self):
+        return 'First name: {first_name: %s}\n Last name: {last_name: %s}'.format(
+            first_name=self.first_name, last_name=self.last_name)
+
 # A user might have multiple students. User must add each student
 # explicit to their user profile.
 class Student(models.Model):
