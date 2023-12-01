@@ -18,7 +18,7 @@ class User(models.Model):
     last_sign_up_date = models.DateField(null=True)
 
     def __str__(self):
-        return 'First name: {first_name: %s}\n Last name: {last_name: %s}'.format(
+        return 'First name: {first_name}\n Last name: {last_name}'.format(
             first_name=self.first_name, last_name=self.last_name)
 
 # A user might have multiple students. User must add each student
@@ -37,7 +37,12 @@ class Student(models.Model):
     # include both first and last name.
     chinese_name = models.CharField(max_length=255, null=True)
     joined_date = models.DateField(null=True)
+    
+    def __str__(self):
+        return 'First name: {first_name}\n Last name: {last_name}'.format(
+            first_name=self.first_name, last_name=self.last_name)
 
+# TODO(lu): Add teacher information.
 class Course(models.Model):
     class_name = models.CharField(max_length=255)
     school_year = models.DateField(null=False)
@@ -80,6 +85,7 @@ class Payment(models.Model):
         ('PR', 'PartialRefund')
     ]
     payment_status = models.CharField(max_length=2, choices=PAYMENT_STATUS)
+
 
 
 
