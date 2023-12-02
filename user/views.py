@@ -8,6 +8,10 @@ from django.db import IntegrityError
 from .user_info_retriever import UserInfoRetriever
 import uuid
 
+# For rest API
+from rest_framework import viewsets
+from .serializers import UserSerializer
+
 @require_http_methods(["GET"])   
 def user(request):
     template = loader.get_template('index.html')
@@ -125,3 +129,8 @@ def add_student(request):
 @require_http_methods(["POST"])
 def remove_student(request):
     pass
+
+# REST APIs
+class UserView(viewsets.ModelViewSet):
+    serializer_class = UserSerializer
+    queryset = models.User.objects.all()
