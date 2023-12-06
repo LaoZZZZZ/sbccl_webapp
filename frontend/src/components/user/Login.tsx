@@ -30,9 +30,7 @@ const Login = ({ onSubmit, onSignUp, onResetPassword }: Props) => {
               type="button"
               value="Login"
               onClick={() => {
-                if (isEmailValid && isPasswordValid) {
-                  onSubmit(true);
-                }
+                onSubmit(isEmailValid && isPasswordValid);
               }}
             />
             <input

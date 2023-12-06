@@ -22,6 +22,7 @@ from user import views
 
 router = routers.DefaultRouter()
 router.register(r'user', views.UserView, 'user')
+router.register(r'user/login', views.UserLogin)
 
 urlpatterns = [
 #    path('board_members/', include('board_members.urls')),

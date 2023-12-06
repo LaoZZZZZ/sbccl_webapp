@@ -134,3 +134,16 @@ def remove_student(request):
 class UserView(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     queryset = models.User.objects.all()
+
+    def get_object(self):
+        return super().get_object()(self)
+    
+    def perform_create(self, serializer):
+        return super().perform_create(serializer)
+    
+    def has_object_permission(self):
+        pass
+
+class UserLogin(viewsets.ModelViewSet):
+    serializer_class = UserSerializer
+    
