@@ -18,8 +18,10 @@ const EmailInput = ({ parentCallback }: Props) => {
         className="form-control"
         id="exampleInputEmail1"
         aria-describedby="emailHelp"
+        required
         onChange={(e) => {
-          let valid = validator.isEmail(e.target.value);
+          let valid =
+            e.target.value !== "" && validator.isEmail(e.target.value);
           if (!valid) {
             setEmailMessage("Invalid email format!");
           } else {

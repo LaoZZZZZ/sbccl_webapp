@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import PasswordInput from "../common/PasswordInput.tsx";
 import EmailInput from "../common/EmailInput.tsx";
+import Alert from "../common/Alert.tsx";
 
 interface Props {
   // login
@@ -12,21 +13,26 @@ interface Props {
 }
 
 const Login = ({ onSubmit, onSignUp, onResetPassword }: Props) => {
-  const [isEmailValid, setIsEmailValid] = useState("true");
-
+  const [isEmailValid, setIsEmailValid] = useState(false);
+  const [isPasswordValid, setIsPasswordValid] = useState(false);
   return (
     <>
       <form className="needs-validation">
         <div className="mb-3 col">
           <EmailInput parentCallback={setIsEmailValid} />
-          <PasswordInput confirmPassword={false} />
+          <PasswordInput
+            confirmPassword={false}
+            passwordValid={setIsPasswordValid}
+          />
           <div className="btn-group">
             <input
               className="btn btn-primary active"
               type="button"
               value="Login"
               onClick={() => {
-                onSubmit(isEmailValid);
+                if (isEmailValid && isPasswordValid) {
+                  onSubmit(true);
+                }
               }}
             />
             <input

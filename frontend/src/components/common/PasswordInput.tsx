@@ -28,6 +28,7 @@ const PasswordConfirmation = ({
         type={showPassword ? "text" : "password"}
         className="form-control"
         id="passwordConfirm"
+        required
         onChange={(e) => {
           matchPassword(passwordInput, e.target.value);
         }}
@@ -35,7 +36,7 @@ const PasswordConfirmation = ({
       {errorMessage === "" ? null : (
         <div
           id="passwordHelpBlock"
-          className={errorMessage === "" ? "form-text" : "text-warning"}
+          className={errorMessage === "" ? "form-text" : "text-danger"}
         >
           {errorMessage}
         </div>
@@ -47,9 +48,12 @@ const PasswordConfirmation = ({
 interface Props {
   // If true, add another input for password verification.
   confirmPassword: boolean;
+  passwordValid: (boolean) => void;
 }
 
-const PasswordInput = ({ confirmPassword }: Props) => {
+const PasswordInput = ({ confirmPassword, passwordValid }: Props) => {
+  const defaultText =
+    "Must be at least 8 characters long, contain lower, upper case letters and digits";
   const [errorMessage, setErrorMessage] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -61,11 +65,14 @@ const PasswordInput = ({ confirmPassword }: Props) => {
         minNumbers: 1,
         minLowercase: 1,
         minUppercase: 1,
+        minSymbols: 0,
       })
     ) {
       setErrorMessage("");
+      return true;
     } else {
-      setErrorMessage("Weak password");
+      setErrorMessage("Invalid password");
+      return false;
     }
   };
   return (
@@ -78,18 +85,18 @@ const PasswordInput = ({ confirmPassword }: Props) => {
         className="form-control"
         id="passwordInput"
         onChange={(e) => {
-          validate(e.target.value);
+          passwordValid(validate(e.target.value));
           setPassword(e.target.value);
         }}
+        required
       />
-      {errorMessage === "" ? null : (
-        <div
-          id="passwordHelpBlock"
-          className={errorMessage === "" ? "form-text" : "text-warning"}
-        >
-          {errorMessage}
-        </div>
-      )}
+      <div
+        id="passwordHelpBlock"
+        className={errorMessage === "" ? "form-text" : "text-danger"}
+      >
+        {errorMessage === "" ? defaultText : errorMessage}
+      </div>
+
       {confirmPassword && (
         <PasswordConfirmation
           passwordInput={password}
@@ -101,6 +108,7 @@ const PasswordInput = ({ confirmPassword }: Props) => {
           type="checkbox"
           className="form-check-input"
           id="exampleCheck1"
+          required
           onClick={() => {
             setShowPassword(!showPassword);
           }}

@@ -16,13 +16,13 @@ const TextInput = ({
 
   return (
     <div className="mb-3">
-      <label htmlFor="examplehtmlFormControlInput1" className="htmlForm-label">
+      <label htmlFor="textInput" className="htmlForm-label">
         {labelText}
       </label>
       <input
         type={inputType}
         className="form-control"
-        id="exampleFormControlInput1"
+        id="textInput"
         placeholder={placeHolder}
         required={requiredInput}
         onChange={(e) => {
