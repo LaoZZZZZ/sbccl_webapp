@@ -4,6 +4,7 @@ import PasswordInput from "../common/PasswordInput.tsx";
 import Details from "../user/Details.tsx";
 import SignUp from "../user/SignUp.tsx";
 import ResetPassword from "../user/ResetPassword.tsx";
+import Alert from "../common/Alert.tsx";
 // Some Hardcoded user information for development purpose. Read data will be loaded from the
 // backend.
 const usersList = [
@@ -32,7 +33,7 @@ const App = () => {
     <div className="container-sm">
       {userState === UserStates.StartLogin && (
         <Login
-          onSubmit={() => {
+          onSubmit={(loginReady) => {
             setUserState(UserStates.LoginSuccess);
           }}
           onSignUp={() => {
@@ -48,13 +49,23 @@ const App = () => {
 
       {userState === UserStates.StartSignUp && (
         <SignUp
-          onSubmit={() => {
-            setUserState(UserStates.StartLogin);
+          onSubmit={(signupReady) => {
+            if (signupReady) {
+              setUserState(UserStates.StartLogin);
+            }
           }}
         />
       )}
 
-      {userState === UserStates.StartResetPassword && <ResetPassword />}
+      {userState === UserStates.StartResetPassword && (
+        <ResetPassword
+          onReset={(resetSuccess) => {
+            if (resetSuccess) {
+              setUserState(UserStates.StartLogin);
+            }
+          }}
+        />
+      )}
     </div>
   );
 };

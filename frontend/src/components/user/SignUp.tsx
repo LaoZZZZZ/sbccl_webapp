@@ -9,13 +9,16 @@ interface Props {
 }
 
 const SignUp = ({ onSubmit }: Props) => {
-  const [isEmailValid, setIsEmailValid] = useState("true");
-
+  const [isEmailValid, setIsEmailValid] = useState(false);
+  const [isPasswordValid, setIsPasswordValid] = useState(false);
   return (
     <div>
       <form className="needs-validation">
         <EmailInput parentCallback={setIsEmailValid} />
-        <PasswordInput confirmPassword={true} />
+        <PasswordInput
+          confirmPassword={true}
+          passwordValid={setIsPasswordValid}
+        />
         <TextInput
           labelText="First name"
           inputType={"text"}
@@ -36,7 +39,9 @@ const SignUp = ({ onSubmit }: Props) => {
           type="button"
           value="Sign up"
           onClick={() => {
-            onSubmit(isEmailValid);
+            if (isEmailValid && isPasswordValid) {
+              onSubmit(true);
+            }
           }}
         />
       </form>
