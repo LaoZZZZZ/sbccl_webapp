@@ -130,10 +130,26 @@ def add_student(request):
 def remove_student(request):
     pass
 
+from rest_framework.decorators import action
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.response import Response
 # REST APIs
 class UserView(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
     serializer_class = UserSerializer
     queryset = models.User.objects.all()
+
+    @action(methods=['post'], detail=True)
+    def reset_password(self, request, pk=None):
+        pass
+
+    @action(methods=['post'], detail=True)
+    def login(self, request, pk=None):
+        content = {
+            'user': str(request.user),
+            'auth': str(request.auth),
+        }
+        return Response(content)
 
     def get_object(self):
         return super().get_object()(self)
@@ -146,4 +162,16 @@ class UserView(viewsets.ModelViewSet):
 
 class UserLogin(viewsets.ModelViewSet):
     serializer_class = UserSerializer
-    
+
+
+class UserLogout(viewsets.ModelViewSet):
+    pass
+
+class UserResetPassword(viewsets.ModelViewSet):
+    pass
+
+class AddStudent(viewsets.ModelViewSet):
+    pass
+
+class RemoveStudent(viewsets.ModelViewSet):
+    pass

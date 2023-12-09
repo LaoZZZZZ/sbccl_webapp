@@ -18,15 +18,11 @@ from django.contrib import admin
 from django.urls import include, path
 # rest APIs
 from rest_framework import routers
-from user import views
-
+from members.views import MemberViewSet
 router = routers.DefaultRouter()
-router.register(r'user', views.UserView, 'user')
-router.register(r'user/login', views.UserLogin)
+router.register('members', MemberViewSet, 'members' )
 
 urlpatterns = [
-#    path('board_members/', include('board_members.urls')),
-    path('user/', include('user.urls')),
     path('rest_api/', include(router.urls)),
     path('admin/', admin.site.urls),
 ]

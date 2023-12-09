@@ -1,30 +1,32 @@
 from django.db import models
+from django.contrib.auth.models import User
 
-class User(models.Model):
-    # User is uniquely identified by their email.
-    email = models.CharField(max_length=255, unique=True)
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
-    middle_name = models.CharField(max_length=255, null=True)
-    joined_date = models.DateField(null=True)
-    password = models.CharField(max_length=255)
-    phone_number = models.IntegerField(null=True)
-    SIGN_UP_STATUS = [
-        ('S', 'SignedUp'),
-        ('V', 'Verified')
-    ]
-    sign_up_status = models.CharField(max_length=1, choices=SIGN_UP_STATUS, null=True)
-    verification_code = models.CharField(max_length=255, null=True)
-    last_sign_up_date = models.DateField(null=True)
+# class User(models.Model):
+#     # User is uniquely identified by their email.
+#     email = models.CharField(max_length=255, unique=True)
+#     first_name = models.CharField(max_length=255)
+#     last_name = models.CharField(max_length=255)
+#     middle_name = models.CharField(max_length=255, null=True)
+#     joined_date = models.DateField(null=True)
+#     password = models.CharField(max_length=255)
+#     phone_number = models.IntegerField(null=True)
+#     SIGN_UP_STATUS = [
+#         ('S', 'SignedUp'),
+#         ('V', 'Verified')
+#     ]
+#     sign_up_status = models.CharField(max_length=1, choices=SIGN_UP_STATUS, null=True)
+#     verification_code = models.CharField(max_length=255, null=True)
+#     last_sign_up_date = models.DateField(null=True)
 
-    def __str__(self):
-        return 'First name: {first_name}\n Last name: {last_name}'.format(
-            first_name=self.first_name, last_name=self.last_name)
+#     def __str__(self):
+#         return 'First name: {first_name}\n Last name: {last_name}'.format(
+#             first_name=self.first_name, last_name=self.last_name)
 
 # A user might have multiple students. User must add each student
 # explicit to their user profile.
+
 class Student(models.Model):
-    parent_id = models.ForeignKey('User', on_delete=models.CASCADE)
+    parent_id = models.ForeignKey(User, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     middle_name = models.CharField(max_length=255, null=True)
@@ -61,7 +63,7 @@ class Registration(models.Model):
     school_year = models.DateField(null=False)
     course_id = models.ForeignKey('Course', on_delete=models.CASCADE)
     student = models.ForeignKey('Student', on_delete=models.CASCADE)
-    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     registration_date = models.DateField(null=False)
     # TODO(lu): need to consider un-registration/transfer.
 
@@ -69,7 +71,7 @@ class Registration(models.Model):
 class Payment(models.Model):
     registration_code = models.ForeignKey(
         'Registration', on_delete=models.CASCADE, verbose_name='Related registration')
-    user = models.ForeignKey('User', on_delete=models.CASCADE, verbose_name='Payment sender')
+    payer = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Payment sender')
     pay_date = models.DateField(null=False)
     original_amount = models.FloatField(null=False)
     amount_in_dollar = models.FloatField(null=False)
