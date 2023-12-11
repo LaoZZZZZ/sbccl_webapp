@@ -19,9 +19,8 @@ from django.urls import include, path
 # rest APIs
 from rest_framework import routers
 from members.views import MemberViewSet
-router = routers.DefaultRouter()
-router.register('members', MemberViewSet, 'members' )
-
+router = routers.SimpleRouter()
+router.register('members', MemberViewSet)
 urlpatterns = [
     path('rest_api/', include(router.urls)),
     path('admin/', admin.site.urls),

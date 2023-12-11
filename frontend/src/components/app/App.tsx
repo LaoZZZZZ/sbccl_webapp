@@ -34,7 +34,7 @@ const App = () => {
   const userLogin = async () => {
     try {
       const userLoginResponse = await axios.get(
-        "http://localhost:8000/rest_api/user"
+        "http://localhost:8000/rest_api/members/test_account/login"
       );
       console.log(userLoginResponse.statusText);
       if (userLoginResponse.status == 200) {
