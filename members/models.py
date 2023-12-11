@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+"""
+Represent the account type of the registered user.
+"""
 class Member(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     phone_number = models.IntegerField(null=True)
@@ -10,16 +13,16 @@ class Member(models.Model):
     ]
     sign_up_status = models.CharField(max_length=1, choices=SIGN_UP_STATUS, null=True)
     verification_code = models.CharField(max_length=255, null=True)
-    USER_TYPE = [
+    MEMBER_TYPE = [
         ('P', 'Parent'),
         ('B', 'BoardMember'),
         ('V', 'Volunteer'),
     ]
-    user_type = models.CharField(max_length=1, choices=USER_TYPE, null=True)
+    member_type = models.CharField(max_length=1, choices=MEMBER_TYPE, null=True)
 
     def __str__(self):
-        return 'User Id: {user_id}\n User type: {user_type}'.format(
-            user_id=self.user_id, user_type=self.user_type)
+        return 'User Id: {user_id}\n Member type: {member_type}'.format(
+            user_id=self.user_id, member_type=self.member_type)
 
 # A user might have multiple students. User must add each student
 # explicit to their user profile.

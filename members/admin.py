@@ -3,7 +3,7 @@ from .models import Member, Student, Course, Payment
 from django.contrib.auth.models import User
 
 class MemberAdmin(admin.ModelAdmin):
-    list_display = ('user_id', 'phone_number',  'user_type', 'sign_up_status')
+    list_display = ('user_id', 'phone_number',  'member_type', 'sign_up_status')
 
 class StudentAdmin(admin.ModelAdmin):
     list_display = ('first_name', "last_name", 'gender', 'joined_date')
