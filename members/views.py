@@ -4,7 +4,7 @@ from django.contrib.auth import login, logout
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
-from .serializers import UserSerializer, MemberSerializer
+from .serializers import UserSerializer, MemberSerializer, StudentSerializer
 from .models import Member
 from .permission_policies import MemberPermissions, IsStaff
 # from .authentication_policies import MemberAuthentication
@@ -112,6 +112,7 @@ class MemberViewSet(ModelViewSet):
                 return Response(status=status.HTTP_404_NOT_FOUND)
             for m in matched_members:
                 m.sign_up_status = 'V'
+                m.verification_code = null
                 m.save()
             return Response(status=status.HTTP_202_ACCEPTED)
         except User.DoesNotExist:
@@ -169,11 +170,29 @@ class MemberViewSet(ModelViewSet):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         
-    # @action(methods=['PUT'], detail=True, url_name='login', name='login user',
-    #         authentication_classes=[SessionAuthentication, BasicAuthentication],
-    #         permission_classes=[IsOwner | IsStaff])
-    # def AddStudent(self, request, pk=None):
-    #     pass
+    @action(methods=['PUT'], detail=True, url_name='add-student', name='Add student to the member',
+            authentication_classes=[SessionAuthentication, BasicAuthentication],
+            permission_classes=[permissions.IsAuthenticated])
+    def AddStudent(self, request, pk=None):
+        try:
+            serializer = StudentSerializer(data=request.data)
+            if not new_student.is_valid():
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+            user = User.objects.get(username=pk)
+            matched_member = Member.objects.get(user_id=user)
+            # Only parent can add students.
+            if matched_member.member_type != 'P':
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+            new_student = serializer.create(selializer.validated_data)
+            existing_students = Student.objects.filter(parent_id=matched_member)
+            for s in existing_students:
+                if s.first_name == new_student.first_name and s.last_name == new_student.last_name:
+                    return Response(status=status.HTTP_409_CONFLICT)
+            new_student.parent_id = matched_member
+            new_student.save()
+            return Response(status=status.HTTP_201_CREATED)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
 
     # @action(methods=['PUT'], detail=True, url_name='login', name='login user',
