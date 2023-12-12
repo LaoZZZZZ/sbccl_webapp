@@ -8,10 +8,6 @@ from django.db import IntegrityError
 from .user_info_retriever import UserInfoRetriever
 import uuid
 
-# For rest API
-from rest_framework import viewsets
-from .serializers import UserSerializer
-
 @require_http_methods(["GET"])   
 def user(request):
     template = loader.get_template('index.html')
@@ -130,6 +126,9 @@ def add_student(request):
 def remove_student(request):
     pass
 
+# For rest API
+from rest_framework import viewsets
+from .serializers import UserSerializer
 from rest_framework.decorators import action
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.response import Response

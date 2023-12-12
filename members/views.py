@@ -2,13 +2,10 @@
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout
 from django.shortcuts import get_object_or_404
-from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
-from .serializers import UserSerializer, MemberSerializer, StudentSerializer
+from .serializers import UserSerializer, MemberSerializer
 from .models import Member
-from .permission_policies import MemberPermissions, IsStaff
-# from .authentication_policies import MemberAuthentication
-from rest_framework.decorators import action, api_view, permission_classes, authentication_classes
+from rest_framework.decorators import action
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework import permissions
 from rest_framework import status
