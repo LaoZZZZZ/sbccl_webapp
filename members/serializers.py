@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Member, Student, Course, Payment, Registration
+from .models import Member, Student
 from django.contrib.auth.models import User
 import re
 import pytz
@@ -44,5 +44,9 @@ class MemberSerializer(serializers.ModelSerializer):
 class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
-        fields = ('parent_id', 'first_name', 'last_name', 'middle_name', 'gender', 'date_of_birth', 'joined_date', 'chinese_name')
+        fields = ('parent_id', 'first_name', 'last_name', 'middle_name', 'gender',
+                  'date_of_birth', 'joined_date', 'chinese_name')
+
+    def validate_date_of_birth(self):
+        pass
 

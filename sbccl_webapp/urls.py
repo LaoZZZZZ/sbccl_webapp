@@ -19,6 +19,7 @@ from django.urls import include, path
 # rest APIs
 from rest_framework import routers
 from members.views import MemberViewSet
+
 router = routers.SimpleRouter()
 router.register('members', MemberViewSet)
 urlpatterns = [

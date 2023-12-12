@@ -13,6 +13,7 @@ class Member(models.Model):
     ]
     sign_up_status = models.CharField(max_length=1, choices=SIGN_UP_STATUS, null=True)
     verification_code = models.CharField(max_length=255, null=True)
+
     MEMBER_TYPE = [
         ('P', 'Parent'),
         ('B', 'BoardMember'),

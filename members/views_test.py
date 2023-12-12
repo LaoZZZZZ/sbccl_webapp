@@ -2,8 +2,6 @@
 from rest_framework.test import APITestCase, APIRequestFactory, APIClient
 from rest_framework import status
 from .models import Member
-from .serializers import UserSerializer
-from .views import MemberViewSet
 from django.contrib.auth.models import User
 from rest_framework.test import force_authenticate
 
@@ -111,8 +109,8 @@ class MemberViewSetTest(APITestCase):
                                    {"verification_code": verification_code}, format='json')
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
         verifed_member = Member.objects.get(user_id=exist_user)
-        self.assertEqual(verified_member.sign_up_status, 'V')
-        self.assertEqual(verified_member.verification_code, '')
+        self.assertEqual(verifed_member.sign_up_status, 'V')
+        self.assertEqual(verifed_member.verification_code, '')
 
     def test_verify_user_succeed(self):
         exist_user = self.create_user('test_name', 'david@gmail.com')
