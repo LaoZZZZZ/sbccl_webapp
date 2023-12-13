@@ -44,9 +44,37 @@ class MemberSerializer(serializers.ModelSerializer):
 class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
-        fields = ('parent_id', 'first_name', 'last_name', 'middle_name', 'gender',
+        fields = ('first_name', 'last_name', 'middle_name', 'gender',
                   'date_of_birth', 'joined_date', 'chinese_name')
 
-    def validate_date_of_birth(self):
-        pass
+    def create(self, validated_data):
+        student = Student(**validated_data)
+        student.joined_date = datetime.utcnow().replace(tzinfo=pytz.utc)
+        return student
+
+    """
+    Raise ValueError if validation failed
+    """
+    def validate_date_of_birth(self, date_of_birth_str):
+        dob = datetime.strptime(str(date_of_birth_str), '%Y-%m-%d')
+        if datetime.now().year - dob.year < 5:
+            raise ValueError('Minimum age requirement is not satisfied!')
+        return dob
+    
+    def validate_first_name(self, first_name):
+        if first_name is None or first_name == '':
+            raise ValueError("First name is empty!")
+        return first_name
+    
+    def validate_last_name(self, last_name):
+        if last_name is None or last_name == '':
+            raise ValueError("Last name is empty!")
+        return last_name
+    
+    def validate_gender(self, gender):
+        if not gender or gender.upper() not in ('M', 'F', 'FEMALE', 'MALE'):
+            raise ValueError("invalid gender information!")
+        return gender
+
+
 
