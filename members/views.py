@@ -3,8 +3,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, logout
 from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
-from .serializers import UserSerializer, MemberSerializer
-from .models import Member
+from .serializers import StudentSerializer, UserSerializer, MemberSerializer
+from .models import Member, Student
 from rest_framework.decorators import action
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework import permissions
@@ -33,8 +33,6 @@ class MemberViewSet(ModelViewSet):
                                 'message':'Invalid data is provided!'
                             })
         new_user = serialized.create(serialized.validated_data)
-        print(new_user.username, new_user.password, new_user.email, new_user.last_name,
-              new_user.first_name)
         matched_users = User.objects.filter(email=new_user.email)
         if matched_users:
             return Response(status=status.HTTP_409_CONFLICT,
@@ -99,18 +97,22 @@ class MemberViewSet(ModelViewSet):
             permission_classes=[permissions.AllowAny])
     def verify_user(self, request, pk=None):
         verification_code = request.query_params.get('verification_code')
-        if verification_code is None:
+        if verification_code is None or verification_code == '':
             return Response(status=status.HTTP_400_BAD_REQUEST)
         try:
             user = User.objects.get(username=pk)
-            matched_members = models.Member.objects.filter(user_id=user.id,
-                                                           verification_code=verification_code)
+            matched_members = models.Member.objects.filter(user_id=user.id)
             if not matched_members:
                 return Response(status=status.HTTP_404_NOT_FOUND)
+            verified = False
             for m in matched_members:
-                m.sign_up_status = 'V'
-                m.verification_code = null
-                m.save()
+                if m.verification_code == verification_code:
+                    m.sign_up_status = 'V'
+                    m.verification_code = None
+                    m.save()
+                    verified = True
+            if not verified:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
             return Response(status=status.HTTP_202_ACCEPTED)
         except User.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -139,7 +141,7 @@ class MemberViewSet(ModelViewSet):
             retrieved_user.password = validated_pass 
             retrieved_user.save()
             for m in matched_members:
-                m.verification_code = ''
+                m.verification_code = None
                 m.save()
             return Response(status=status.HTTP_202_ACCEPTED)
         except ValidationError:
@@ -167,20 +169,20 @@ class MemberViewSet(ModelViewSet):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         
-    @action(methods=['PUT'], detail=True, url_name='add-student', name='Add student to the member',
+    @action(methods=['PUT'], detail=True, url_path='add-student', name='Add student to the member',
             authentication_classes=[SessionAuthentication, BasicAuthentication],
             permission_classes=[permissions.IsAuthenticated])
-    def AddStudent(self, request, pk=None):
+    def add_student(self, request, pk=None):
         try:
             serializer = StudentSerializer(data=request.data)
-            if not new_student.is_valid():
+            if not serializer.is_valid():
                 return Response(status=status.HTTP_400_BAD_REQUEST)
-            user = User.objects.get(username=pk)
+            user = User.objects.get(username=request.user.username)
             matched_member = Member.objects.get(user_id=user)
             # Only parent can add students.
             if matched_member.member_type != 'P':
                 return Response(status=status.HTTP_400_BAD_REQUEST)
-            new_student = serializer.create(selializer.validated_data)
+            new_student = serializer.create(serializer.validated_data)
             existing_students = Student.objects.filter(parent_id=matched_member)
             for s in existing_students:
                 if s.first_name == new_student.first_name and s.last_name == new_student.last_name:
