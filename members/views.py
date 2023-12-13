@@ -194,8 +194,37 @@ class MemberViewSet(ModelViewSet):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-    # @action(methods=['PUT'], detail=True, url_name='login', name='login user',
-    #         authentication_classes=[SessionAuthentication, BasicAuthentication],
-    #         permission_classes=[IsOwner | IsStaff])
-    # def RemoveStudent(self, request, pk=None):
-    #     pass    
+    @action(methods=['PUT'], detail=True, url_path='remove-student', name='Remove student from member',
+            authentication_classes=[SessionAuthentication, BasicAuthentication],
+            permission_classes=[permissions.IsAuthenticated])
+    def remove_student(self, request, pk=None):
+        try:
+            serializer = StudentSerializer(data=request.data)
+            if not serializer.is_valid():
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+            student_to_delete = serializer.create(serializer.validated_data)
+            user = User.objects.get(username=request.user.username)
+            matched_member = Member.objects.get(user_id=user)
+            # Only parent can remove students.
+            if matched_member.member_type != 'P':
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+            existing_students = Student.objects.filter(parent_id=matched_member,
+                                                       first_name=student_to_delete.first_name,
+                                                       last_name=student_to_delete.last_name)
+            for s in existing_students:
+                s.delete()
+            return Response(status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+    @action(methods=['PUT'], detail=True, url_path='register-course', name='Register a student to a course',
+            authentication_classes=[SessionAuthentication, BasicAuthentication],
+            permission_classes=[permissions.IsAuthenticated])
+    def register_course(self, request, pk=None):
+        pass
+
+    @action(methods=['PUT'], detail=True, url_path='unregister-course', name='Unregister a student to a course',
+            authentication_classes=[SessionAuthentication, BasicAuthentication],
+            permission_classes=[permissions.IsAuthenticated])
+    def unregister_course(self, request, pk=None):
+        pass   
