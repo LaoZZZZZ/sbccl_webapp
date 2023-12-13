@@ -223,8 +223,43 @@ class MemberViewSetTest(APITestCase):
                                    data=student_json, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    # def test_add_student(self):
-    #     exist_user = self.create_user('test_name', 'david@gmail.com')
-    #     self.create_member(exist_user)
+    def test_remove_student_succeed(self):
+        exist_user = self.create_user('test_name', 'david@gmail.com')
+        self.create_member(exist_user)
 
-    #     self.client.force_authenticate(user=exist_user)
+        student_json = {
+            'first_name': 'david',
+            'last_name': 'chatty',
+            'date_of_birth': '2015-10-01',
+            'gender': 'M'
+        }
+        self.client.force_authenticate(user=exist_user)
+        response = self.client.put('/rest_api/members/test_name/add-student/',
+                                   data=student_json, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        member = Member.objects.get(user_id=exist_user)
+        student = Student.objects.get(parent_id=member)
+        self.assertEqual(student.last_name, 'chatty')
+        self.assertEqual(student.first_name, 'david')
+        self.assertIsNotNone(student.joined_date)
+
+        response = self.client.put('/rest_api/members/test_name/remove-student/',
+                                   data=student_json, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_remove_non_existing_student_no_op(self):
+        exist_user = self.create_user('test_name', 'david@gmail.com')
+        self.create_member(exist_user)
+
+        student_json = {
+            'first_name': 'david',
+            'last_name': 'chatty',
+            'date_of_birth': '2015-10-01',
+            'gender': 'M'
+        }
+        self.client.force_authenticate(user=exist_user)
+
+        response = self.client.put('/rest_api/members/test_name/remove-student/',
+                                   data=student_json, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
