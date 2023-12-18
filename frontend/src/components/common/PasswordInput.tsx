@@ -48,15 +48,15 @@ const PasswordConfirmation = ({
 interface Props {
   // If true, add another input for password verification.
   confirmPassword: boolean;
-  passwordValid: (boolean) => void;
+  retrievePassword: (string) => void;
 }
 
-const PasswordInput = ({ confirmPassword, passwordValid }: Props) => {
+const PasswordInput = ({ confirmPassword, retrievePassword }: Props) => {
   const defaultText =
     "Must be at least 8 characters long, contain lower, upper case letters and digits";
   const [errorMessage, setErrorMessage] = useState("");
-  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [password, setPassword] = useState("");
 
   const validate = (password) => {
     if (
@@ -85,8 +85,10 @@ const PasswordInput = ({ confirmPassword, passwordValid }: Props) => {
         className="form-control"
         id="passwordInput"
         onChange={(e) => {
-          passwordValid(validate(e.target.value));
-          setPassword(e.target.value);
+          if (validate(e.target.value)) {
+            setPassword(e.target.value);
+            retrievePassword(e.target.value);
+          }
         }}
         required
       />

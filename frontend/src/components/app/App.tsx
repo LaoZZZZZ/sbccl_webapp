@@ -1,5 +1,12 @@
-import React, { Children, Component, useEffect, useState } from "react";
-import Login from "../user/Login.tsx";
+import React, {
+  Children,
+  Component,
+  useEffect,
+  useReducer,
+  useState,
+} from "react";
+
+import LoginPage from "../user/LoginPage.tsx";
 import Details from "../user/Details.tsx";
 import SignUp from "../user/SignUp.tsx";
 import ResetPassword from "../user/ResetPassword.tsx";
@@ -18,95 +25,175 @@ const usersList = [
   },
 ];
 
-const UserStates = {
-  StartLogin: 0, // initial state
-  StartSignUp: 1, // User wants to sign up, switch to sign up page
-  StartResetPassword: 2, // user wants to reset password, render password reset page
-  LoginReady: 3, // User entered valid credentials, ready to send login request to backend.
-  LoginSuccess: 4, // Login succeeded, render user information.
-  LoginFailure: 5, // Login failed, report error and transition back to login page (StartLogin)
+const Page = {
+  StartLogin: 0, // User is on login page
+  StartResetPassword: 2, // User is on reset password page
+  StartSignUp: 3, // user is on the sign up page
+  PostLogin: 4, // User successfully logged in, showing the user profile page.
 };
 
-const App = () => {
-  /* Default on login page*/
-  const [userState, setUserState] = useState(UserStates.StartLogin);
-  const [userData, setUserData] = useState(null);
-  const userLogin = async () => {
-    try {
-      const userLoginResponse = await axios.get(
-        "http://localhost:8000/rest_api/members/test_account/login"
-      );
-      console.log(userLoginResponse.statusText);
-      if (userLoginResponse.status == 200) {
-        setUserState(UserStates.LoginSuccess);
-        setUserData(userLoginResponse.data);
-      } else {
-        setUserState(UserStates.LoginFailure);
-      }
-    } catch (e) {}
-  };
+const UserActions = {
+  Login: 0, // User is attempting to login with entered cridential.
+  SignUp: 1, // User is attempting to sign up with entered information
+  ResetPassword: 2, // User is attempting to reset password with new password.
+  Logout: 3, // User is attempting to logout.
+};
 
-  useEffect(() => {
-    if (userState !== UserStates.LoginReady) {
-      return;
-    }
-    userLogin();
-  }, [userState, userData]);
+const userLogout = async (user_state) => {
+  await axios
+    .put("http://localhost:8000/rest_api/members/logout", {
+      user_state,
+    })
+    .then(function (response) {
+      console.log(response);
+      return {
+        page: Page.StartLogin,
+      };
+    });
+};
+
+const userSignUp = async (user_profile) => {
+  const userLoginResponse = await axios
+    .put("http://localhost:8000/rest_api/members/sign-up", {
+      user_profile,
+    })
+    .then(function (response) {
+      console.log(response);
+      if (response.status == 200) {
+        return {
+          page: Page.StartLogin,
+          // Add students here.
+        };
+      } else {
+        return {
+          page: Page.StartSignUp,
+          // Add students here.
+        };
+      }
+    });
+};
+
+const userResetPassword = async (user_state) => {
+  const userLoginResponse = await axios
+    .put("http://localhost:8000/rest_api/members/reset-password", {
+      user_state,
+    })
+    .then(function (response) {
+      console.log(response);
+      if (response.status == 200) {
+        return {
+          page: Page.PostLogin,
+          // Add students here.
+        };
+      } else {
+        return {
+          page: Page.StartResetPassword,
+          // Add students here.
+        };
+      }
+    });
+};
+
+const reducer = (user_repo, action) => {
+  switch (action.type) {
+    case UserActions.Login:
+      console.log(user_repo.user_info);
+      return { ...user_repo, page: Page.PostLogin };
+    case UserActions.Logout:
+      return {
+        page: Page.StartLogin,
+        user_info: null,
+      };
+    case UserActions.SignUp:
+      return {
+        page: Page.StartSignUp,
+        user_info: null,
+      };
+    case UserActions.ResetPassword:
+      return {
+        page: Page.StartResetPassword,
+        user_info: null,
+      };
+    default:
+      throw new Error("Unrecognized action type?");
+  }
+};
+
+const INITIAL_STATE = {
+  /* Default on login page*/
+  page: Page.StartLogin,
+  // Basic user information including
+  // a. username, password
+  // b. Auth token
+  user_info: null,
+  student: [],
+};
+
+export const UserContext = React.createContext([]);
+
+const App = () => {
+  const [user_repo, dispatch] = useReducer(reducer, INITIAL_STATE);
 
   return (
-    <div className="container-sm">
-      {userState === UserStates.StartLogin && (
-        <Login
-          onSubmit={(loginReady) => {
-            console.log("submitting");
-            if (loginReady) {
-              setUserState(UserStates.LoginReady);
-            } else {
-              console.log("failed to login");
-              setUserState(UserStates.LoginFailure);
-            }
-          }}
-          onSignUp={() => {
-            setUserState(UserStates.StartSignUp);
-          }}
-          onResetPassword={() => {
-            setUserState(UserStates.StartResetPassword);
-          }}
-        />
-      )}
+    <UserContext.Provider value={[user_repo, dispatch]}>
+      <div className="container-sm">
+        {user_repo.page === Page.StartLogin && (
+          <LoginPage
+            onSubmit={(loginReady) => {
+              console.log("submitting");
+              if (loginReady) {
+                dispatch({ type: UserActions.Login });
+              }
+            }}
+            onSignUp={() => {
+              dispatch({ type: UserActions.SignUp });
+            }}
+            onResetPassword={() => {
+              dispatch({ type: UserActions.ResetPassword });
+            }}
+          />
+        )}
 
-      {userState === UserStates.LoginSuccess && <Details />}
+        {user_repo.page === Page.PostLogin && <Details />}
 
-      {userState === UserStates.StartSignUp && (
-        <SignUp
-          onSubmit={(signupReady) => {
-            if (signupReady) {
-              setUserState(UserStates.StartLogin);
-            }
-          }}
-        />
-      )}
+        {user_repo.page === Page.StartSignUp && (
+          <SignUp
+            onSubmit={(signupReady) => {
+              if (signupReady) {
+                dispatch({ type: UserActions.Login });
+              }
+            }}
+            onBackToLogin={() => {
+              dispatch({ type: UserActions.Login });
+            }}
+          />
+        )}
 
-      {userState === UserStates.StartResetPassword && (
-        <ResetPassword
-          onReset={(resetSuccess) => {
-            if (resetSuccess) {
-              setUserState(UserStates.StartLogin);
-            }
-          }}
-        />
-      )}
-
-      {userState === UserStates.LoginFailure && (
+        {user_repo.page === Page.StartResetPassword && (
+          <ResetPassword
+            onReset={(resetSuccess) => {
+              if (resetSuccess) {
+                dispatch({ type: UserActions.Login });
+              }
+            }}
+            onBackToLogin={() => {
+              dispatch({ type: UserActions.Login });
+            }}
+          />
+        )}
+        {/* { 
+      {user_repo.user_state === UserStates.LoginFailure && (
         <Alert
           message="Invalid user credential is provided"
           parentCallback={() => {
             console.log("login failed");
-            setUserState(UserStates.StartLogin);
+            dispatch({ type: Action.StartLogin });
           }}
-        />
-      )}
-    </div>
+        /> }
+        
+      )} */}
+      </div>
+    </UserContext.Provider>
   );
 };
 

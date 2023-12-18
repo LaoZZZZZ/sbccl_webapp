@@ -64,9 +64,8 @@ class Registration(models.Model):
     # unique identifier to the registration. This code will be sent to the user too.
     confirmation_code = models.CharField(max_length=255, primary_key=True)
     school_year = models.DateField(null=False)
-    course_id = models.ForeignKey('Course', on_delete=models.CASCADE)
+    course = models.ForeignKey('Course', on_delete=models.CASCADE)
     student = models.ForeignKey('Student', on_delete=models.CASCADE)
-    # user = models.ForeignKey('sbccl_webapp.commons.User', on_delete=models.CASCADE)
     registration_date = models.DateField(null=False)
     # TODO(lu): need to consider un-registration/transfer.
 
