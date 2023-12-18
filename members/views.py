@@ -59,10 +59,10 @@ class MemberViewSet(ModelViewSet):
         }
         return Response(data=content, status=status.HTTP_201_CREATED)
 
-    @action(methods=['PUT'], detail=True, url_path='login', name='login user',
+    @action(methods=['PUT'], detail=False, url_path='login', name='login user',
             authentication_classes=[SessionAuthentication, BasicAuthentication],
             permission_classes=[permissions.IsAuthenticated])
-    def login(self, request, pk=None):
+    def login(self, request):
         try:
             matched_member = models.Member.objects.get(user_id=request.user)
             if matched_member.sign_up_status == 'S':

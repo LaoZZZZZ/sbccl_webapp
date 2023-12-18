@@ -77,7 +77,7 @@ class MemberViewSetTest(APITestCase):
         self.create_member(exist_user)
 
         self.client.force_authenticate(user=exist_user)
-        response = self.client.put('/rest_api/members/test_name/login/',format='json')
+        response = self.client.put('/rest_api/members/login/',format='json')
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
         response = self.client.put('/rest_api/members/test_name/logout/',format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)

@@ -3,9 +3,10 @@ import EmailInput from "../common/EmailInput.tsx";
 
 interface Props {
   onReset: (boolean) => void;
+  onBackToLogin: () => void;
 }
 
-const ResetPassword = ({ onReset }: Props) => {
+const ResetPassword = ({ onReset, onBackToLogin }: Props) => {
   const [isEmailValid, setIsEmailValid] = useState(false);
   return (
     <>
@@ -14,9 +15,8 @@ const ResetPassword = ({ onReset }: Props) => {
         <div className="col-auto">
           <button
             type="submit"
-            className="btn btn-primary mb-3"
+            className="btn btn-primary"
             onClick={() => {
-              console.log("email valided" + isEmailValid);
               if (isEmailValid) {
                 onReset(true);
               }
@@ -24,6 +24,14 @@ const ResetPassword = ({ onReset }: Props) => {
           >
             Reset
           </button>
+          <input
+            className="btn btn-secondary"
+            type="button"
+            value="Back to login"
+            onClick={() => {
+              onBackToLogin();
+            }}
+          />
         </div>
       </form>
     </>

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import validator from "validator";
 
 interface Props {
-  parentCallback: (boolean) => void;
+  parentCallback: (string) => void;
 }
 
 const EmailInput = ({ parentCallback }: Props) => {
@@ -26,8 +26,8 @@ const EmailInput = ({ parentCallback }: Props) => {
             setEmailMessage("Invalid email format!");
           } else {
             setEmailMessage(defaultMessage);
+            parentCallback(e.target.value);
           }
-          parentCallback(valid);
         }}
       />
       <div

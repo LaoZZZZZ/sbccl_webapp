@@ -7,3 +7,8 @@ def ValidateStudent(student_info):
 def ValidateBoardMember(board_member):
     pass
 
+def ValidateUserEmail(email):
+    pass
+
+def ValidatePasswordFormat(password):
+    pass

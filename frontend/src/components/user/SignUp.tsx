@@ -6,9 +6,10 @@ import TextInput from "../common/TextInput.tsx";
 interface Props {
   // login
   onSubmit: (boolean) => void;
+  onBackToLogin: () => void;
 }
 
-const SignUp = ({ onSubmit }: Props) => {
+const SignUp = ({ onSubmit, onBackToLogin }: Props) => {
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [isPasswordValid, setIsPasswordValid] = useState(false);
   return (
@@ -42,6 +43,14 @@ const SignUp = ({ onSubmit }: Props) => {
             if (isEmailValid && isPasswordValid) {
               onSubmit(true);
             }
+          }}
+        />
+        <input
+          className="btn btn-secondary"
+          type="button"
+          value="Back to login"
+          onClick={() => {
+            onBackToLogin();
           }}
         />
       </form>
