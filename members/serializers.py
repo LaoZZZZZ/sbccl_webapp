@@ -11,7 +11,7 @@ class LoginFormSerializer(serializers.Serializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'date_joined', 'password')
+        fields = ('username', 'email', 'first_name', 'last_name', 'password')
 
     def create(self, validated_data):
         user = User(**validated_data)

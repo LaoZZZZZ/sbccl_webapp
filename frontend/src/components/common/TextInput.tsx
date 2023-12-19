@@ -5,12 +5,14 @@ interface Props {
   inputType: string;
   placeHolder?: string;
   requiredInput?: boolean;
+  retrieveInput: (string) => void;
 }
 const TextInput = ({
   labelText,
   inputType,
   placeHolder,
   requiredInput,
+  retrieveInput,
 }: Props) => {
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -28,8 +30,10 @@ const TextInput = ({
         onChange={(e) => {
           if (e.target.value == "") {
             setErrorMessage("Please enter " + labelText);
+            retrieveInput("");
           } else {
             setErrorMessage("");
+            retrieveInput(e.target.value);
           }
         }}
       />

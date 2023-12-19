@@ -13,6 +13,8 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from members import models
 import uuid
+from rest_framework.parsers import JSONParser
+import io
 
 # REST APIs
 class MemberViewSet(ModelViewSet):
@@ -28,6 +30,7 @@ class MemberViewSet(ModelViewSet):
     def create(self, request):
         serialized = UserSerializer(data=request.data)
         if not serialized.is_valid():
+            print("Invalid user:", serialized.data)
             return Response(status=status.HTTP_400_BAD_REQUEST,
                             data={
                                 'message':'Invalid data is provided!'
@@ -40,7 +43,7 @@ class MemberViewSet(ModelViewSet):
                                 'message': 'The email already registered'
                             })
         registration_code = str(uuid.uuid5(uuid.NAMESPACE_URL, new_user.username))
-        
+        print(new_user)
         new_user.save()
         new_member = Member.objects.create(
             user_id=new_user,
