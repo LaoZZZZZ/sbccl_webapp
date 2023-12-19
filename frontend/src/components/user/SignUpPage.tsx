@@ -9,7 +9,7 @@ interface Props {
   onBackToLogin: () => void;
 }
 
-const SignUp = ({ onSubmit, onBackToLogin }: Props) => {
+const SignUpPage = ({ onSubmit, onBackToLogin }: Props) => {
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [isPasswordValid, setIsPasswordValid] = useState(false);
   return (
@@ -58,4 +58,4 @@ const SignUp = ({ onSubmit, onBackToLogin }: Props) => {
   );
 };
 
-export default SignUp;
+export default SignUpPage;

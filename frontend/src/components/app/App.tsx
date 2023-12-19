@@ -7,23 +7,13 @@ import React, {
 } from "react";
 
 import LoginPage from "../user/LoginPage.tsx";
-import Details from "../user/Details.tsx";
-import SignUp from "../user/SignUp.tsx";
-import ResetPassword from "../user/ResetPassword.tsx";
+import UserMainPage from "../user/UserMainPage.tsx";
+import SignUpPage from "../user/SignUpPage.tsx";
+import ResetPasswordPage from "../user/ResetPasswordPage.tsx";
 import axios from "axios";
 import Alert from "../common/Alert.tsx";
 // Some Hardcoded user information for development purpose. Read data will be loaded from the
 // backend.
-const usersList = [
-  {
-    email: "luzhao1986@gmail.com",
-    first_name: "Lu",
-    last_name: "Zhao",
-    joined_date: "2023-11-01",
-    id: 2,
-    sign_up_status: "V",
-  },
-];
 
 const Page = {
   StartLogin: 0, // User is on login page
@@ -98,21 +88,28 @@ const reducer = (user_repo, action) => {
   switch (action.type) {
     case UserActions.Login:
       console.log(user_repo.user_info);
-      return { ...user_repo, page: Page.PostLogin };
+      return {
+        ...user_repo,
+        page: Page.PostLogin,
+        user_info: action.user_info,
+      };
     case UserActions.Logout:
       return {
+        ...user_repo,
         page: Page.StartLogin,
         user_info: null,
       };
     case UserActions.SignUp:
       return {
+        ...user_repo,
         page: Page.StartSignUp,
-        user_info: null,
+        user_info: action.user_info,
       };
     case UserActions.ResetPassword:
       return {
+        ...user_repo,
         page: Page.StartResetPassword,
-        user_info: null,
+        user_info: action.user_info,
       };
     default:
       throw new Error("Unrecognized action type?");
@@ -154,10 +151,10 @@ const App = () => {
           />
         )}
 
-        {user_repo.page === Page.PostLogin && <Details />}
+        {user_repo.page === Page.PostLogin && <UserMainPage />}
 
         {user_repo.page === Page.StartSignUp && (
-          <SignUp
+          <SignUpPage
             onSubmit={(signupReady) => {
               if (signupReady) {
                 dispatch({ type: UserActions.Login });
@@ -170,7 +167,7 @@ const App = () => {
         )}
 
         {user_repo.page === Page.StartResetPassword && (
-          <ResetPassword
+          <ResetPasswordPage
             onReset={(resetSuccess) => {
               if (resetSuccess) {
                 dispatch({ type: UserActions.Login });

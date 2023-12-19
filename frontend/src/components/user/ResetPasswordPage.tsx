@@ -6,7 +6,7 @@ interface Props {
   onBackToLogin: () => void;
 }
 
-const ResetPassword = ({ onReset, onBackToLogin }: Props) => {
+const ResetPasswordPage = ({ onReset, onBackToLogin }: Props) => {
   const [isEmailValid, setIsEmailValid] = useState(false);
   return (
     <>
@@ -38,4 +38,4 @@ const ResetPassword = ({ onReset, onBackToLogin }: Props) => {
   );
 };
 
-export default ResetPassword;
+export default ResetPasswordPage;

@@ -24,6 +24,7 @@ const EmailInput = ({ parentCallback }: Props) => {
             e.target.value !== "" && validator.isEmail(e.target.value);
           if (!valid) {
             setEmailMessage("Invalid email format!");
+            parentCallback("");
           } else {
             setEmailMessage(defaultMessage);
             parentCallback(e.target.value);
