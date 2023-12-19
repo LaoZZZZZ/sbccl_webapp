@@ -27,14 +27,14 @@ class MemberViewSetTest(APITestCase):
         return member
 
     def test_create_member_succeed(self):
-        user_json = {'username': 'test_name', 'password': 'helloworld12H',
-                     'email': 'david@gmail.com', 'first_name': 'david', 'last_name': 'Rob'}
+        user_json = {'username': 'test3@gmail.com', 'email': 'test3@gmail.com',
+                      'first_name': 'Sandy', 'last_name': 'Zhao', 'password': 'Helloworld1'}
         response = self.client.post('/rest_api/members/', data=user_json, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Member.objects.count(), 1)
-        self.assertEqual(Member.objects.get().user_id.username, 'test_name')
-        user = User.objects.get(username='test_name')
-        self.assertEqual(user.password, 'helloworld12H')
+        self.assertEqual(Member.objects.get().user_id.username, 'test3@gmail.com')
+        user = User.objects.get(username='test3@gmail.com')
+        self.assertEqual(user.password, 'Helloworld1')
         created_member = Member.objects.get(user_id=user)
         self.assertEqual(created_member.sign_up_status, 'S')
         self.assertEqual(created_member.member_type, 'P')

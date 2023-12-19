@@ -2,16 +2,8 @@ import React, { useContext, useState } from "react";
 import PasswordInput from "../common/PasswordInput.tsx";
 import EmailInput from "../common/EmailInput.tsx";
 import axios from "axios";
-
 import { UserContext } from "../app/App.tsx";
 import Alert from "../common/Alert.tsx";
-
-const UserActions = {
-  Login: 0, // User is attempting to login with entered cridential.
-  SignUp: 1, // User is attempting to sign up with entered information
-  ResetPassword: 2, // User is attempting to reset password with new password.
-  Logout: 3, // User is attempting to logout.
-};
 
 const LoginPage = ({ onSignUp, onResetPassword }: Props) => {
   const [emailAddress, setEmailAddress] = useState("");
@@ -36,12 +28,11 @@ const LoginPage = ({ onSignUp, onResetPassword }: Props) => {
               type="button"
               value="Login"
               onClick={async () => {
-                console.log("login" + emailAddress + ":" + password);
+                console.log("login: " + emailAddress + ":" + password);
                 if (emailAddress === "" || password === "") {
                   setLoginFailed(true);
                   return;
                 }
-                console.log("sending login request");
                 await axios
                   .put(
                     "http://localhost:8000/rest_api/members/login/",
@@ -85,7 +76,7 @@ const LoginPage = ({ onSignUp, onResetPassword }: Props) => {
       </form>
       {loginFailed && (
         <Alert
-          message="Invalid user or password is provided!"
+          message="Invalid username or password is provided!"
           parentCallback={() => {
             setLoginFailed(false);
           }}
