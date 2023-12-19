@@ -111,8 +111,8 @@ const PasswordInput = ({ confirmPassword, retrievePassword }: Props) => {
           className="form-check-input"
           id="exampleCheck1"
           required
-          onClick={() => {
-            setShowPassword(!showPassword);
+          onChange={(event) => {
+            setShowPassword(event.target.checked);
           }}
         />
         <label className="form-check-label" htmlFor="exampleCheck1">

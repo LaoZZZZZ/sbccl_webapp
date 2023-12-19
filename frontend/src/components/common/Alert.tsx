@@ -1,17 +1,23 @@
-import React, { ReactNode } from 'react'
+import React, { ReactNode } from "react";
 
 interface Props {
-    message: ReactNode;
-    parentCallback: ()=>void;
+  message: ReactNode;
+  parentCallback: () => void;
 }
 
-export const Alert = ({message, parentCallback} : Props) => {
+export const Alert = ({ message, parentCallback }: Props) => {
   return (
-    <div className="alert alert-primary alert-dismissible" role="alert">
+    <div className="alert alert-danger alert-dismissible" role="alert">
       {message}
-      <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close" onClick={parentCallback}></button>
+      <button
+        type="button"
+        className="btn-close"
+        data-bs-dismiss="alert"
+        aria-label="Close"
+        onClick={parentCallback}
+      ></button>
     </div>
-  )
-}
+  );
+};
 
-export default Alert
+export default Alert;
