@@ -14,7 +14,8 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('username', 'email', 'first_name', 'last_name', 'password')
 
     def create(self, validated_data):
-        user = User(**validated_data)
+        user = User.objects.create_user(**validated_data)
+        user.set_password(validated_data['password'])
         user.date_joined = datetime.utcnow().replace(tzinfo=pytz.utc)
         return user
     

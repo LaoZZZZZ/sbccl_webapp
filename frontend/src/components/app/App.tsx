@@ -42,27 +42,6 @@ const userLogout = async (user_state) => {
     });
 };
 
-const userSignUp = async (user_profile) => {
-  const userLoginResponse = await axios
-    .put("http://localhost:8000/rest_api/members/sign-up", {
-      user_profile,
-    })
-    .then(function (response) {
-      console.log(response);
-      if (response.status == 200) {
-        return {
-          page: Page.StartLogin,
-          // Add students here.
-        };
-      } else {
-        return {
-          page: Page.StartSignUp,
-          // Add students here.
-        };
-      }
-    });
-};
-
 const userResetPassword = async (user_state) => {
   const userLoginResponse = await axios
     .put("http://localhost:8000/rest_api/members/reset-password", {
@@ -86,26 +65,26 @@ const userResetPassword = async (user_state) => {
 
 const reducer = (user_repo, action) => {
   switch (action.type) {
-    case UserActions.Login:
+    case "login":
       console.log(user_repo.user_info);
       return {
         ...user_repo,
-        page: Page.PostLogin,
+        page: Page.StartLogin,
         user_info: action.user_info,
       };
-    case UserActions.Logout:
+    case "logout":
       return {
         ...user_repo,
         page: Page.StartLogin,
         user_info: null,
       };
-    case UserActions.SignUp:
+    case "signup":
       return {
         ...user_repo,
         page: Page.StartSignUp,
         user_info: action.user_info,
       };
-    case UserActions.ResetPassword:
+    case "reset_password":
       return {
         ...user_repo,
         page: Page.StartResetPassword,
@@ -128,25 +107,21 @@ const INITIAL_STATE = {
 
 export const UserContext = React.createContext([]);
 
+const { Provider } = UserContext;
+
 const App = () => {
   const [user_repo, dispatch] = useReducer(reducer, INITIAL_STATE);
 
   return (
-    <UserContext.Provider value={[user_repo, dispatch]}>
+    <Provider value={[user_repo, dispatch]}>
       <div className="container-sm">
         {user_repo.page === Page.StartLogin && (
           <LoginPage
-            onSubmit={(loginReady) => {
-              console.log("submitting");
-              if (loginReady) {
-                dispatch({ type: UserActions.Login });
-              }
-            }}
             onSignUp={() => {
-              dispatch({ type: UserActions.SignUp });
+              dispatch({ type: "signup" });
             }}
             onResetPassword={() => {
-              dispatch({ type: UserActions.ResetPassword });
+              dispatch({ type: "reset_password" });
             }}
           />
         )}
@@ -155,13 +130,8 @@ const App = () => {
 
         {user_repo.page === Page.StartSignUp && (
           <SignUpPage
-            onSubmit={(signupReady) => {
-              if (signupReady) {
-                dispatch({ type: UserActions.Login });
-              }
-            }}
             onBackToLogin={() => {
-              dispatch({ type: UserActions.Login });
+              dispatch({ type: "login" });
             }}
           />
         )}
@@ -170,11 +140,11 @@ const App = () => {
           <ResetPasswordPage
             onReset={(resetSuccess) => {
               if (resetSuccess) {
-                dispatch({ type: UserActions.Login });
+                dispatch({ type: "login" });
               }
             }}
             onBackToLogin={() => {
-              dispatch({ type: UserActions.Login });
+              dispatch({ type: "login" });
             }}
           />
         )}
@@ -190,7 +160,7 @@ const App = () => {
         
       )} */}
       </div>
-    </UserContext.Provider>
+    </Provider>
   );
 };
 

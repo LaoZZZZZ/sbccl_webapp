@@ -34,7 +34,6 @@ class MemberViewSetTest(APITestCase):
         self.assertEqual(Member.objects.count(), 1)
         self.assertEqual(Member.objects.get().user_id.username, 'test3@gmail.com')
         user = User.objects.get(username='test3@gmail.com')
-        self.assertEqual(user.password, 'Helloworld1')
         created_member = Member.objects.get(user_id=user)
         self.assertEqual(created_member.sign_up_status, 'S')
         self.assertEqual(created_member.member_type, 'P')
@@ -105,7 +104,7 @@ class MemberViewSetTest(APITestCase):
         exist_user = self.create_user('test_name', 'david@gmail.com')
         self.create_member(exist_user, sign_up_status='S', verification_code=verification_code)
 
-        response = self.client.put('/rest_api/members/test_name/verify-user/?verification_code=12345-abc',
+        response = self.client.put('/rest_api/members/verify-user/?verification_code=12345-abc',
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
         verifed_member = Member.objects.get(user_id=exist_user)
@@ -114,7 +113,7 @@ class MemberViewSetTest(APITestCase):
 
     def test_verify_user_not_found(self):
         exist_user = self.create_user('test_name', 'david@gmail.com')
-        response = self.client.put('/rest_api/members/test_name/verify-user/?verification_code=12345-abc',
+        response = self.client.put('/rest_api/members/verify-user/?verification_code=12345-abc',
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 

@@ -30,18 +30,22 @@ const userSignUp = async (user_profile) => {
 
 interface Props {
   // login
-  onSubmit: (boolean) => void;
   onBackToLogin: () => void;
 }
 
-const SignUpPage = ({ onSubmit, onBackToLogin }: Props) => {
+const SignUpStatus = {
+  SUCCESS: 0,
+  FAILED: 1,
+};
+
+const SignUpPage = ({ onBackToLogin }: Props) => {
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
   const [lastName, setLastName] = useState("");
   const [firstName, setFirstName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
 
-  const [signupFailMsg, setSignupFailedMsg] = useState("");
+  const [signUpStatus, setSignupStatus] = useState({});
   const [, dispatch] = useContext(UserContext);
 
   return (
@@ -73,7 +77,10 @@ const SignUpPage = ({ onSubmit, onBackToLogin }: Props) => {
           value="Sign up"
           onClick={async () => {
             if (emailAddress === "" || password === "") {
-              setSignupFailedMsg("Invalid information is provided!");
+              setSignupStatus({
+                status: SignUpStatus.FAILED,
+                msg: "Invalid information is provided!",
+              });
               return;
             }
             console.log("email: " + emailAddress + " password: " + password);
@@ -93,13 +100,20 @@ const SignUpPage = ({ onSubmit, onBackToLogin }: Props) => {
               })
               .then(function (response) {
                 console.log(response);
-                if (response.status == 200) {
-                  dispatch({ action: 0, user_info });
+                if (response.status == 201) {
+                  setSignupStatus({
+                    status: SignUpStatus.SUCCESS,
+                    msg: "Well done! You successfully created an account!",
+                    data: user_info,
+                  });
                 }
               })
               .catch(function (error) {
                 console.log(error);
-                setSignupFailedMsg(error.message);
+                setSignupStatus({
+                  status: SignUpStatus.FAILED,
+                  msg: JSON.stringify(error.response.data),
+                });
               });
           }}
         />
@@ -112,11 +126,21 @@ const SignUpPage = ({ onSubmit, onBackToLogin }: Props) => {
           }}
         />
       </form>
-      {signupFailMsg !== "" && (
+      {signUpStatus["status"] === SignUpStatus.FAILED && (
         <Alert
-          message={signupFailMsg}
+          success={false}
+          message={signUpStatus["msg"]}
           parentCallback={() => {
-            setSignupFailedMsg("");
+            setSignupStatus({});
+          }}
+        />
+      )}
+      {signUpStatus["status"] === SignUpStatus.SUCCESS && (
+        <Alert
+          success={true}
+          message={signUpStatus["msg"]}
+          parentCallback={() => {
+            dispatch({ type: "login", user_info: signUpStatus["data"] });
           }}
         />
       )}

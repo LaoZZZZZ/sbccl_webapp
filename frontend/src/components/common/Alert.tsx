@@ -1,13 +1,21 @@
 import React, { ReactNode } from "react";
 
 interface Props {
+  success?: boolean;
   message: ReactNode;
   parentCallback: () => void;
 }
 
-export const Alert = ({ message, parentCallback }: Props) => {
+export const Alert = ({ success, message, parentCallback }: Props) => {
   return (
-    <div className="alert alert-danger alert-dismissible" role="alert">
+    <div
+      className={
+        success
+          ? "alert alert-success alert-dismissible"
+          : "alert alert-danger alert-dismissible"
+      }
+      role="alert"
+    >
       {message}
       <button
         type="button"
