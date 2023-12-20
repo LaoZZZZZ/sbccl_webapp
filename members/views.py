@@ -30,37 +30,29 @@ class MemberViewSet(ModelViewSet):
     def create(self, request):
         serialized = UserSerializer(data=request.data)
         if not serialized.is_valid():
-            print("Invalid user:", serialized.data)
-            return Response(status=status.HTTP_400_BAD_REQUEST,
-                            data={
-                                'message':'Invalid data is provided!'
-                            })
+            return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
         new_user = serialized.create(serialized.validated_data)
-        matched_users = User.objects.filter(email=new_user.email)
-        if matched_users:
-            return Response(status=status.HTTP_409_CONFLICT,
-                            data={
-                                'message': 'The email already registered'
-                            })
         registration_code = str(uuid.uuid5(uuid.NAMESPACE_URL, new_user.username))
-        print(new_user)
         new_user.save()
         new_member = Member.objects.create(
             user_id=new_user,
             sign_up_status='S',
             verification_code=registration_code,
             member_type='P') # parent
-        
+        if 'phone_number' in request.data:
+            new_member.phone_number = request.data['phone_number']
         # TODO(lu): Send confirmation email to the user before saving the user account.
         # new_user.email_user("account created successfully", "Congratulations!")
         new_member.save()
         content = {
             'user': serialized.validated_data,
             'auth': None,
-            'verification_url': 'rest_api/members/{username}/verify-user/?verification_code={code}'.format(
-                username=new_user.username, code=registration_code)
+            'verification_url': 'rest_api/members/verify-user/?verification_code={code}'.format(
+                code=registration_code)
         }
-        return Response(data=content, status=status.HTTP_201_CREATED)
+        response = Response(data=content, status=status.HTTP_201_CREATED)
+        response['location'] = registration_code
+        return response
 
     @action(methods=['PUT'], detail=False, url_path='login', name='login user',
             authentication_classes=[SessionAuthentication, BasicAuthentication],
@@ -95,16 +87,15 @@ class MemberViewSet(ModelViewSet):
     """
      Verify the signup for the user.
     """
-    @action(methods=['PUT'], detail=True, url_path='verify-user', name='Verify the user.',
-            authentication_classes=[BasicAuthentication],
+    @action(methods=['PUT'], detail=False, url_path='verify-user', name='Verify the user.',
+            authentication_classes=[],
             permission_classes=[permissions.AllowAny])
-    def verify_user(self, request, pk=None):
+    def verify_user(self, request):
         verification_code = request.query_params.get('verification_code')
         if verification_code is None or verification_code == '':
             return Response(status=status.HTTP_400_BAD_REQUEST)
         try:
-            user = User.objects.get(username=pk)
-            matched_members = models.Member.objects.filter(user_id=user.id)
+            matched_members = models.Member.objects.filter(verification_code=verification_code)
             if not matched_members:
                 return Response(status=status.HTTP_404_NOT_FOUND)
             verified = False
