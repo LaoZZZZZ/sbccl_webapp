@@ -79,7 +79,6 @@ class MemberViewSet(ModelViewSet):
             permission_classes=[permissions.IsAuthenticated])
     def logout(self, request, pk=None):
         try:
-            logout(request)
             return Response(status=status.HTTP_200_OK)
         except User.DoesNotExist or models.Member.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -108,6 +107,33 @@ class MemberViewSet(ModelViewSet):
             if not verified:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
             return Response(status=status.HTTP_202_ACCEPTED)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+    """
+    User forget password. They want to reset the password via a randomly generated code
+    """
+    @action(methods=['PUT'], detail=True, url_path='create-password-reset-code',
+            name='Verify the user.',
+            authentication_classes=[],
+            permission_classes=[permissions.AllowAny])
+    def create_password_reset_code(self, request, pk=None):
+        try:
+            retrieved_user = User.objects.get(username=pk)
+            matched_members = Member.objects.filter(user_id=retrieved_user)
+            if not matched_members:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+            registration_code = str(uuid.uuid5(uuid.NAMESPACE_URL, pk))
+
+            for m in matched_members:
+                m.verification_code = registration_code
+                m.save()
+            content = {
+                'verification_code': registration_code
+            }
+            return Response(content, status=status.HTTP_202_ACCEPTED)
+        except ValidationError:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         except User.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 

@@ -138,11 +138,6 @@ const App = () => {
 
         {user_repo.page === Page.StartResetPassword && (
           <ResetPasswordPage
-            onReset={(resetSuccess) => {
-              if (resetSuccess) {
-                dispatch({ type: "login" });
-              }
-            }}
             onBackToLogin={() => {
               dispatch({ type: "login" });
             }}
