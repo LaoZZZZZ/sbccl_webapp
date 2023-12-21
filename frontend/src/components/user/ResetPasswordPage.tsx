@@ -9,41 +9,44 @@ interface Props {
 }
 
 const Status = {
-  SUCCESS: 0,
-  FAILED: 1,
+  UNSPECIFIED: 0,
+  SUCCESS: 1,
+  FAILED: 2,
 };
+
 const ResetPasswordPage = ({ onBackToLogin }: Props) => {
   const [emailAddress, setEmailAddress] = useState("");
   const [, dispatch] = useContext(UserContext);
-  const [resetStatus, setResetStatus] = useState({});
+  const [resetStatus, setResetStatus] = useState({
+    status: Status.UNSPECIFIED,
+    msg: "",
+  });
 
   return (
-    <>
+    <div>
       <form className="row g-3">
         <EmailInput parentCallback={setEmailAddress} />
         <div className="col-auto">
-          <button
-            type="submit"
-            className="btn btn-primary"
+          <input
+            className="btn btn-primary active"
+            type="button"
+            value="Reset"
             onClick={async () => {
               if (emailAddress === "") {
                 setResetStatus({
                   status: Status.FAILED,
-                  msg: "No email is provided",
+                  msg: "No valid email is provided",
                 });
                 return;
               }
               const url =
-                "http://localhost:8000/rest_api/members/" +
-                emailAddress +
-                "/create-password-reset-code/";
-              console.log("url: " + url);
+                "http://localhost:8000/rest_api/members/create-password-reset-code/?email=" +
+                emailAddress;
               await axios
-                .put(url)
+                .put(url, {}, {})
                 .then(function (response) {
-                  // reset password is
+                  // reset code is created successfully.
                   if (response.status == 201) {
-                    console.log();
                     setResetStatus({
                       status: Status.SUCCESS,
                       msg: "A password reset link has been sent to your registred email.",
@@ -51,45 +54,45 @@ const ResetPasswordPage = ({ onBackToLogin }: Props) => {
                   }
                 })
                 .catch(function (error) {
-                  console.log("error: " + error.response.data);
+                  console.log(error.response.data);
                   setResetStatus({
                     status: Status.FAILED,
                     msg: JSON.stringify(error.response.data),
                   });
                 });
             }}
-          >
-            Reset
-          </button>
+          />
           <input
             className="btn btn-secondary"
             type="button"
             value="Back to login"
             onClick={() => {
+              setResetStatus({
+                status: Status.UNSPECIFIED,
+                msg: "",
+              });
               onBackToLogin();
             }}
           />
         </div>
       </form>
-      {resetStatus["status"] === Status.FAILED && (
+      {resetStatus["status"] !== Status.UNSPECIFIED && (
         <Alert
-          success={false}
+          success={resetStatus["status"] === Status.SUCCESS}
           message={resetStatus["msg"]}
           parentCallback={() => {
-            setResetStatus({});
+            if (resetStatus["status"] == Status.SUCCESS) {
+              dispatch({ type: "login" });
+            } else {
+              setResetStatus({
+                status: Status.UNSPECIFIED,
+                msg: "",
+              });
+            }
           }}
         />
       )}
-      {resetStatus["status"] === Status.SUCCESS && (
-        <Alert
-          success={true}
-          message={resetStatus["msg"]}
-          parentCallback={() => {
-            // dispatch({ type: "login" });
-          }}
-        />
-      )}
-    </>
+    </div>
   );
 };
 

@@ -111,7 +111,6 @@ const SignUpPage = ({ onBackToLogin }: Props) => {
                 }
               })
               .catch(function (error) {
-                console.log(error);
                 setSignupStatus({
                   status: SignUpStatus.FAILED,
                   msg: JSON.stringify(error.response.data),

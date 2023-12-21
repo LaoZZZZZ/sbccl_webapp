@@ -104,10 +104,10 @@ class MemberViewSetTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_create_password_reset_code(self):
-        exist_user = self.create_user('david@gmail.com', 'david@gmail.com')
+        exist_user = self.create_user('test_name', 'david@gmail.com')
         self.create_member(exist_user, sign_up_status='S')
 
-        response = self.client.put('/rest_api/members/david\@gmail.com/create-password-reset-code/',
+        response = self.client.put('/rest_api/members/create-password-reset-code/?email=david@gmail.com',
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         updated_member = Member.objects.get(user_id=exist_user)

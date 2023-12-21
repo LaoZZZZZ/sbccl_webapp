@@ -143,17 +143,6 @@ const App = () => {
             }}
           />
         )}
-        {/* { 
-      {user_repo.user_state === UserStates.LoginFailure && (
-        <Alert
-          message="Invalid user credential is provided"
-          parentCallback={() => {
-            console.log("login failed");
-            dispatch({ type: Action.StartLogin });
-          }}
-        /> }
-        
-      )} */}
       </div>
     </Provider>
   );
