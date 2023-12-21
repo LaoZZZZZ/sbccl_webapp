@@ -138,27 +138,11 @@ const App = () => {
 
         {user_repo.page === Page.StartResetPassword && (
           <ResetPasswordPage
-            onReset={(resetSuccess) => {
-              if (resetSuccess) {
-                dispatch({ type: "login" });
-              }
-            }}
             onBackToLogin={() => {
               dispatch({ type: "login" });
             }}
           />
         )}
-        {/* { 
-      {user_repo.user_state === UserStates.LoginFailure && (
-        <Alert
-          message="Invalid user credential is provided"
-          parentCallback={() => {
-            console.log("login failed");
-            dispatch({ type: Action.StartLogin });
-          }}
-        /> }
-        
-      )} */}
       </div>
     </Provider>
   );

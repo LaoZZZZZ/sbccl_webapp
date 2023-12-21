@@ -71,7 +71,8 @@ class MemberViewSet(ModelViewSet):
         except User.DoesNotExist: 
             return Response(status=status.HTTP_404_NOT_FOUND)
         except Member.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response('{username} does not exist'.format(username=request.user.username),
+                             status=status.HTTP_404_NOT_FOUND)
 
 
     @action(methods=['PUT'], detail=True, url_path='logout', name='log out user',
@@ -79,7 +80,6 @@ class MemberViewSet(ModelViewSet):
             permission_classes=[permissions.IsAuthenticated])
     def logout(self, request, pk=None):
         try:
-            logout(request)
             return Response(status=status.HTTP_200_OK)
         except User.DoesNotExist or models.Member.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -109,7 +109,36 @@ class MemberViewSet(ModelViewSet):
                 return Response(status=status.HTTP_400_BAD_REQUEST)
             return Response(status=status.HTTP_202_ACCEPTED)
         except User.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response('There is no user having the provided verification code - ' + verification_code,
+                             status=status.HTTP_404_NOT_FOUND)
+
+    """
+    User forget password. They want to reset the password via a randomly generated code
+    """
+    @action(methods=['PUT'], detail=False, url_path='create-password-reset-code',
+            name='Verify the user.',
+            authentication_classes=[],
+            permission_classes=[permissions.AllowAny])
+    def create_password_reset_code(self, request):
+        try:
+            email_address = request.query_params.get('email')
+            retrieved_user = User.objects.get(email=email_address)
+            matched_members = Member.objects.filter(user_id=retrieved_user)
+            if not matched_members:
+                return Response("The user does not exist!", status=status.HTTP_404_NOT_FOUND)
+            registration_code = str(uuid.uuid5(uuid.NAMESPACE_URL, retrieved_user.username))
+
+            for m in matched_members:
+                m.verification_code = registration_code
+                m.save()
+            response = Response(status=status.HTTP_201_CREATED)
+            response['location'] =registration_code
+            return response
+        except ValidationError:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        except User.DoesNotExist:
+            return Response("{username} does not exist!".format(username=email_address),
+                             status=status.HTTP_404_NOT_FOUND)
 
     """
     User forget password. They want to reset the password via

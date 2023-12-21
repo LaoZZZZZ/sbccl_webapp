@@ -101,15 +101,16 @@ const SignUpPage = ({ onBackToLogin }: Props) => {
               .then(function (response) {
                 console.log(response);
                 if (response.status == 201) {
+                  const confirm_msg =
+                    "Well done! You successfully created an account! An verification email has been sent to registered email";
                   setSignupStatus({
                     status: SignUpStatus.SUCCESS,
-                    msg: "Well done! You successfully created an account!",
+                    msg: confirm_msg,
                     data: user_info,
                   });
                 }
               })
               .catch(function (error) {
-                console.log(error);
                 setSignupStatus({
                   status: SignUpStatus.FAILED,
                   msg: JSON.stringify(error.response.data),

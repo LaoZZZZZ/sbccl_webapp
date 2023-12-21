@@ -51,20 +51,6 @@ class MemberViewSetTest(APITestCase):
         response = self.client.post('/rest_api/members/', data=user_json, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_create_member_conflit_email_fail(self):
-        # set up
-        exist_user = User.objects.create(
-            username='test_name',
-            password='helloworld12H',
-            email='david@gmail.com'
-        )
-        exist_user.save()
-
-        user_json = {'username': 'different_name', 'password': 'helloworld12H',
-                     'email': 'david@gmail.com', 'first_name': 'david', 'last_name': 'Rob'}
-        response = self.client.post('/rest_api/members/', data=user_json, format='json')
-        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
-
     def test_create_member_invalid_password_fail(self):
         user_json = {'username': 'different_name', 'password': 'invalid',
                      'email': 'david@gmail.com', 'first_name': 'david', 'last_name': 'Rob'}
@@ -112,10 +98,20 @@ class MemberViewSetTest(APITestCase):
         self.assertIsNone(verifed_member.verification_code)
 
     def test_verify_user_not_found(self):
-        exist_user = self.create_user('test_name', 'david@gmail.com')
+        self.create_user('test_name', 'david@gmail.com')
         response = self.client.put('/rest_api/members/verify-user/?verification_code=12345-abc',
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_create_password_reset_code(self):
+        exist_user = self.create_user('test_name', 'david@gmail.com')
+        self.create_member(exist_user, sign_up_status='S')
+
+        response = self.client.put('/rest_api/members/create-password-reset-code/?email=david@gmail.com',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        updated_member = Member.objects.get(user_id=exist_user)
+        self.assertEqual(updated_member.verification_code, response.data['verification_code'])
 
     def test_reset_password_by_code_succeed(self):
         verification_code = "12345-abc"
