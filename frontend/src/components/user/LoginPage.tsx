@@ -5,7 +5,13 @@ import axios from "axios";
 import { UserContext } from "../app/App.tsx";
 import Alert from "../common/Alert.tsx";
 
-const LoginPage = ({ onSignUp, onResetPassword }: Props) => {
+interface Props {
+  onLoginSuccess: ({}) => void;
+  onSignUp: () => void;
+  onResetPassword: () => void;
+}
+
+const LoginPage = ({ onLoginSuccess, onSignUp, onResetPassword }: Props) => {
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
   const [loginFailed, setLoginFailed] = useState(false);
@@ -28,7 +34,6 @@ const LoginPage = ({ onSignUp, onResetPassword }: Props) => {
               type="button"
               value="Login"
               onClick={async () => {
-                console.log("login: " + emailAddress + ":" + password);
                 if (emailAddress === "" || password === "") {
                   setLoginFailed(true);
                   return;
@@ -47,7 +52,7 @@ const LoginPage = ({ onSignUp, onResetPassword }: Props) => {
                   .then(function (response) {
                     if (response.status == 202) {
                       const user_info = response.data;
-                      dispatch({ type: 0, user_info });
+                      onLoginSuccess(user_info);
                     }
                   })
                   .catch(function (error) {
@@ -60,7 +65,7 @@ const LoginPage = ({ onSignUp, onResetPassword }: Props) => {
               type="button"
               value="Sign up"
               onClick={() => {
-                onSignUp(true);
+                onSignUp();
               }}
             />
             <input
@@ -68,7 +73,7 @@ const LoginPage = ({ onSignUp, onResetPassword }: Props) => {
               type="button"
               value="Reset password"
               onClick={() => {
-                onResetPassword(true);
+                onResetPassword();
               }}
             />
           </div>
@@ -76,6 +81,7 @@ const LoginPage = ({ onSignUp, onResetPassword }: Props) => {
       </form>
       {loginFailed && (
         <Alert
+          success={false}
           message="Invalid username or password is provided!"
           parentCallback={() => {
             setLoginFailed(false);

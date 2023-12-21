@@ -23,6 +23,16 @@ class MemberViewSet(ModelViewSet):
     serializer_class = MemberSerializer
     authentication_classes = [SessionAuthentication, BasicAuthentication]
 
+    def __generate_user_info__(self, user, member):
+        return {
+            'username': user.username,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'phone_number:': member.phone_number,
+            'member_type': member.member_type
+        }
+
     def list(self, request):
         serializer = self.get_serializer(self.queryset, many=True)
         return Response(serializer.data)
@@ -63,13 +73,15 @@ class MemberViewSet(ModelViewSet):
             if matched_member.sign_up_status == 'S':
                 return Response(status=status.HTTP_401_UNAUTHORIZED)
             login(request, request.user)
+            user = User.objects.get(username=request.user)
             content = {
-                'user': str(request.user),
+                'user': self.__generate_user_info__(user, matched_member),
                 'auth': str(request.auth)
             }
             return Response(content, status=status.HTTP_202_ACCEPTED)
         except User.DoesNotExist: 
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response('{username} does not exist'.format(username=request.user.username),
+                            status=status.HTTP_404_NOT_FOUND)
         except Member.DoesNotExist:
             return Response('{username} does not exist'.format(username=request.user.username),
                              status=status.HTTP_404_NOT_FOUND)
@@ -80,6 +92,7 @@ class MemberViewSet(ModelViewSet):
             permission_classes=[permissions.IsAuthenticated])
     def logout(self, request, pk=None):
         try:
+            logout(request.user)
             return Response(status=status.HTTP_200_OK)
         except User.DoesNotExist or models.Member.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
