@@ -29,6 +29,7 @@ const PasswordConfirmation = ({
         className="form-control"
         id="passwordConfirm"
         required
+        autoComplete="new-password"
         onChange={(e) => {
           matchPassword(passwordInput, e.target.value);
         }}
@@ -84,6 +85,7 @@ const PasswordInput = ({ confirmPassword, retrievePassword }: Props) => {
         type={showPassword ? "text" : "password"}
         className="form-control"
         id="passwordInput"
+        autoComplete={confirmPassword ? "current-password" : "new-password"}
         onChange={(e) => {
           if (validate(e.target.value)) {
             setPassword(e.target.value);
@@ -110,7 +112,6 @@ const PasswordInput = ({ confirmPassword, retrievePassword }: Props) => {
           type="checkbox"
           className="form-check-input"
           id="exampleCheck1"
-          required
           onChange={(event) => {
             setShowPassword(event.target.checked);
           }}

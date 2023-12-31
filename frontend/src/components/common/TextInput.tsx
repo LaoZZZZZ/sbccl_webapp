@@ -17,14 +17,14 @@ const TextInput = ({
   const [errorMessage, setErrorMessage] = useState("");
 
   return (
-    <div className="mb-3">
+    <>
       <label htmlFor="textInput" className="htmlForm-label">
         {labelText}
       </label>
       <input
         type={inputType}
         className="form-control"
-        id="textInput"
+        id={labelText}
         placeholder={placeHolder}
         required={requiredInput}
         onChange={(e) => {
@@ -39,13 +39,13 @@ const TextInput = ({
       />
       {requiredInput && errorMessage !== "" && (
         <div
-          id="textInputWarning"
+          id={labelText + "warning"}
           className={errorMessage === "" ? "form-text" : "text-warning"}
         >
           {errorMessage}
         </div>
       )}
-    </div>
+    </>
   );
 };
 

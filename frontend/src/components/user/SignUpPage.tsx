@@ -7,27 +7,6 @@ import axios from "axios";
 import { UserContext } from "../app/App.tsx";
 import Alert from "../common/Alert.tsx";
 
-const userSignUp = async (user_profile) => {
-  const userLoginResponse = await axios
-    .put("http://localhost:8000/rest_api/members/sign-up", {
-      user_profile,
-    })
-    .then(function (response) {
-      console.log(response);
-      if (response.status == 200) {
-        return {
-          page: Page.StartLogin,
-          // Add students here.
-        };
-      } else {
-        return {
-          page: Page.StartSignUp,
-          // Add students here.
-        };
-      }
-    });
-};
-
 interface Props {
   // login
   onBackToLogin: () => void;
@@ -36,6 +15,36 @@ interface Props {
 const SignUpStatus = {
   SUCCESS: 0,
   FAILED: 1,
+};
+
+const sendSignUpRequest = async (user_info, callback) => {
+  try {
+    const response = await axios.post(
+      "http://localhost:8000/rest_api/members/",
+      user_info,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log(response.status);
+    const confirm_msg =
+      "Well done! You successfully created an account! An verification email has been sent to registered email";
+    callback({
+      status: SignUpStatus.SUCCESS,
+      msg: confirm_msg,
+      data: user_info,
+    });
+    return true;
+  } catch (error) {
+    console.log(error);
+    callback({
+      status: SignUpStatus.FAILED,
+      msg: JSON.stringify(error.response.data),
+    });
+    return false;
+  }
 };
 
 const SignUpPage = ({ onBackToLogin }: Props) => {
@@ -47,6 +56,30 @@ const SignUpPage = ({ onBackToLogin }: Props) => {
 
   const [signUpStatus, setSignupStatus] = useState({});
   const [, dispatch] = useContext(UserContext);
+
+  const onSignUp = () => {
+    if (
+      emailAddress === "" ||
+      password === "" ||
+      firstName === "" ||
+      lastName === ""
+    ) {
+      setSignupStatus({
+        status: SignUpStatus.FAILED,
+        msg: "Invalid information is provided!",
+      });
+      return;
+    }
+    const user_info = {
+      username: emailAddress,
+      email: emailAddress,
+      password: password,
+      last_name: lastName,
+      first_name: firstName,
+      phone_number: phoneNumber,
+    };
+    return sendSignUpRequest(user_info, setSignupStatus);
+  };
 
   return (
     <div>
@@ -66,7 +99,7 @@ const SignUpPage = ({ onBackToLogin }: Props) => {
           retrieveInput={setLastName}
         />
         <TextInput
-          labelText="Cell phone"
+          labelText="Phone number"
           inputType={"tel"}
           requiredInput={false}
           retrieveInput={setPhoneNumber}
@@ -75,47 +108,8 @@ const SignUpPage = ({ onBackToLogin }: Props) => {
           className="btn btn-primary active"
           type="button"
           value="Sign up"
-          onClick={async () => {
-            if (emailAddress === "" || password === "") {
-              setSignupStatus({
-                status: SignUpStatus.FAILED,
-                msg: "Invalid information is provided!",
-              });
-              return;
-            }
-            console.log("email: " + emailAddress + " password: " + password);
-            const user_info = {
-              username: emailAddress,
-              email: emailAddress,
-              password: password,
-              last_name: lastName,
-              first_name: firstName,
-              phone_number: phoneNumber,
-            };
-            await axios
-              .post("http://localhost:8000/rest_api/members/", user_info, {
-                headers: {
-                  "Content-Type": "application/json",
-                },
-              })
-              .then(function (response) {
-                console.log(response);
-                if (response.status == 201) {
-                  const confirm_msg =
-                    "Well done! You successfully created an account! An verification email has been sent to registered email";
-                  setSignupStatus({
-                    status: SignUpStatus.SUCCESS,
-                    msg: confirm_msg,
-                    data: user_info,
-                  });
-                }
-              })
-              .catch(function (error) {
-                setSignupStatus({
-                  status: SignUpStatus.FAILED,
-                  msg: JSON.stringify(error.response.data),
-                });
-              });
+          onClick={() => {
+            onSignUp();
           }}
         />
         <input

@@ -38,31 +38,36 @@ class MemberViewSet(ModelViewSet):
         return Response(serializer.data)
 
     def create(self, request):
-        serialized = UserSerializer(data=request.data)
-        if not serialized.is_valid():
-            return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
-        new_user = serialized.create(serialized.validated_data)
-        registration_code = str(uuid.uuid5(uuid.NAMESPACE_URL, new_user.username))
-        new_user.save()
-        new_member = Member.objects.create(
-            user_id=new_user,
-            sign_up_status='S',
-            verification_code=registration_code,
-            member_type='P') # parent
-        if 'phone_number' in request.data:
-            new_member.phone_number = request.data['phone_number']
-        # TODO(lu): Send confirmation email to the user before saving the user account.
-        # new_user.email_user("account created successfully", "Congratulations!")
-        new_member.save()
-        content = {
-            'user': serialized.validated_data,
-            'auth': None,
-            'verification_url': 'rest_api/members/verify-user/?verification_code={code}'.format(
-                code=registration_code)
-        }
-        response = Response(data=content, status=status.HTTP_201_CREATED)
-        response['location'] = registration_code
-        return response
+        try:
+            serialized = UserSerializer(data=request.data)
+            if not serialized.is_valid():
+                return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
+            new_user = serialized.create(serialized.validated_data)
+            registration_code = str(uuid.uuid5(uuid.NAMESPACE_URL, new_user.username))
+            new_user.save()
+            new_member = Member.objects.create(
+                user_id=new_user,
+                sign_up_status='S',
+                verification_code=registration_code,
+                member_type='P') # parent
+            if 'phone_number' in request.data:
+                new_member.phone_number = request.data['phone_number']
+            # TODO(lu): Send confirmation email to the user before saving the user account.
+            # new_user.email_user("account created successfully", "Congratulations!")
+            new_member.save()
+            content = {
+                'user': serialized.validated_data,
+                'auth': None,
+                'verification_url': 'rest_api/members/verify-user/?verification_code={code}'.format(
+                    code=registration_code)
+            }
+            response = Response(data=content, status=status.HTTP_201_CREATED)
+            response['location'] = registration_code
+            return response
+        except ValueError as e:
+            # delete the user so that the user can retry.
+            new_user.delete()
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
     @action(methods=['PUT'], detail=False, url_path='login', name='login user',
             authentication_classes=[SessionAuthentication, BasicAuthentication],
