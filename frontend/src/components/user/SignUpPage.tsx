@@ -9,7 +9,6 @@ import { UserContext } from "../app/App.tsx";
 import Alert from "../common/Alert.tsx";
 
 interface Props {
-  // login
   onBackToLogin: () => void;
 }
 
@@ -39,7 +38,6 @@ const sendSignUpRequest = async (user_info, callback) => {
     });
     return true;
   } catch (error) {
-    console.log(error);
     callback({
       status: SignUpStatus.FAILED,
       msg: JSON.stringify(error.response.data),
@@ -59,7 +57,6 @@ const SignUpPage = ({ onBackToLogin }: Props) => {
   const [, dispatch] = useContext(UserContext);
 
   const onSignUp = () => {
-    console.log(emailAddress);
     if (emailAddress === "") {
       setSignupStatus({
         status: SignUpStatus.FAILED,
@@ -87,8 +84,10 @@ const SignUpPage = ({ onBackToLogin }: Props) => {
       password: password,
       last_name: lastName,
       first_name: firstName,
-      phone_number: phoneNumber,
     };
+    if (phoneNumber !== "") {
+      user_info["phone_number"] = phoneNumber;
+    }
     return sendSignUpRequest(user_info, setSignupStatus);
   };
 
@@ -156,7 +155,7 @@ const SignUpPage = ({ onBackToLogin }: Props) => {
           success={true}
           message={signUpStatus["msg"]}
           parentCallback={() => {
-            dispatch({ type: "login", user_info: signUpStatus["data"] });
+            onBackToLogin();
           }}
         />
       )}
