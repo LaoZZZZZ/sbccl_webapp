@@ -28,7 +28,6 @@ const sendSignUpRequest = async (user_info, callback) => {
         },
       }
     );
-    console.log(response.status);
     const confirm_msg =
       "Well done! You successfully created an account! An verification email has been sent to registered email";
     callback({
@@ -51,7 +50,7 @@ const SignUpPage = ({ onBackToLogin }: Props) => {
   const [password, setPassword] = useState("");
   const [lastName, setLastName] = useState("");
   const [firstName, setFirstName] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("000");
 
   const [signUpStatus, setSignupStatus] = useState({});
   const [, dispatch] = useContext(UserContext);
@@ -78,6 +77,13 @@ const SignUpPage = ({ onBackToLogin }: Props) => {
       });
       return;
     }
+    if (phoneNumber === "") {
+      setSignupStatus({
+        status: SignUpStatus.FAILED,
+        msg: "Please provide valid phone number!",
+      });
+      return;
+    }
     const user_info = {
       username: emailAddress,
       email: emailAddress,
@@ -85,6 +91,7 @@ const SignUpPage = ({ onBackToLogin }: Props) => {
       last_name: lastName,
       first_name: firstName,
     };
+    // The phone number is provided and validated.
     if (phoneNumber !== "") {
       user_info["phone_number"] = phoneNumber;
     }
