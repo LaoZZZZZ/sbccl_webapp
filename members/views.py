@@ -12,9 +12,8 @@ from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from members import models
+import utils.validators.request_validator
 import uuid
-from rest_framework.parsers import JSONParser
-import io
 
 # REST APIs
 class MemberViewSet(ModelViewSet):
@@ -38,6 +37,7 @@ class MemberViewSet(ModelViewSet):
         return Response(serializer.data)
 
     def create(self, request):
+        new_user = None
         try:
             serialized = UserSerializer(data=request.data)
             if not serialized.is_valid():
@@ -51,6 +51,9 @@ class MemberViewSet(ModelViewSet):
                 verification_code=registration_code,
                 member_type='P') # parent
             if 'phone_number' in request.data:
+                if not utils.validators.request_validator.ValidatePhoneNumber(request.data['phone_number']):
+                    return Response("Invalid phone number is provided",
+                                     status=status.HTTP_400_BAD_REQUEST)
                 new_member.phone_number = request.data['phone_number']
             # TODO(lu): Send confirmation email to the user before saving the user account.
             # new_user.email_user("account created successfully", "Congratulations!")
@@ -66,7 +69,8 @@ class MemberViewSet(ModelViewSet):
             return response
         except Exception as e:
             # delete the user so that the user can retry.
-            new_user.delete()
+            if new_user:
+                new_user.delete()
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
 
