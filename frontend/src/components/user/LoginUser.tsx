@@ -1,11 +1,8 @@
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 import PropTypes from "prop-types";
-import { UserContext } from "../app/App";
 import axios from "axios";
 
 export const LoginUser = ({ username, password }) => {
-  const [, dispatch] = useContext(UserContext);
-
   useEffect(() => {
     const login = async () => {
       const response = await axios.put(

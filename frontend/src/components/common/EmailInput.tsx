@@ -9,15 +9,16 @@ const EmailInput = ({ parentCallback }: Props) => {
   let defaultMessage = "We'll never share your email with anyone else.";
   const [emailMessage, setEmailMessage] = useState(defaultMessage);
   return (
-    <div>
+    <>
       <label htmlFor="exampleInputEmail1" className="form-label">
-        Email address
+        *Email address
       </label>
       <input
         type="email"
         className="form-control"
         id="exampleInputEmail1"
         aria-describedby="emailHelp"
+        autoComplete="username"
         required
         onChange={(e) => {
           let valid =
@@ -39,7 +40,7 @@ const EmailInput = ({ parentCallback }: Props) => {
       >
         {emailMessage}
       </div>
-    </div>
+    </>
   );
 };
 

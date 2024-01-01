@@ -2,7 +2,6 @@ import React, { useContext, useState } from "react";
 import PasswordInput from "../common/PasswordInput.tsx";
 import EmailInput from "../common/EmailInput.tsx";
 import axios from "axios";
-import { UserContext } from "../app/App.tsx";
 import Alert from "../common/Alert.tsx";
 
 interface Props {
@@ -15,8 +14,6 @@ const LoginPage = ({ onLoginSuccess, onSignUp, onResetPassword }: Props) => {
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
   const [loginFailed, setLoginFailed] = useState(false);
-
-  const [, dispatch] = useContext(UserContext);
 
   return (
     <>
