@@ -1,3 +1,5 @@
+import re
+
 def ValidateUser(user_info):
     pass
 
@@ -12,3 +14,7 @@ def ValidateUserEmail(email):
 
 def ValidatePasswordFormat(password):
     pass
+
+def ValidatePhoneNumber(phone_number):
+    pattern = "^\\+?\\d{1,4}?[-.\\s]?\\(?\\d{1,3}?\\)?[-.\\s]?\\d{1,4}[-.\\s]?\\d{1,4}[-.\\s]?\\d{1,9}$"
+    return re.match(pattern, phone_number.strip())

@@ -64,10 +64,11 @@ class MemberViewSet(ModelViewSet):
             response = Response(data=content, status=status.HTTP_201_CREATED)
             response['location'] = registration_code
             return response
-        except ValueError as e:
+        except Exception as e:
             # delete the user so that the user can retry.
             new_user.delete()
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+
 
     @action(methods=['PUT'], detail=False, url_path='login', name='login user',
             authentication_classes=[SessionAuthentication, BasicAuthentication],

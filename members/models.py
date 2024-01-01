@@ -6,7 +6,7 @@ Represent the account type of the registered user.
 """
 class Member(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    phone_number = models.IntegerField(null=True)
+    phone_number = models.CharField(null=True)
     SIGN_UP_STATUS = [
         ('S', 'SignedUp'),
         ('V', 'Verified')
