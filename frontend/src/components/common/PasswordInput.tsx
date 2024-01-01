@@ -79,7 +79,7 @@ const PasswordInput = ({ confirmPassword, retrievePassword }: Props) => {
   return (
     <div className="mb-3">
       <label htmlFor="passwordInput" className="form-label">
-        Password
+        *Password
       </label>
       <input
         type={showPassword ? "text" : "password"}

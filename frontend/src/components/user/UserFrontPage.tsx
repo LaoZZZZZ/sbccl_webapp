@@ -13,7 +13,6 @@ const Page = {
 const reducer = (userState, action) => {
   switch (action.type) {
     case "login":
-      console.log(userState.user_info);
       return {
         ...userState,
         page: Page.StartLogin,

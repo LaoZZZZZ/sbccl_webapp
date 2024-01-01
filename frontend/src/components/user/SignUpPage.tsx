@@ -2,6 +2,7 @@ import React, { useContext, useState } from "react";
 import PasswordInput from "../common/PasswordInput.tsx";
 import EmailInput from "../common/EmailInput.tsx";
 import TextInput from "../common/TextInput.tsx";
+import validator from "validator";
 
 import axios from "axios";
 import { UserContext } from "../app/App.tsx";
@@ -58,15 +59,25 @@ const SignUpPage = ({ onBackToLogin }: Props) => {
   const [, dispatch] = useContext(UserContext);
 
   const onSignUp = () => {
-    if (
-      emailAddress === "" ||
-      password === "" ||
-      firstName === "" ||
-      lastName === ""
-    ) {
+    console.log(emailAddress);
+    if (emailAddress === "") {
       setSignupStatus({
         status: SignUpStatus.FAILED,
-        msg: "Invalid information is provided!",
+        msg: "Please provide a valid email address!",
+      });
+      return;
+    }
+    if (password === "") {
+      setSignupStatus({
+        status: SignUpStatus.FAILED,
+        msg: "Please enter a valid password!",
+      });
+      return;
+    }
+    if (firstName === "" || lastName === "") {
+      setSignupStatus({
+        status: SignUpStatus.FAILED,
+        msg: "Please provide valid name!",
       });
       return;
     }
@@ -91,18 +102,28 @@ const SignUpPage = ({ onBackToLogin }: Props) => {
           inputType={"text"}
           requiredInput={true}
           retrieveInput={setFirstName}
+          validationFunc={(value) => {
+            return validator.isAlpha(value);
+          }}
         />
         <TextInput
           labelText="Last name"
           inputType={"text"}
           requiredInput={true}
           retrieveInput={setLastName}
+          validationFunc={(value) => {
+            return validator.isAlpha(value);
+          }}
         />
         <TextInput
           labelText="Phone number"
           inputType={"tel"}
           requiredInput={false}
           retrieveInput={setPhoneNumber}
+          validationFunc={(phone_number) => {
+            // phone number is no required so empty string is acceptable input.
+            return phone_number === "" || validator.isMobilePhone(phone_number);
+          }}
         />
         <input
           className="btn btn-primary active"

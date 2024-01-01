@@ -6,6 +6,8 @@ interface Props {
   placeHolder?: string;
   requiredInput?: boolean;
   retrieveInput: (string) => void;
+  // returns true if the value is valid.
+  validationFunc: (string) => boolean;
 }
 const TextInput = ({
   labelText,
@@ -13,13 +15,14 @@ const TextInput = ({
   placeHolder,
   requiredInput,
   retrieveInput,
+  validationFunc,
 }: Props) => {
   const [errorMessage, setErrorMessage] = useState("");
-
+  const completeLabel = (requiredInput ? "*" : "").concat(labelText);
   return (
     <>
       <label htmlFor="textInput" className="htmlForm-label">
-        {labelText}
+        {completeLabel}
       </label>
       <input
         type={inputType}
@@ -28,16 +31,16 @@ const TextInput = ({
         placeholder={placeHolder}
         required={requiredInput}
         onChange={(e) => {
-          if (e.target.value == "") {
-            setErrorMessage("Please enter " + labelText);
+          if (!validationFunc(e.target.value)) {
+            setErrorMessage("Please provide valid " + labelText);
             retrieveInput("");
-          } else {
-            setErrorMessage("");
-            retrieveInput(e.target.value);
+            return;
           }
+          setErrorMessage("");
+          retrieveInput(e.target.value);
         }}
       />
-      {requiredInput && errorMessage !== "" && (
+      {errorMessage !== "" && (
         <div
           id={labelText + "warning"}
           className={errorMessage === "" ? "form-text" : "text-warning"}

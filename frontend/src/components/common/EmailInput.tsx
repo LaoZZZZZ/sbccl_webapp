@@ -11,7 +11,7 @@ const EmailInput = ({ parentCallback }: Props) => {
   return (
     <>
       <label htmlFor="exampleInputEmail1" className="form-label">
-        Email address
+        *Email address
       </label>
       <input
         type="email"
