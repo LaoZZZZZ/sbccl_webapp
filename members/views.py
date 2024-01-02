@@ -73,7 +73,6 @@ class MemberViewSet(ModelViewSet):
             response['location'] = registration_code
             return response
         except Exception as e:
-            print(str(e))
             # delete the user so that the user can retry.
             if new_user:
                 new_user.delete()
