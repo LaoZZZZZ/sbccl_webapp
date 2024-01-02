@@ -58,16 +58,22 @@ class MemberViewSet(ModelViewSet):
             # TODO(lu): Send confirmation email to the user before saving the user account.
             # new_user.email_user("account created successfully", "Congratulations!")
             new_member.save()
+            verification_url = 'http://localhost:8000/rest_api/members/verify-user/?verification_code={code}'.format(
+                    code=registration_code)
+            msg = "Thanks for registering account in SBCCL school. Please click {link} to verify this account.".format(link=verification_url)
+            new_user.email_user(
+                subject="Registration confirmation",
+                message=msg)
             content = {
                 'user': serialized.validated_data,
                 'auth': None,
-                'verification_url': 'rest_api/members/verify-user/?verification_code={code}'.format(
-                    code=registration_code)
+                'verification_url': verification_url
             }
             response = Response(data=content, status=status.HTTP_201_CREATED)
             response['location'] = registration_code
             return response
         except Exception as e:
+            print(str(e))
             # delete the user so that the user can retry.
             if new_user:
                 new_user.delete()

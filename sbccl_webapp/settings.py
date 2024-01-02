@@ -63,6 +63,23 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'sbccl_webapp.urls'
 
+# Emails sent to the admins when there is server errors
+# SERVER_EMAIL = 'ccl_admin@sbcclny.com'
+#ADMINS = [
+#    ("Lu Zhao", "luzhao@sbcclny.com")
+#]
+
+# Email setting for normal user workflows including password reset, sign up, etc.
+DEFAULT_FROM_EMAIL = 'no-reply@sbcclny.com'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_PASSWORD = 'sbccl_email_sender'
+EMAIL_HOST_USER = 'no-reply@sbcclny.com'
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+EMAIL_TIMEOUT = 5
+# it's a default setting but still want to explicitly set it as we're using smtp server.
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
