@@ -55,8 +55,6 @@ class MemberViewSet(ModelViewSet):
                     return Response("Invalid phone number is provided",
                                      status=status.HTTP_400_BAD_REQUEST)
                 new_member.phone_number = request.data['phone_number']
-            # TODO(lu): Send confirmation email to the user before saving the user account.
-            # new_user.email_user("account created successfully", "Congratulations!")
             new_member.save()
             verification_url = 'http://localhost:8000/rest_api/members/verify-user/?verification_code={code}'.format(
                     code=registration_code)
@@ -73,7 +71,7 @@ class MemberViewSet(ModelViewSet):
             response['location'] = registration_code
             return response
         except Exception as e:
-            # delete the user so that the user can retry.
+            # User can not login for unverified account. Delete the user so that the user can retry.
             if new_user:
                 new_user.delete()
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
