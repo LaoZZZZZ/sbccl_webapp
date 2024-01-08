@@ -56,8 +56,7 @@ class MemberViewSet(ModelViewSet):
                                      status=status.HTTP_400_BAD_REQUEST)
                 new_member.phone_number = request.data['phone_number']
             new_member.save()
-            verification_url = 'http://localhost:8000/rest_api/members/verify-user/?verification_code={code}'.format(
-                    code=registration_code)
+            verification_url = 'http://localhost:3000/verify-user/?{code}'.format(code=registration_code)
             msg = "Thanks for registering account in SBCCL school. Please click {link} to verify this account.".format(link=verification_url)
             new_user.email_user(
                 subject="Registration confirmation",
@@ -118,24 +117,26 @@ class MemberViewSet(ModelViewSet):
             permission_classes=[permissions.AllowAny])
     def verify_user(self, request):
         verification_code = request.query_params.get('verification_code')
+        email = request.query_params.get('email')
         if verification_code is None or verification_code == '':
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response("No verification code is provided!",status=status.HTTP_400_BAD_REQUEST)
+        if email is None:
+            return Response("No email was provided!", status=status.HTTP_400_BAD_REQUEST)
         try:
-            matched_members = models.Member.objects.filter(verification_code=verification_code)
-            if not matched_members:
-                return Response(status=status.HTTP_404_NOT_FOUND)
-            verified = False
-            for m in matched_members:
-                if m.verification_code == verification_code:
-                    m.sign_up_status = 'V'
-                    m.verification_code = None
-                    m.save()
-                    verified = True
-            if not verified:
-                return Response(status=status.HTTP_400_BAD_REQUEST)
+            user = User.objects.get(username=email)
+            matched_members = models.Member.objects.get(user_id=user)
+            # User has already been verified
+            if matched_members.sign_up_status == 'V':
+                return Response("The user has already been verified!",
+                                status=status.HTTP_409_CONFLICT)
+            if matched_members.verification_code != verification_code:
+                return Response("Incorrect verification code is provided!",status=status.HTTP_400_BAD_REQUEST)
+            matched_members.sign_up_status = 'V'
+            matched_members.verification_code = None
+            matched_members.save()
             return Response(status=status.HTTP_202_ACCEPTED)
-        except User.DoesNotExist:
-            return Response('There is no user having the provided verification code - ' + verification_code,
+        except User.DoesNotExist or Member.DoesNotExist:
+            return Response('There is no user registered with - ' + email,
                              status=status.HTTP_404_NOT_FOUND)
 
     """

@@ -15,11 +15,8 @@ import { element } from "prop-types";
 
 const router = createBrowserRouter(
   createRoutesFromElements([
-    <Route path="/login" element={<App />}></Route>,
-    <Route
-      path="/verify-user/:verification_code"
-      element={<VerifyUser />}
-    ></Route>,
+    <Route path="/login" element={<App />} />,
+    <Route path="/verify-user/:verification_code" element={<VerifyUser />} />,
   ])
 );
 
