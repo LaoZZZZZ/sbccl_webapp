@@ -99,7 +99,7 @@ const SignUpPage = ({ onBackToLogin }: Props) => {
   };
 
   return (
-    <div>
+    <div className="container-sm">
       <form className="needs-validation">
         <EmailInput parentCallback={setEmailAddress} />
         <PasswordInput confirmPassword={true} retrievePassword={setPassword} />
