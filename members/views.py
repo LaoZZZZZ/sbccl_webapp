@@ -56,7 +56,7 @@ class MemberViewSet(ModelViewSet):
                                      status=status.HTTP_400_BAD_REQUEST)
                 new_member.phone_number = request.data['phone_number']
             new_member.save()
-            verification_url = 'http://localhost:3000/verify-user/?{code}'.format(code=registration_code)
+            verification_url = 'http://localhost:3000/verify-user/{code}'.format(code=registration_code)
             msg = "Thanks for registering account in SBCCL school. Please click {link} to verify this account.".format(link=verification_url)
             new_user.email_user(
                 subject="Registration confirmation",

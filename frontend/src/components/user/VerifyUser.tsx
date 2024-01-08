@@ -61,39 +61,40 @@ const VerifyUser = () => {
 
   return (
     <>
-      <p>Verification code: {verification_code}</p>
-      <form className="form-inline">
-        <div className="form-group mb-2">
-          <EmailInput parentCallback={setEmailAddress} />
-          <input
-            className="btn btn-primary active"
-            type="button"
-            value="Verify"
-            onClick={() => {
-              onVerify();
+      <div className="container-sm">
+        <form className="form-inline">
+          <div className="form-group mb-2">
+            <EmailInput parentCallback={setEmailAddress} />
+            <input
+              className="btn btn-primary active"
+              type="button"
+              value="Verify"
+              onClick={() => {
+                onVerify();
+              }}
+            />
+          </div>
+        </form>
+        {verificationStatus["status"] === VerificatiionStatus.FAILED && (
+          <Alert
+            success={false}
+            message={verificationStatus["msg"]}
+            parentCallback={() => {
+              setVerificationStatus({});
             }}
           />
-        </div>
-      </form>
-      {verificationStatus["status"] === VerificatiionStatus.FAILED && (
-        <Alert
-          success={false}
-          message={verificationStatus["msg"]}
-          parentCallback={() => {
-            setVerificationStatus({});
-          }}
-        />
-      )}
-      {verificationStatus["status"] === VerificatiionStatus.SUCCESS && (
-        <Alert
-          success={true}
-          message={verificationStatus["msg"]}
-          parentCallback={() => {
-            console.log("Redirect to login");
-            return redirect("/login");
-          }}
-        />
-      )}
+        )}
+        {verificationStatus["status"] === VerificatiionStatus.SUCCESS && (
+          <Alert
+            success={true}
+            message={verificationStatus["msg"]}
+            parentCallback={() => {
+              console.log("Redirect to login");
+              return redirect("/login");
+            }}
+          />
+        )}
+      </div>
     </>
   );
 };
