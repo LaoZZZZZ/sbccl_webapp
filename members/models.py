@@ -49,8 +49,7 @@ class Student(models.Model):
 
 # TODO(lu): Add teacher information.
 class Course(models.Model):
-    class_name = models.CharField(max_length=255)
-    school_year = models.DateField(null=False)
+    name = models.CharField(max_length=255)
     students = models.ManyToManyField(Student, through="Registration")
     course_description = models.CharField(max_length = 255)
     COURSE_TYPE = [
@@ -58,6 +57,17 @@ class Course(models.Model):
         ('E', 'Enrichment')
     ]
     course_type = models.CharField(max_length=1, choices=COURSE_TYPE)
+    COURSE_STATUS = [
+        ('A', 'Active'),  # available for registration
+        ('U', 'Unavailable') # not available for registration
+    ]
+    course_status = models.CharField(max_length=1, choices=COURSE_STATUS)
+    size_limit =models.IntegerField(null=False)
+    # the date that this course is created.
+    creation_date = models.DateField(null=True)
+    # the last time that this course was updated
+    last_update_time = models.DateField(null=True)
+    creater_name = models.CharField(max_length=255, null=False)
 
 # Capture the registration event for each student
 class Registration(models.Model):
@@ -89,7 +99,6 @@ class Payment(models.Model):
         ('PR', 'PartialRefund')
     ]
     payment_status = models.CharField(max_length=2, choices=PAYMENT_STATUS)
-
 
 
 

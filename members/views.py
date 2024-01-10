@@ -271,10 +271,39 @@ class MemberViewSet(ModelViewSet):
             authentication_classes=[SessionAuthentication, BasicAuthentication],
             permission_classes=[permissions.IsAuthenticated])
     def register_course(self, request, pk=None):
+
         pass
 
     @action(methods=['PUT'], detail=True, url_path='unregister-course', name='Unregister a student to a course',
             authentication_classes=[SessionAuthentication, BasicAuthentication],
             permission_classes=[permissions.IsAuthenticated])
     def unregister_course(self, request, pk=None):
+        pass   
+
+    @action(methods=['PUT'], detail=True, url_path='add-course', name='Add a new course',
+        authentication_classes=[SessionAuthentication, BasicAuthentication],
+        permission_classes=[permissions.IsAuthenticated])
+    def add_course(self, request, pk=None):
+        try:
+            print("Adding a course")
+            user = User.objects.get(username=request.user.username)
+            # TODO(lu): Add special 
+            if not user.is_staff():
+                return Response("The user has no rights to add course!",
+                                status=status.HTTP_401_UNAUTHORIZED)
+            member = Member.objects.get(user_id=user)
+            # Only bord member is allowed to add course.
+            if member.member_type() is not 'B':
+                return Response("The user has no rights to add course!",
+                                status=status.HTTP_401_UNAUTHORIZED)
+            # 
+        except User.DoesNotExist as e:
+            return Response(str(e), status=status.HTTP_401_UNAUTHORIZED)
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)  
+
+    @action(methods=['PUT'], detail=True, url_path='delete-course', name='Delete a course',
+    authentication_classes=[SessionAuthentication, BasicAuthentication],
+    permission_classes=[permissions.IsAuthenticated])
+    def add_course(self, request, pk=None):
         pass   
