@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Member, Student
+from .models import Member, Student, Course
 from django.contrib.auth.models import User
 import re
 import pytz
@@ -76,6 +76,41 @@ class StudentSerializer(serializers.ModelSerializer):
         if not gender or gender.upper() not in ('M', 'F', 'FEMALE', 'MALE'):
             raise ValueError("invalid gender information!")
         return gender
+    
+class CourseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = ('name', 'course_description', 'course_type',
+                  'course_status', 'size_limit')
+    
+    def validate_course_type(self, course_type):
+        if course_type not in ['L', 'E']:
+            raise ValueError("Invalid course type")
+        return course_type
+    
+    def validate_name(self, name):
+        if not name:
+            raise ValueError("No name is provided for the course")
+        
+        return name
+
+    def validate_size_limit(self, size_limit):
+        if size_limit < 0:
+            raise ValueError("Invalid course size limit!")
+        return size_limit
+
+    def validate_course_status(self, course_status):
+        if course_status not in ['A', 'U']:
+            raise ValueError("Invalid course status!")
+        return course_status
+
+    def create(self, validated_data, username):
+        course = Course(**validated_data)
+        course.creation_date = datetime.utcnow().replace(tzinfo=pytz.utc)
+        course.last_update_time = course.creation_date
+        course.creater_name = username
+        return course
+    
 
 
 
