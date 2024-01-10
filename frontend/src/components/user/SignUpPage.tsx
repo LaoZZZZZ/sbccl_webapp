@@ -99,9 +99,9 @@ const SignUpPage = ({ onBackToLogin }: Props) => {
   };
 
   return (
-    <div className="container-sm">
-      <form className="col md-3">
-        <div className="col md-3">
+    <div className="container">
+      <div className="col w-50 justify-content-between">
+        <form className="form-label form-control">
           <EmailInput parentCallback={setEmailAddress} />
           <PasswordInput
             confirmPassword={true}
@@ -153,26 +153,26 @@ const SignUpPage = ({ onBackToLogin }: Props) => {
               onBackToLogin();
             }}
           />
-        </div>
-      </form>
-      {signUpStatus["status"] === SignUpStatus.FAILED && (
-        <Alert
-          success={false}
-          message={signUpStatus["msg"]}
-          parentCallback={() => {
-            setSignupStatus({});
-          }}
-        />
-      )}
-      {signUpStatus["status"] === SignUpStatus.SUCCESS && (
-        <Alert
-          success={true}
-          message={signUpStatus["msg"]}
-          parentCallback={() => {
-            onBackToLogin();
-          }}
-        />
-      )}
+        </form>
+        {signUpStatus["status"] === SignUpStatus.FAILED && (
+          <Alert
+            success={false}
+            message={signUpStatus["msg"]}
+            parentCallback={() => {
+              setSignupStatus({});
+            }}
+          />
+        )}
+        {signUpStatus["status"] === SignUpStatus.SUCCESS && (
+          <Alert
+            success={true}
+            message={signUpStatus["msg"]}
+            parentCallback={() => {
+              onBackToLogin();
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 };

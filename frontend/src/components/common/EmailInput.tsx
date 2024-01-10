@@ -10,37 +10,35 @@ const EmailInput = ({ parentCallback }: Props) => {
   const [emailMessage, setEmailMessage] = useState(defaultMessage);
   return (
     <>
-      <div className="md-3">
-        <label htmlFor="exampleInputEmail1" className="col-sm-3 col-form-label">
-          *Email address
-        </label>
-        <input
-          type="email"
-          className="col-sm-3 col-form-control"
-          id="exampleInputEmail1"
-          aria-describedby="emailHelp"
-          autoComplete="username"
-          required
-          onChange={(e) => {
-            let valid =
-              e.target.value !== "" && validator.isEmail(e.target.value);
-            if (!valid) {
-              setEmailMessage("Invalid email format!");
-              parentCallback("");
-            } else {
-              setEmailMessage(defaultMessage);
-              parentCallback(e.target.value);
-            }
-          }}
-        />
-        <div
-          id="emailHelp"
-          className={
-            emailMessage === defaultMessage ? "form-text" : "text-warning"
+      <label htmlFor="exampleInputEmail1" className="form-label">
+        *Email address
+      </label>
+      <input
+        type="email"
+        className="form-control"
+        id="exampleInputEmail1"
+        aria-describedby="emailHelp"
+        autoComplete="username"
+        required
+        onChange={(e) => {
+          let valid =
+            e.target.value !== "" && validator.isEmail(e.target.value);
+          if (!valid) {
+            setEmailMessage("Invalid email format!");
+            parentCallback("");
+          } else {
+            setEmailMessage(defaultMessage);
+            parentCallback(e.target.value);
           }
-        >
-          {emailMessage}
-        </div>
+        }}
+      />
+      <div
+        id="emailHelp"
+        className={
+          emailMessage === defaultMessage ? "form-text" : "text-warning"
+        }
+      >
+        {emailMessage}
       </div>
     </>
   );

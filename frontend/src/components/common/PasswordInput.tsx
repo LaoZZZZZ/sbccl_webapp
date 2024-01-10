@@ -20,13 +20,13 @@ const PasswordConfirmation = ({
   };
 
   return (
-    <div className="col md-3">
-      <label htmlFor="passwordConfirm" className="col-sm-3 col-form-label">
+    <div className="form-label">
+      <label htmlFor="passwordConfirm" className="form-label">
         Confirm password
       </label>
       <input
         type={showPassword ? "text" : "password"}
-        className="col-sm-3 col-form-control"
+        className="form-control"
         id="passwordConfirm"
         required
         autoComplete="new-password"
@@ -78,13 +78,13 @@ const PasswordInput = ({ confirmPassword, retrievePassword }: Props) => {
   };
   return (
     <>
-      <div className="col md-3">
-        <label htmlFor="passwordInput" className="col-sm-3 col-form-label">
+      <div>
+        <label htmlFor="passwordInput" className="form-label">
           *Password
         </label>
         <input
           type={showPassword ? "text" : "password"}
-          className="col-sm-3 col-form-control"
+          className="form-control"
           id="passwordInput"
           autoComplete={confirmPassword ? "current-password" : "new-password"}
           onChange={(e) => {
