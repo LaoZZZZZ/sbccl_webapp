@@ -20,13 +20,13 @@ const TextInput = ({
   const [errorMessage, setErrorMessage] = useState("");
   const completeLabel = (requiredInput ? "*" : "").concat(labelText);
   return (
-    <>
-      <label htmlFor="textInput" className="htmlForm-label">
+    <div className="md-3">
+      <label htmlFor="textInput" className="col-sm-3 col-form-label">
         {completeLabel}
       </label>
       <input
         type={inputType}
-        className="form-control"
+        className="col-sm-3 col-form-label"
         id={labelText}
         placeholder={placeHolder}
         required={requiredInput}
@@ -48,7 +48,7 @@ const TextInput = ({
           {errorMessage}
         </div>
       )}
-    </>
+    </div>
   );
 };
 

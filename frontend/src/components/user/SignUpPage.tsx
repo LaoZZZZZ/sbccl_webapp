@@ -100,53 +100,60 @@ const SignUpPage = ({ onBackToLogin }: Props) => {
 
   return (
     <div className="container-sm">
-      <form className="needs-validation">
-        <EmailInput parentCallback={setEmailAddress} />
-        <PasswordInput confirmPassword={true} retrievePassword={setPassword} />
-        <TextInput
-          labelText="First name"
-          inputType={"text"}
-          requiredInput={true}
-          retrieveInput={setFirstName}
-          validationFunc={(value) => {
-            return validator.isAlpha(value);
-          }}
-        />
-        <TextInput
-          labelText="Last name"
-          inputType={"text"}
-          requiredInput={true}
-          retrieveInput={setLastName}
-          validationFunc={(value) => {
-            return validator.isAlpha(value);
-          }}
-        />
-        <TextInput
-          labelText="Phone number"
-          inputType={"tel"}
-          requiredInput={false}
-          retrieveInput={setPhoneNumber}
-          validationFunc={(phone_number) => {
-            // phone number is no required so empty string is acceptable input.
-            return phone_number === "" || validator.isMobilePhone(phone_number);
-          }}
-        />
-        <input
-          className="btn btn-primary active"
-          type="button"
-          value="Sign up"
-          onClick={() => {
-            onSignUp();
-          }}
-        />
-        <input
-          className="btn btn-secondary"
-          type="button"
-          value="Back to login"
-          onClick={() => {
-            onBackToLogin();
-          }}
-        />
+      <form className="col md-3">
+        <div className="col md-3">
+          <EmailInput parentCallback={setEmailAddress} />
+          <PasswordInput
+            confirmPassword={true}
+            retrievePassword={setPassword}
+          />
+          <TextInput
+            labelText="First name"
+            inputType={"text"}
+            requiredInput={true}
+            retrieveInput={setFirstName}
+            validationFunc={(value) => {
+              return validator.isAlpha(value);
+            }}
+          />
+          <TextInput
+            labelText="Last name"
+            inputType={"text"}
+            requiredInput={true}
+            retrieveInput={setLastName}
+            validationFunc={(value) => {
+              return validator.isAlpha(value);
+            }}
+          />
+          <TextInput
+            labelText="Phone number"
+            inputType={"tel"}
+            requiredInput={false}
+            retrieveInput={setPhoneNumber}
+            validationFunc={(phone_number) => {
+              // phone number is no required so empty string is acceptable input.
+              return (
+                phone_number === "" || validator.isMobilePhone(phone_number)
+              );
+            }}
+          />
+          <input
+            className="btn btn-primary active"
+            type="button"
+            value="Sign up"
+            onClick={() => {
+              onSignUp();
+            }}
+          />
+          <input
+            className="btn btn-secondary"
+            type="button"
+            value="Back to login"
+            onClick={() => {
+              onBackToLogin();
+            }}
+          />
+        </div>
       </form>
       {signUpStatus["status"] === SignUpStatus.FAILED && (
         <Alert

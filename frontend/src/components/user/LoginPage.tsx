@@ -18,8 +18,8 @@ const LoginPage = ({ onLoginSuccess, onSignUp, onResetPassword }: Props) => {
   return (
     <>
       <div className="container-sm">
-        <form className="needs-validation">
-          <div className="mb-3 col">
+        <form className="col md-3">
+          <div className="col md-3">
             <EmailInput parentCallback={setEmailAddress} />
             <PasswordInput
               // No need to let the user to confirm their password separately.
