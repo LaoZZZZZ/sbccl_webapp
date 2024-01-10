@@ -21,9 +21,7 @@ const TextInput = ({
   const completeLabel = (requiredInput ? "*" : "").concat(labelText);
   return (
     <>
-      <label htmlFor="textInput" className="htmlForm-label">
-        {completeLabel}
-      </label>
+      <label htmlFor="textInput">{completeLabel}</label>
       <input
         type={inputType}
         className="form-control"

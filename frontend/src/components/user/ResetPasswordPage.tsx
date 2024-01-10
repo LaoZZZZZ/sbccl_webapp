@@ -24,57 +24,55 @@ const ResetPasswordPage = ({ onBackToLogin }: Props) => {
 
   return (
     <div>
-      <form className="row g-3">
+      <form className="w-50 form-control">
         <EmailInput parentCallback={setEmailAddress} />
-        <div className="col-auto">
-          <input
-            className="btn btn-primary active"
-            type="button"
-            value="Reset"
-            onClick={async () => {
-              if (emailAddress === "") {
+        <input
+          className="btn btn-primary active"
+          type="button"
+          value="Reset"
+          onClick={async () => {
+            if (emailAddress === "") {
+              setResetStatus({
+                status: Status.FAILED,
+                msg: "No valid email is provided",
+              });
+              return;
+            }
+            const url =
+              "http://localhost:8000/rest_api/members/create-password-reset-code/?email=" +
+              emailAddress;
+            await axios
+              .put(url, {}, {})
+              .then(function (response) {
+                // reset code is created successfully.
+                if (response.status == 201) {
+                  setResetStatus({
+                    status: Status.SUCCESS,
+                    msg: "A password reset link has been sent to your registred email.",
+                  });
+                }
+              })
+              .catch(function (error) {
+                console.log(error.response.data);
                 setResetStatus({
                   status: Status.FAILED,
-                  msg: "No valid email is provided",
+                  msg: JSON.stringify(error.response.data),
                 });
-                return;
-              }
-              const url =
-                "http://localhost:8000/rest_api/members/create-password-reset-code/?email=" +
-                emailAddress;
-              await axios
-                .put(url, {}, {})
-                .then(function (response) {
-                  // reset code is created successfully.
-                  if (response.status == 201) {
-                    setResetStatus({
-                      status: Status.SUCCESS,
-                      msg: "A password reset link has been sent to your registred email.",
-                    });
-                  }
-                })
-                .catch(function (error) {
-                  console.log(error.response.data);
-                  setResetStatus({
-                    status: Status.FAILED,
-                    msg: JSON.stringify(error.response.data),
-                  });
-                });
-            }}
-          />
-          <input
-            className="btn btn-secondary"
-            type="button"
-            value="Back to login"
-            onClick={() => {
-              setResetStatus({
-                status: Status.UNSPECIFIED,
-                msg: "",
               });
-              onBackToLogin();
-            }}
-          />
-        </div>
+          }}
+        />
+        <input
+          className="btn btn-secondary"
+          type="button"
+          value="Back to login"
+          onClick={() => {
+            setResetStatus({
+              status: Status.UNSPECIFIED,
+              msg: "",
+            });
+            onBackToLogin();
+          }}
+        />
       </form>
       {resetStatus["status"] !== Status.UNSPECIFIED && (
         <Alert

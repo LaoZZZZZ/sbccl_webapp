@@ -20,7 +20,7 @@ const PasswordConfirmation = ({
   };
 
   return (
-    <>
+    <div className="form-label">
       <label htmlFor="passwordConfirm" className="form-label">
         Confirm password
       </label>
@@ -42,7 +42,7 @@ const PasswordConfirmation = ({
           {errorMessage}
         </div>
       )}
-    </>
+    </div>
   );
 };
 
@@ -77,50 +77,52 @@ const PasswordInput = ({ confirmPassword, retrievePassword }: Props) => {
     }
   };
   return (
-    <div className="mb-3">
-      <label htmlFor="passwordInput" className="form-label">
-        *Password
-      </label>
-      <input
-        type={showPassword ? "text" : "password"}
-        className="form-control"
-        id="passwordInput"
-        autoComplete={confirmPassword ? "current-password" : "new-password"}
-        onChange={(e) => {
-          if (validate(e.target.value)) {
-            setPassword(e.target.value);
-            retrievePassword(e.target.value);
-          }
-        }}
-        required
-      />
-      <div
-        id="passwordHelpBlock"
-        className={errorMessage === "" ? "form-text" : "text-danger"}
-      >
-        {errorMessage === "" ? defaultText : errorMessage}
-      </div>
-
-      {confirmPassword && (
-        <PasswordConfirmation
-          passwordInput={password}
-          showPassword={showPassword}
-        />
-      )}
-      <div className="mb-3 form-check">
-        <input
-          type="checkbox"
-          className="form-check-input"
-          id="exampleCheck1"
-          onChange={(event) => {
-            setShowPassword(event.target.checked);
-          }}
-        />
-        <label className="form-check-label" htmlFor="exampleCheck1">
-          Show password
+    <>
+      <div>
+        <label htmlFor="passwordInput" className="form-label">
+          *Password
         </label>
+        <input
+          type={showPassword ? "text" : "password"}
+          className="form-control"
+          id="passwordInput"
+          autoComplete={confirmPassword ? "current-password" : "new-password"}
+          onChange={(e) => {
+            if (validate(e.target.value)) {
+              setPassword(e.target.value);
+              retrievePassword(e.target.value);
+            }
+          }}
+          required
+        />
+        <div
+          id="passwordHelpBlock"
+          className={errorMessage === "" ? "form-text" : "text-danger"}
+        >
+          {errorMessage === "" ? defaultText : errorMessage}
+        </div>
+
+        {confirmPassword && (
+          <PasswordConfirmation
+            passwordInput={password}
+            showPassword={showPassword}
+          />
+        )}
+        <div className="mb-3 form-check">
+          <input
+            type="checkbox"
+            className="form-check-input"
+            id="showpassword"
+            onChange={(event) => {
+              setShowPassword(event.target.checked);
+            }}
+          />
+          <label className="form-check-label" htmlFor="exampleCheck1">
+            Show password
+          </label>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

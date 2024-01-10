@@ -1,6 +1,7 @@
 import "bootstrap/dist/css/bootstrap.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
+import ErrorPage from "./error-page.jsx";
 import App from "./components/app/App.tsx";
 import VerifyUser from "./components/user/VerifyUser.tsx";
 import reportWebVitals from "./reportWebVitals";
@@ -15,8 +16,13 @@ import { element } from "prop-types";
 
 const router = createBrowserRouter(
   createRoutesFromElements([
-    <Route path="/login" element={<App />} />,
-    <Route path="/verify-user/:verification_code" element={<VerifyUser />} />,
+    <Route path="/" element={<App />} errorElement={<ErrorPage />} />,
+    <Route path="/login" element={<App />} errorElement={<ErrorPage />} />,
+    <Route
+      path="/verify-user/:verification_code"
+      element={<VerifyUser />}
+      errorElement={<ErrorPage />}
+    />,
   ])
 );
 
