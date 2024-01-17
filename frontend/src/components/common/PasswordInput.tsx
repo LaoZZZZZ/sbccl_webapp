@@ -72,7 +72,7 @@ const PasswordInput = ({ confirmPassword, retrievePassword }: Props) => {
       setErrorMessage("");
       return true;
     } else {
-      setErrorMessage("Invalid password");
+      setErrorMessage("Invalid password! \n" + defaultText);
       return false;
     }
   };
@@ -97,7 +97,7 @@ const PasswordInput = ({ confirmPassword, retrievePassword }: Props) => {
         />
         <div
           id="passwordHelpBlock"
-          className={errorMessage === "" ? "form-text" : "text-danger"}
+          className={errorMessage === "" ? "form-text" : "text-warning"}
         >
           {errorMessage === "" ? defaultText : errorMessage}
         </div>
