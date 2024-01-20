@@ -72,7 +72,7 @@ const PasswordInput = ({ confirmPassword, retrievePassword }: Props) => {
       setErrorMessage("");
       return true;
     } else {
-      setErrorMessage("Invalid password! \n" + defaultText);
+      setErrorMessage(defaultText);
       return false;
     }
   };

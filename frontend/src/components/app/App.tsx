@@ -60,7 +60,9 @@ const App = () => {
       <div className="container-sm">
         {user_profile.page === Page.StartLogin && <UserFrontPage />}
 
-        {user_profile.page === Page.PostLogin && <UserMainPage />}
+        {user_profile.page === Page.PostLogin && (
+          <UserMainPage userInfo={user_profile.user_info} />
+        )}
       </div>
     </Provider>
   );
