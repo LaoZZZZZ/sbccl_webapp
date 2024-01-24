@@ -61,8 +61,8 @@ const VerifyUser = () => {
 
   return (
     <>
-      <div className="container-sm">
-        <form className="form-inline">
+      <div className="container">
+        <form className="w-50 form-control">
           <div className="form-group mb-2">
             <EmailInput parentCallback={setEmailAddress} />
             <input

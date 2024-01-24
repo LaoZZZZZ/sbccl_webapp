@@ -53,7 +53,7 @@ const UserFrontPage = () => {
   const [, transitionUserState] = useContext(UserContext);
 
   return (
-    <div className="container-sm">
+    <div className="container-xxl">
       {userState.page === Page.StartLogin && (
         <LoginPage
           onLoginSuccess={(user_info) => {

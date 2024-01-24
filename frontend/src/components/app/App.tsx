@@ -19,7 +19,6 @@ const Page = {
 const reducer = (user_repo, action) => {
   switch (action.type) {
     case "login_complete":
-      console.log(action.user_info);
       return {
         ...user_repo,
         page: Page.PostLogin,
@@ -60,7 +59,9 @@ const App = () => {
       <div className="container-sm">
         {user_profile.page === Page.StartLogin && <UserFrontPage />}
 
-        {user_profile.page === Page.PostLogin && <UserMainPage />}
+        {user_profile.page === Page.PostLogin && (
+          <UserMainPage userInfo={user_profile.user_info} />
+        )}
       </div>
     </Provider>
   );

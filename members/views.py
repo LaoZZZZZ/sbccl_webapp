@@ -7,6 +7,7 @@ from .serializers import StudentSerializer, UserSerializer, MemberSerializer
 from .models import Member, Student
 from rest_framework.decorators import action
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.renderers import JSONRenderer
 from rest_framework import permissions
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
@@ -266,6 +267,23 @@ class MemberViewSet(ModelViewSet):
             return Response(status=status.HTTP_200_OK)
         except User.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+    @action(methods=['GET'], detail=False, url_path='fetch-students',
+            name='Get all students for the member',
+            authentication_classes=[SessionAuthentication, BasicAuthentication],
+            permission_classes=[permissions.IsAuthenticated])
+    def fetch_students(self, request, pk=None):
+        try:
+            user = User.objects.get(username=request.user)
+            matched_members = models.Member.objects.get(user_id=user)
+            students = models.Student.objects.filter(parent_id=matched_members)
+            content = {
+                'students': [JSONRenderer().render(StudentSerializer(s).data) for s in students]
+            }
+            return Response(data=content, status=status.HTTP_200_OK)
+        except User.DoesNotExist or Member.DoesNotExist:
+            return Response('There is no user registered with - ' + request.user,
+                             status=status.HTTP_404_NOT_FOUND)
 
     @action(methods=['PUT'], detail=True, url_path='register-course', name='Register a student to a course',
             authentication_classes=[SessionAuthentication, BasicAuthentication],

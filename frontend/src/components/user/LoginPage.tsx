@@ -31,6 +31,7 @@ const LoginPage = ({ onLoginSuccess, onSignUp, onResetPassword }: Props) => {
               type="button"
               value="Login"
               onClick={async () => {
+                console.log(emailAddress + password);
                 if (emailAddress === "" || password === "") {
                   setLoginFailed(true);
                   return;
@@ -49,6 +50,10 @@ const LoginPage = ({ onLoginSuccess, onSignUp, onResetPassword }: Props) => {
                   .then(function (response) {
                     if (response.status == 202) {
                       const user_info = response.data;
+                      user_info.auth = {
+                        password: password,
+                        username: user_info.user.username,
+                      };
                       onLoginSuccess(user_info);
                     }
                   })
