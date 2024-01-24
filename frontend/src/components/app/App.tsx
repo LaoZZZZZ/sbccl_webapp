@@ -19,7 +19,6 @@ const Page = {
 const reducer = (user_repo, action) => {
   switch (action.type) {
     case "login_complete":
-      console.log(action.user_info);
       return {
         ...user_repo,
         page: Page.PostLogin,
