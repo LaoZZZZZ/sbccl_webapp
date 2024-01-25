@@ -6,7 +6,6 @@ interface Props {
 }
 
 const Student = ({ student, columns }: Props) => {
-  console.log(student);
   return (
     <tr>
       {columns.map((key) => {

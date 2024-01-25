@@ -80,7 +80,7 @@ const ResetPasswordPage = ({ onBackToLogin }: Props) => {
           message={resetStatus["msg"]}
           parentCallback={() => {
             if (resetStatus["status"] == Status.SUCCESS) {
-              dispatch({ type: "login" });
+              onBackToLogin();
             } else {
               setResetStatus({
                 status: Status.UNSPECIFIED,

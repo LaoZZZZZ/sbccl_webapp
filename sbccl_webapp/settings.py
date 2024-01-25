@@ -65,9 +65,9 @@ ROOT_URLCONF = 'sbccl_webapp.urls'
 
 # Emails sent to the admins when there is server errors
 # SERVER_EMAIL = 'ccl_admin@sbcclny.com'
-ADMINS = [
-   ("Lu Zhao", "luzhao@sbcclny.com")
-]
+# ADMINS = [
+#    ("Lu Zhao", "luzhao@sbcclny.com")
+# ]
 
 # Email setting for normal user workflows including password reset, sign up, etc.
 DEFAULT_FROM_EMAIL = 'no-reply@sbcclny.com'

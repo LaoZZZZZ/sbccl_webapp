@@ -159,6 +159,11 @@ class MemberViewSet(ModelViewSet):
             for m in matched_members:
                 m.verification_code = registration_code
                 m.save()
+            verification_url = 'http://localhost:3000/reset-password-by-code/{code}'.format(code=registration_code)
+            msg = "You just requested to reset your password. Please click {link} to verify this account.".format(link=verification_url)
+            retrieved_user.email_user(
+                subject="Password reset",
+                message=msg)
             response = Response(status=status.HTTP_201_CREATED)
             response['location'] =registration_code
             return response
@@ -172,7 +177,7 @@ class MemberViewSet(ModelViewSet):
     User forget password. They want to reset the password via
     """
     @action(methods=['PUT'], detail=True, url_path='reset-password-by-code',
-            name='Verify the user.',
+            name='Reset password.',
             authentication_classes=[BasicAuthentication],
             permission_classes=[permissions.AllowAny])
     def reset_password_by_code(self, request, pk=None):
@@ -289,7 +294,6 @@ class MemberViewSet(ModelViewSet):
             authentication_classes=[SessionAuthentication, BasicAuthentication],
             permission_classes=[permissions.IsAuthenticated])
     def register_course(self, request, pk=None):
-
         pass
 
     @action(methods=['PUT'], detail=True, url_path='unregister-course', name='Unregister a student to a course',
@@ -311,10 +315,10 @@ class MemberViewSet(ModelViewSet):
                                 status=status.HTTP_401_UNAUTHORIZED)
             member = Member.objects.get(user_id=user)
             # Only bord member is allowed to add course.
-            if member.member_type() is not 'B':
+            if member.member_type() is not "B":
                 return Response("The user has no rights to add course!",
                                 status=status.HTTP_401_UNAUTHORIZED)
-            # 
+            return Response(status=status.HTTP_201_CREATED) 
         except User.DoesNotExist as e:
             return Response(str(e), status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
