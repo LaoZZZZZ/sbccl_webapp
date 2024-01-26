@@ -176,34 +176,36 @@ class MemberViewSet(ModelViewSet):
     """
     User forget password. They want to reset the password via
     """
-    @action(methods=['PUT'], detail=True, url_path='reset-password-by-code',
+    @action(methods=['PUT'], detail=False, url_path='reset-password-by-code',
             name='Reset password.',
             authentication_classes=[BasicAuthentication],
             permission_classes=[permissions.AllowAny])
-    def reset_password_by_code(self, request, pk=None):
+    def reset_password_by_code(self, request):
+        print(request.query_params)
         verification_code = request.query_params.get('verification_code')
         if verification_code is None:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        new_password = request.query_params.get('new_password')
+        new_password = request.query_params.get('password')
         if new_password is None:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         try:
+            email_address = request.query_params.get('email')
+            retrieved_user = User.objects.get(email=email_address)
+            matched_member = Member.objects.get(user_id=retrieved_user)
             validated_pass = UserSerializer().validate_password(new_password)
-            retrieved_user = User.objects.get(username=pk)
-            matched_members = Member.objects.filter(user_id=retrieved_user.id,
-                                                    verification_code=verification_code)
-            if not matched_members:
-                return Response(status=status.HTTP_404_NOT_FOUND)
-            retrieved_user.password = validated_pass 
+            if not matched_member.verification_code == verification_code:
+                return Response("Invalid verification code is provided!",
+                                status=status.HTTP_400_BAD_REQUEST)
+            retrieved_user.set_password(validated_pass)
             retrieved_user.save()
-            for m in matched_members:
-                m.verification_code = None
-                m.save()
+            matched_member.verification_code = None
+            matched_member.save()
             return Response(status=status.HTTP_202_ACCEPTED)
         except ValidationError:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         except User.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response("{email} is not registered".format(email=request.query_params.get('email')),
+                            status=status.HTTP_404_NOT_FOUND)
 
     """
     Reset the password for the user.
