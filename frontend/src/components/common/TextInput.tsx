@@ -20,7 +20,7 @@ const TextInput = ({
   const [errorMessage, setErrorMessage] = useState("");
   const completeLabel = (requiredInput ? "*" : "").concat(labelText);
   return (
-    <>
+    <div className="pb-2">
       <label htmlFor="textInput">{completeLabel}</label>
       <input
         type={inputType}
@@ -46,7 +46,7 @@ const TextInput = ({
           {errorMessage}
         </div>
       )}
-    </>
+    </div>
   );
 };
 

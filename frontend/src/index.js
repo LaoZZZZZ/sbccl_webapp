@@ -12,7 +12,7 @@ import {
   createRoutesFromElements,
   RouterProvider,
 } from "react-router-dom";
-import { element } from "prop-types";
+import ResetPasswordByCode from "./components/user/ResetPasswordByCodePage.tsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements([
@@ -21,6 +21,11 @@ const router = createBrowserRouter(
     <Route
       path="/verify-user/:verification_code"
       element={<VerifyUser />}
+      errorElement={<ErrorPage />}
+    />,
+    <Route
+      path="/reset-password-by-code/:verification_code"
+      element={<ResetPasswordByCode />}
       errorElement={<ErrorPage />}
     />,
   ])

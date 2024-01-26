@@ -16,7 +16,7 @@ const LoginPage = ({ onLoginSuccess, onSignUp, onResetPassword }: Props) => {
   const [loginFailed, setLoginFailed] = useState(false);
 
   return (
-    <div className="w-50 form-control">
+    <div className="w-50 form-control mx-auto align-middle">
       <form className="control-form">
         <div className="">
           <EmailInput parentCallback={setEmailAddress} />
@@ -31,7 +31,6 @@ const LoginPage = ({ onLoginSuccess, onSignUp, onResetPassword }: Props) => {
               type="button"
               value="Login"
               onClick={async () => {
-                console.log(emailAddress + password);
                 if (emailAddress === "" || password === "") {
                   setLoginFailed(true);
                   return;
