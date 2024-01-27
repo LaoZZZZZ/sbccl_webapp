@@ -1,10 +1,13 @@
-import React, { useReducer } from "react";
+import React, { useContext, useReducer } from "react";
 import ListStudent from "./ListStudent.tsx";
 import AccountDetail from "./AccountDetailPage.tsx";
 import Registration from "./RegistrationPage.tsx";
+import { UserContext } from "../app/App.tsx";
+import axios from "axios";
 
 interface Props {
   userInfo: React.ReactNode;
+  logOutCallback: () => {};
 }
 
 const Page = {
@@ -32,12 +35,31 @@ const SwitchPage = (state, action) => {
       };
   }
 };
+
 // Main page for user profile after login.
 // Contains the following components:
 // 1. User profile
 // 2. Students under this user
 // 3. Registrations associated with each student
-const UserMainPage = ({ userInfo }: Props) => {
+const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
+  const logOut = async (userInfo) => {
+    await axios
+      .put(
+        "http://localhost:8000/rest_api/members/logout/",
+        {},
+        {
+          auth: userInfo.auth,
+        }
+      )
+      .then(function (response) {
+        if (response.status == 202) {
+          logOutCallback();
+        }
+      })
+      .catch(function (error) {
+        logOutCallback();
+      });
+  };
   const INITIAL_PAGE = {
     /* Default on account detail page*/
     page: Page.AccountDetail,
@@ -93,7 +115,14 @@ const UserMainPage = ({ userInfo }: Props) => {
               </button>
             </li>
             <li className="nav-item">
-              <button className="btn btn-borderless">Logout</button>
+              <button
+                className="btn btn-borderless"
+                onClick={() => {
+                  logOut(userInfo);
+                }}
+              >
+                Logout
+              </button>
             </li>
           </ul>
         </div>

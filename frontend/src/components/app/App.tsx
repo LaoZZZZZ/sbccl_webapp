@@ -8,9 +8,9 @@ import React, {
 
 import UserMainPage from "../user/UserMainPage.tsx";
 import UserFrontPage from "../user/UserFrontPage.tsx";
+
 // Some Hardcoded user information for development purpose. Read data will be loaded from the
 // backend.
-
 const Page = {
   StartLogin: 0, // User is on login page
   PostLogin: 1, // User successfully logged in, showing the user profile page.
@@ -24,7 +24,7 @@ const reducer = (user_repo, action) => {
         page: Page.PostLogin,
         user_info: action.user_info,
       };
-    case "lougout":
+    case "logout":
       return {
         ...user_repo,
         page: Page.StartLogin,
@@ -54,13 +54,31 @@ const App = () => {
     INITIAL_STATE
   );
 
+  // Used by the UserFrontPage to passback the user information
+  const loginSuccess = (userInfo) => {
+    transitionUserState({
+      type: "login_complete",
+      user_info: userInfo,
+    });
+  };
+
+  // Used by the UserMainPage to logout and switch to back to login page.
+  const logOut = () => {
+    transitionUserState({ type: "logout", user_info: null });
+  };
+
   return (
     <Provider value={[user_profile, transitionUserState]}>
-      <div className="container-sm">
-        {user_profile.page === Page.StartLogin && <UserFrontPage />}
+      <div className="container-xl">
+        {user_profile.page === Page.StartLogin && (
+          <UserFrontPage loginSuccessCallback={loginSuccess} />
+        )}
 
         {user_profile.page === Page.PostLogin && (
-          <UserMainPage userInfo={user_profile.user_info} />
+          <UserMainPage
+            userInfo={user_profile.user_info}
+            logOutCallback={logOut}
+          />
         )}
       </div>
     </Provider>

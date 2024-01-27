@@ -1,8 +1,11 @@
 import LoginPage from "../user/LoginPage.tsx";
 import SignUpPage from "../user/SignUpPage.tsx";
 import ResetPasswordPage from "../user/ResetPasswordPage.tsx";
-import React, { useContext, useReducer } from "react";
-import { UserContext } from "../app/App.tsx";
+import React, { useReducer } from "react";
+
+interface Props {
+  loginSuccessCallback: ({}) => {};
+}
 
 const Page = {
   StartLogin: 0, // User is on login page
@@ -48,19 +51,15 @@ const INITIAL_STATE = {
 // 1. User login with known username and passworld
 // 2. new user sign up
 // 3. Reset password if the user forgets their password.
-const UserFrontPage = () => {
+const UserFrontPage = ({ loginSuccessCallback }: Props) => {
   const [userState, dispatch] = useReducer(reducer, INITIAL_STATE);
-  const [, transitionUserState] = useContext(UserContext);
 
   return (
     <div className="container-xxl">
       {userState.page === Page.StartLogin && (
         <LoginPage
           onLoginSuccess={(user_info) => {
-            transitionUserState({
-              type: "login_complete",
-              user_info: user_info,
-            });
+            loginSuccessCallback(user_info);
           }}
           onSignUp={() => {
             dispatch({ type: "signup" });

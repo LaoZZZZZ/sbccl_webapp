@@ -17,19 +17,23 @@ const AccountDetail = ({ userInfo }: Props) => {
     { rowName: "Balance", key: "balance" },
   ];
 
+  // TODO(lu): Make phone number editable for the user.
   return (
-    <table className="table table-bordered table-hover">
-      <tbody>
-        {table_row_names.map((key_value) => {
-          return (
-            <tr>
-              <th>{key_value.rowName}</th>
-              <th>{userInfo[key_value.key]}</th>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
+    <>
+      <table className="table table-bordered table-hover">
+        <tbody>
+          {table_row_names.map((key_value) => {
+            return (
+              <tr>
+                <th>{key_value.rowName}</th>
+                <th>{userInfo[key_value.key]}</th>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      <div></div>
+    </>
   );
 };
 
