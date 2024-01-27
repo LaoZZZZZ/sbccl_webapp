@@ -8,8 +8,8 @@ interface Props {
 const Student = ({ student, columns }: Props) => {
   return (
     <tr>
-      {columns.map((key) => {
-        return <td> {student[key]}</td>;
+      {columns.map((column) => {
+        return <td> {student[column.key]}</td>;
       })}
       <td>
         <div className="dropend">
