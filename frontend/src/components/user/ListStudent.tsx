@@ -47,14 +47,20 @@ const ListStudent = ({ userInfo }: Props) => {
       fetchStudents(userInfo, setStudentsState);
     }
   }, [studentsState]);
-  const table_columns = ["last_name", "first_name", "gender", "date_of_birth"];
+  const table_columns_names = [
+    { column_name: "Last Name", key: "last_name" },
+    { column_name: "First Name", key: "first_name" },
+    { column_name: "Gender", key: "gender" },
+    { column_name: "Date Of Birth", key: "date_of_birth" },
+  ];
+
   return (
     <>
-      <table className="table table-bordered">
+      <table className="table table-bordered table-hover">
         <thead>
           <tr>
-            {table_columns.map((name) => {
-              return <th scope="col">{name}</th>;
+            {table_columns_names.map((key_value) => {
+              return <th scope="col">{key_value.column_name}</th>;
             })}
             <th>
               <button type="button" className="btn btn-primary">
@@ -65,7 +71,7 @@ const ListStudent = ({ userInfo }: Props) => {
         </thead>
         <tbody>
           {studentsState.value.map((student_info) => (
-            <Student student={student_info} columns={table_columns} />
+            <Student student={student_info} columns={table_columns_names} />
           ))}
         </tbody>
       </table>
