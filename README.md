@@ -11,9 +11,13 @@ In order to run this application, below are required libaries
 - Django
 - Djangorestframework
 - django-cors-headers
-- React Native
 - Apache
 - python3
+- Postgresql
+- React. For frontend dependency, please see package.json under ./frontend folder. For instructions, please see ./frontend/README.md
+- npm
+- Bootstrap
+
 
 # How to run the server
 
