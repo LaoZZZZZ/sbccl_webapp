@@ -2,14 +2,14 @@ import React from "react";
 
 interface Props {
   student: {};
-  columns: [];
+  columns: string[];
 }
 
 const Student = ({ student, columns }: Props) => {
   return (
     <tr>
       {columns.map((column) => {
-        return <td> {student[column.key]}</td>;
+        return <td> {student[column]}</td>;
       })}
       <td>
         <div className="dropend">
