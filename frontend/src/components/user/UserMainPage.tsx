@@ -100,7 +100,7 @@ const UserMainPage = ({ userInfo }: Props) => {
       </div>
       {state?.page == Page.AccountDetail && (
         <div className="pt-3 w-75 mx-auto">
-          <AccountDetail userInfo={userInfo} />
+          <AccountDetail userInfo={userInfo.user} />
         </div>
       )}
       {state?.page == Page.Students && (

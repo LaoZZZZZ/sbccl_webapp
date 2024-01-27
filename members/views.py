@@ -30,7 +30,10 @@ class MemberViewSet(ModelViewSet):
             'first_name': user.first_name,
             'last_name': user.last_name,
             'phone_number:': member.phone_number,
-            'member_type': member.member_type
+            'member_type': member.member_type,
+            'last_login': user.last_login.date(),
+            'date_joined': user.date_joined.date(),
+            'balance': 0.0
         }
 
     def list(self, request):
