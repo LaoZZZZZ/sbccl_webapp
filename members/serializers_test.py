@@ -1,7 +1,7 @@
 
 from django.test import TestCase
 
-from .serializers import UserSerializer
+from .serializers import StudentSerializer, UserSerializer
 from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
 import io
@@ -51,6 +51,13 @@ class UserSerializerTest(TestCase):
         saved_user=User.objects.get(username='test')
         self.assertIsNotNone(saved_user)
         self.assertEqual(saved_user.password, 'sdeisQ1234')
+
+    def test_create_student_success(self):
+        student_json = {'first_name': 'sandy', 'last_name': 'zhao',
+                        'middle_name': 'dfd', 'gender': 'F', 'date_of_birth': '2016-02-01',
+                        'chinese_name': ''}
+        student_serializer = StudentSerializer(data=student_json)
+        self.assertTrue(student_serializer.is_valid(raise_exception=True))
         
 
 
