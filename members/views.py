@@ -258,26 +258,27 @@ class MemberViewSet(ModelViewSet):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-    @action(methods=['PUT'], detail=True, url_path='remove-student', name='Remove student from member',
+    @action(methods=['PUT'], detail=False, url_path='remove-student', name='Remove student from member',
             authentication_classes=[SessionAuthentication, BasicAuthentication],
             permission_classes=[permissions.IsAuthenticated])
-    def remove_student(self, request, pk=None):
+    def remove_student(self, request):
         try:
             serializer = StudentSerializer(data=request.data)
             if not serializer.is_valid():
                 return Response(status=status.HTTP_400_BAD_REQUEST)
             student_to_delete = serializer.create(serializer.validated_data)
-            user = User.objects.get(username=request.user.username)
+            user = User.objects.get(email=request.user.username)
             matched_member = Member.objects.get(user_id=user)
             # Only parent can remove students.
             if matched_member.member_type != 'P':
-                return Response(status=status.HTTP_400_BAD_REQUEST)
+                return Response("Only parent can remove students!",
+                                status=status.HTTP_400_BAD_REQUEST)
             existing_students = Student.objects.filter(parent_id=matched_member,
                                                        first_name=student_to_delete.first_name,
                                                        last_name=student_to_delete.last_name)
             for s in existing_students:
                 s.delete()
-            return Response(status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_202_ACCEPTED)
         except User.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 

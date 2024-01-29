@@ -60,10 +60,23 @@ const StudentsPage = ({ userInfo }: Props) => {
     "Date Of Birth",
   ];
 
+  // The students list has changed. Trigger refetching from the backend.
+  const fetchStudentLists = () => {
+    setStudentsState({
+      fetched: false,
+      value: [],
+      addStudent: false,
+    });
+  };
+
   return (
     <>
       {studentsState.value.length > 0 && (
-        <ListStudents students={studentsState.value} />
+        <ListStudents
+          students={studentsState.value}
+          userAuth={userInfo.auth}
+          updateStudentList={fetchStudentLists}
+        />
       )}
       {/* Add a divider to the remaining part of page */}
       <hr className="hr pt-2" />
@@ -84,13 +97,7 @@ const StudentsPage = ({ userInfo }: Props) => {
       {studentsState.addStudent && (
         <AddStudents
           userAuth={userInfo.auth}
-          updateStudentList={() => {
-            setStudentsState({
-              fetched: false,
-              value: [],
-              addStudent: false,
-            });
-          }}
+          updateStudentList={fetchStudentLists}
         />
       )}
     </>
