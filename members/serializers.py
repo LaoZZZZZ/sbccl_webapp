@@ -58,24 +58,20 @@ class StudentSerializer(serializers.ModelSerializer):
     """
     def validate_date_of_birth(self, date_of_birth_str):
         dob = datetime.strptime(str(date_of_birth_str), '%Y-%m-%d')
-        if datetime.now().year - dob.year < 5:
+        if datetime.now().year - dob.year < 4:
             raise ValueError('Minimum age requirement is not satisfied!')
         return dob
     
-    def validate_first_name(self, first_name):
-        if first_name is None or first_name == '':
-            raise ValueError("First name is empty!")
-        return first_name
-    
-    def validate_last_name(self, last_name):
-        if last_name is None or last_name == '':
-            raise ValueError("Last name is empty!")
-        return last_name
-    
     def validate_gender(self, gender):
-        if not gender or gender.upper() not in ('M', 'F', 'FEMALE', 'MALE'):
+        if not gender or gender.upper() not in ('U', 'M', 'F', 'FEMALE', 'MALE'):
             raise ValueError("invalid gender information!")
         return gender
+    def to_internal_value(self, data):
+        if data.get('chinese_name', None) == '':
+            data.pop('chinese_name')
+        if data.get('middle_name', None) == '':
+            data.pop('middle_name')
+        return super().to_internal_value(data)
     
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:

@@ -1,9 +1,8 @@
 import React, { useContext, useReducer } from "react";
-import ListStudent from "./ListStudent.tsx";
 import AccountDetail from "./AccountDetailPage.tsx";
 import Registration from "./RegistrationPage.tsx";
-import { UserContext } from "../app/App.tsx";
 import axios from "axios";
+import StudentsPage from "./StudentsPage.tsx";
 
 interface Props {
   userInfo: React.ReactNode;
@@ -111,10 +110,10 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
                   transitionPageState({ type: "go_to_registration" });
                 }}
               >
-                Register class
+                Registration
               </button>
             </li>
-            <li className="nav-item">
+            <li className="nav-item ">
               <button
                 className="btn btn-borderless"
                 onClick={() => {
@@ -134,7 +133,7 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
       )}
       {state?.page == Page.Students && (
         <div className="pt-3 w-75 mx-auto">
-          <ListStudent userInfo={userInfo} />
+          <StudentsPage userInfo={userInfo} />
         </div>
       )}
       {state?.page == Page.Registration && (

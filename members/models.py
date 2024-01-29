@@ -68,6 +68,8 @@ class Course(models.Model):
     # the last time that this course was updated
     last_update_time = models.DateField(null=True)
     creater_name = models.CharField(max_length=255, null=False)
+    # how much is this course in dollars
+    cost = models.FloatField(null=True)
 
 # Capture the registration event for each student
 class Registration(models.Model):
@@ -77,6 +79,7 @@ class Registration(models.Model):
     course = models.ForeignKey('Course', on_delete=models.CASCADE)
     student = models.ForeignKey('Student', on_delete=models.CASCADE)
     registration_date = models.DateField(null=False)
+    expiration_date = models.DateField(null=False)
     # TODO(lu): need to consider un-registration/transfer.
 
 # Payment history
