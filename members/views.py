@@ -3,8 +3,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, logout
 from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
-from .serializers import StudentSerializer, UserSerializer, MemberSerializer
-from .models import Member, Student
+from .serializers import StudentSerializer, UserSerializer, MemberSerializer, CourseSerializer
+from .models import Course, Member, Student
 from rest_framework.decorators import action
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.renderers import JSONRenderer
@@ -304,7 +304,17 @@ class MemberViewSet(ModelViewSet):
             permission_classes=[permissions.IsAuthenticated])
     def register_course(self, request):
         try:
-            student_serializer = StudentSerializer(data=request.data)
+            course_serializer = CourseSerializer(request.data['course'])
+            if not course_serializer.is_valid():
+                return Response("Invalid course information is provided",
+                                status=status.HTTP_400_BAD_REQUEST)
+            validated_course = course_serializer.validated_data
+            persisted_course = Course.objects.get(name=validated_course['name'])
+            if not persisted_course.active():
+                return Response("The class is no longer open for registration",
+                                status=status.HTTP_400_BAD_REQUEST)
+            
+            student_serializer = StudentSerializer(data=request.data['student'])
             if not student_serializer.is_valid():
                 return Response("Invalid student is provided", status=status.HTTP_400_BAD_REQUEST)
             validated = student_serializer.validated_data
@@ -314,6 +324,7 @@ class MemberViewSet(ModelViewSet):
             persisted_student = Student.objects.get(first_name=validated['first_name'],
                                                     last_name=validated['last_name'],
                                                     parent_id=matched_members)
+            
             return Response(status=status.HTTP_201_CREATED)
         except User.DoesNotExist or Member.DoesNotExist as e:
             return Response("The user does not exist!", status=status.HTTP_404_NOT_FOUND)
@@ -339,7 +350,7 @@ class MemberViewSet(ModelViewSet):
                                 status=status.HTTP_401_UNAUTHORIZED)
             member = Member.objects.get(user_id=user)
             # Only bord member is allowed to add course.
-            if member.member_type() is not "B":
+            if member.member_type() != "B":
                 return Response("The user has no rights to add course!",
                                 status=status.HTTP_401_UNAUTHORIZED)
             return Response(status=status.HTTP_201_CREATED) 
