@@ -364,5 +364,5 @@ class MemberViewSet(ModelViewSet):
     @action(methods=['PUT'], detail=True, url_path='delete-course', name='Delete a course',
     authentication_classes=[SessionAuthentication, BasicAuthentication],
     permission_classes=[permissions.IsAuthenticated])
-    def add_course(self, request, pk=None):
+    def remove_course(self, request, pk=None):
         pass   
