@@ -133,18 +133,18 @@ WSGI_APPLICATION = 'sbccl_webapp.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        # "NAME": "test_ccl",
-        # "USER": "luzhao",
-        # "PASSWORD": "huiyang@2023",
-        # "HOST": "127.0.0.1",
-        # "PORT": "5434"
-        "OPTIONS": {
-            "service": "sbccl",
-            "passfile": "/Users/luzhao/.my_pgpass",
-        },
-        "TEST": {
-            "NAME": "",
-        }
+        "NAME": "postgres",
+        "USER": "postgres",
+        "PASSWORD": "huiyang@2023",
+        "HOST": "127.0.0.1",
+        "PORT": "5433",
+        # "OPTIONS": {
+        #     "service": "sbccl",
+        #     "passfile": "/Users/luzhao/.my_pgpass",
+        # },
+        # "TEST": {
+        #     "NAME": "test_postgres"
+        # }
     },
 }
 
