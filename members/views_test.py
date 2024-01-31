@@ -1,6 +1,8 @@
 
 from rest_framework.test import APITestCase, APIRequestFactory, APIClient
 from rest_framework import status
+
+from .views import MemberViewSet
 from .models import Member, Student
 from django.contrib.auth.models import User
 from rest_framework.test import force_authenticate
@@ -9,11 +11,11 @@ class MemberViewSetTest(APITestCase):
     def create_user(self, user_name, email):
         exist_user = User.objects.create(
             username=user_name,
-            password='helloworld12H',
             email=email
         )
+        exist_user.set_password('helloworld12H')
         exist_user.save()
-        return exist_user
+        return User.objects.get(username=user_name)
 
     def create_member(self, user, sign_up_status='V', verification_code=None):
         member = Member.objects.create(
@@ -89,11 +91,9 @@ class MemberViewSetTest(APITestCase):
         verification_code = "12345-abc"
         exist_user = self.create_user('test_name', 'david@gmail.com')
         self.create_member(exist_user, sign_up_status='S', verification_code=verification_code)
-
-        response = self.client.put('/rest_api/members/verify-user/',
-                                   {'verification_code': verification_code,
-                                    'email': 'david@gmail.com'},
-                                   format='json')
+        url = '/rest_api/members/verify-user/?verification_code={code}&email={email}'.format(
+            code=verification_code, email='david@gmail.com')
+        response = self.client.put(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
         verifed_member = Member.objects.get(user_id=exist_user)
         self.assertEqual(verifed_member.sign_up_status, 'V')
@@ -101,50 +101,46 @@ class MemberViewSetTest(APITestCase):
 
     def test_verify_user_not_found(self):
         self.create_user('test_name', 'david@gmail.com')
-        response = self.client.put('/rest_api/members/verify-user/',
-                                   {'verification_code': '12345-abc',
-                                    'email': 'david@gmail.com'}, format='json')
+        url = '/rest_api/members/verify-user/?verification_code={code}&email={email}'.format(
+            code='12345-abc', email='david@gmail.com')
+        response = self.client.put(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_create_password_reset_code(self):
         exist_user = self.create_user('test_name', 'david@gmail.com')
         self.create_member(exist_user, sign_up_status='S')
 
-        response = self.client.put('/rest_api/members/create-password-reset-code/',
-                                   {'email': 'david@gmail.com'},
+        response = self.client.put('/rest_api/members/create-password-reset-code/?email={email}'.format(email='david@gmail.com'),
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         updated_member = Member.objects.get(user_id=exist_user)
-        self.assertEqual(updated_member.verification_code, response.data['verification_code'])
+        self.assertEqual(updated_member.verification_code, response['location'])
 
     def test_reset_password_by_code_succeed(self):
         verification_code = "12345-abc"
         new_password = 'HelloWorld1'
         exist_user = self.create_user('test_name', 'david@gmail.com')
         self.create_member(exist_user, sign_up_status='S', verification_code=verification_code)
-        response = self.client.put('/rest_api/members/test_name/reset-password-by-code/',
-                                   {'verification_code': "12345-abc",
-                                    'new_password': 'HelloWorld1'}, format='json')
+        url = '/rest_api/members/reset-password-by-code/?verification_code={code}&password={password}&email={email}'.format(code=verification_code, password=new_password, email='david@gmail.com')
+        response = self.client.put(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
         verifed_member = Member.objects.get(user_id=exist_user)
         self.assertIsNone(verifed_member.verification_code)
-        updated_user = User.objects.get(username='test_name')
-        self.assertEqual(updated_user.password, new_password)
     
     def test_reset_password_by_code_fail(self):
         verification_code = "12345-abc"
         new_password = 'HelloWorld1'
-        url = '/rest_api/members/test_name/reset-password-by-code/?verification_code={code}&new_password={pw}'.format(code = verification_code, pw=new_password)
+        url = '/rest_api/members/reset-password-by-code/?verification_code={code}&new_password={pw}'.format(code=verification_code, pw=new_password)
         exist_user = self.create_user('test_name', 'david@gmail.com')
         self.create_member(exist_user, sign_up_status='V', verification_code='')
         response = self.client.put(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(User.objects.get(username='test_name').password, exist_user.password)
 
     def test_reset_invalid_password_by_code_fail(self):
         verification_code = "12345-abc"
         new_password = 'invalid'
-        url = '/rest_api/members/test_name/reset-password-by-code/?verification_code={code}&new_password={pw}'.format(code = verification_code, pw=new_password)
+        url = '/rest_api/members/reset-password-by-code/?verification_code={code}&new_password={pw}'.format(code = verification_code, pw=new_password)
         exist_user = self.create_user('test_name', 'david@gmail.com')
         self.create_member(exist_user, sign_up_status='V', verification_code='')
         response = self.client.put(url, format='json')
@@ -153,7 +149,7 @@ class MemberViewSetTest(APITestCase):
 
     def test_reset_password_via_login_succeed(self):
         new_password = 'HelloWorld1'
-        url = '/rest_api/members/test_name/reset-password/?new_password={pw}'.format(pw=new_password)
+        url = '/rest_api/members/reset-password/?new_password={pw}'.format(pw=new_password)
         exist_user = self.create_user('test_name', 'david@gmail.com')
         self.create_member(exist_user, sign_up_status='V')
         
@@ -176,7 +172,7 @@ class MemberViewSetTest(APITestCase):
             'gender': 'M'
         }
         self.client.force_authenticate(user=exist_user)
-        response = self.client.put('/rest_api/members/test_name/add-student/',
+        response = self.client.put('/rest_api/members/add-student/',
                                    data=student_json, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -186,8 +182,8 @@ class MemberViewSetTest(APITestCase):
         self.assertEqual(student.first_name, 'david')
         self.assertIsNotNone(student.joined_date)
 
-        response = self.client.put('/rest_api/members/test_name/add-student/',
-                            data=student_json, format='json')
+        response = self.client.put('/rest_api/members/add-student/',
+                                   data=student_json, format='json')
         self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
 
 
@@ -201,7 +197,7 @@ class MemberViewSetTest(APITestCase):
             'gender': 'M'
         }
         self.client.force_authenticate(user=exist_user)
-        response = self.client.put('/rest_api/members/test_name/add-student/',
+        response = self.client.put('/rest_api/members/add-student/',
                                    data=student_json, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -219,7 +215,7 @@ class MemberViewSetTest(APITestCase):
             'gender': 'M'
         }
         self.client.force_authenticate(user=exist_user)
-        response = self.client.put('/rest_api/members/test_name/add-student/',
+        response = self.client.put('/rest_api/members/add-student/',
                                    data=student_json, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -234,7 +230,7 @@ class MemberViewSetTest(APITestCase):
             'gender': 'M'
         }
         self.client.force_authenticate(user=exist_user)
-        response = self.client.put('/rest_api/members/test_name/add-student/',
+        response = self.client.put('/rest_api/members/add-student/',
                                    data=student_json, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -244,9 +240,9 @@ class MemberViewSetTest(APITestCase):
         self.assertEqual(student.first_name, 'david')
         self.assertIsNotNone(student.joined_date)
 
-        response = self.client.put('/rest_api/members/test_name/remove-student/',
+        response = self.client.put('/rest_api/members/remove-student/',
                                    data=student_json, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
 
     def test_remove_non_existing_student_no_op(self):
         exist_user = self.create_user('test_name', 'david@gmail.com')
@@ -260,6 +256,6 @@ class MemberViewSetTest(APITestCase):
         }
         self.client.force_authenticate(user=exist_user)
 
-        response = self.client.put('/rest_api/members/test_name/remove-student/',
+        response = self.client.put('/rest_api/members/remove-student/',
                                    data=student_json, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

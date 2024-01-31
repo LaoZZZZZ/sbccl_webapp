@@ -1,10 +1,10 @@
 # For rest API
 from django.contrib.auth.models import User
-from django.contrib.auth import login, logout
+from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
-from .serializers import StudentSerializer, UserSerializer, MemberSerializer
-from .models import Member, Student
+from .serializers import StudentSerializer, UserSerializer, MemberSerializer, CourseSerializer
+from .models import Course, Member, Student
 from rest_framework.decorators import action
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.renderers import JSONRenderer
@@ -108,7 +108,7 @@ class MemberViewSet(ModelViewSet):
             permission_classes=[permissions.IsAuthenticated])
     def logout(self, request, pk=None):
         try:
-            logout(request.user)
+            logout(request)
             return Response(status=status.HTTP_200_OK)
         except User.DoesNotExist or models.Member.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -127,8 +127,8 @@ class MemberViewSet(ModelViewSet):
         if email is None:
             return Response("No email was provided!", status=status.HTTP_400_BAD_REQUEST)
         try:
-            user = User.objects.get(username=email)
-            matched_members = models.Member.objects.get(user_id=user)
+            user = User.objects.get(email=email)
+            matched_members = models.Member.objects.get(user_id=user.id)
             # User has already been verified
             if matched_members.sign_up_status == 'V':
                 return Response("The user has already been verified!",
@@ -139,9 +139,11 @@ class MemberViewSet(ModelViewSet):
             matched_members.verification_code = None
             matched_members.save()
             return Response(status=status.HTTP_202_ACCEPTED)
-        except User.DoesNotExist or Member.DoesNotExist:
+        except User.DoesNotExist as e:
             return Response('There is no user registered with - ' + email,
                              status=status.HTTP_404_NOT_FOUND)
+        except Member.DoesNotExist as e:
+            return Response(str(e), status=status.HTTP_404_NOT_FOUND)
 
     """
     User forget password. They want to reset the password via a randomly generated code
@@ -184,19 +186,18 @@ class MemberViewSet(ModelViewSet):
             authentication_classes=[BasicAuthentication],
             permission_classes=[permissions.AllowAny])
     def reset_password_by_code(self, request):
-        print(request.query_params)
         verification_code = request.query_params.get('verification_code')
         if verification_code is None:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response('No verification code is provided!', status=status.HTTP_400_BAD_REQUEST)
         new_password = request.query_params.get('password')
         if new_password is None:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response('No password is provided!', status=status.HTTP_400_BAD_REQUEST)
         try:
             email_address = request.query_params.get('email')
             retrieved_user = User.objects.get(email=email_address)
             matched_member = Member.objects.get(user_id=retrieved_user)
             validated_pass = UserSerializer().validate_password(new_password)
-            if not matched_member.verification_code == verification_code:
+            if matched_member.verification_code != verification_code:
                 return Response("Invalid verification code is provided!",
                                 status=status.HTTP_400_BAD_REQUEST)
             retrieved_user.set_password(validated_pass)
@@ -204,8 +205,8 @@ class MemberViewSet(ModelViewSet):
             matched_member.verification_code = None
             matched_member.save()
             return Response(status=status.HTTP_202_ACCEPTED)
-        except ValidationError:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        except ValidationError as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
         except User.DoesNotExist:
             return Response("{email} is not registered".format(email=request.query_params.get('email')),
                             status=status.HTTP_404_NOT_FOUND)
@@ -213,7 +214,7 @@ class MemberViewSet(ModelViewSet):
     """
     Reset the password for the user.
     """
-    @action(methods=['PUT'], detail=True, url_path='reset-password', name='Reset password.',
+    @action(methods=['PUT'], detail=False, url_path='reset-password', name='Reset password.',
             authentication_classes=[SessionAuthentication, BasicAuthentication],
             permission_classes=[permissions.IsAuthenticated])
     def reset_password(self, request, pk=None):
@@ -237,10 +238,9 @@ class MemberViewSet(ModelViewSet):
         try:
             serializer = StudentSerializer(data=request.data)
             if not serializer.is_valid():
-                print(serializer.data)
                 return Response(JSONRenderer().render(serializer.errors),
                                 status=status.HTTP_400_BAD_REQUEST)
-            user = User.objects.get(email=request.user.username)
+            user = User.objects.get(username=request.user.username)
             matched_member = Member.objects.get(user_id=user)
             # Only parent can add students.
             if matched_member.member_type != 'P':
@@ -267,7 +267,7 @@ class MemberViewSet(ModelViewSet):
             if not serializer.is_valid():
                 return Response(status=status.HTTP_400_BAD_REQUEST)
             student_to_delete = serializer.create(serializer.validated_data)
-            user = User.objects.get(email=request.user.username)
+            user = User.objects.get(username=request.user.username)
             matched_member = Member.objects.get(user_id=user)
             # Only parent can remove students.
             if matched_member.member_type != 'P':
@@ -276,6 +276,8 @@ class MemberViewSet(ModelViewSet):
             existing_students = Student.objects.filter(parent_id=matched_member,
                                                        first_name=student_to_delete.first_name,
                                                        last_name=student_to_delete.last_name)
+            if not existing_students:
+                return Response("The student does not exist!", status=status.HTTP_400_BAD_REQUEST)
             for s in existing_students:
                 s.delete()
             return Response(status=status.HTTP_202_ACCEPTED)
@@ -304,7 +306,17 @@ class MemberViewSet(ModelViewSet):
             permission_classes=[permissions.IsAuthenticated])
     def register_course(self, request):
         try:
-            student_serializer = StudentSerializer(data=request.data)
+            course_serializer = CourseSerializer(request.data['course'])
+            if not course_serializer.is_valid():
+                return Response("Invalid course information is provided",
+                                status=status.HTTP_400_BAD_REQUEST)
+            validated_course = course_serializer.validated_data
+            persisted_course = Course.objects.get(name=validated_course['name'])
+            if not persisted_course.active():
+                return Response("The class is no longer open for registration",
+                                status=status.HTTP_400_BAD_REQUEST)
+            
+            student_serializer = StudentSerializer(data=request.data['student'])
             if not student_serializer.is_valid():
                 return Response("Invalid student is provided", status=status.HTTP_400_BAD_REQUEST)
             validated = student_serializer.validated_data
@@ -314,6 +326,7 @@ class MemberViewSet(ModelViewSet):
             persisted_student = Student.objects.get(first_name=validated['first_name'],
                                                     last_name=validated['last_name'],
                                                     parent_id=matched_members)
+            
             return Response(status=status.HTTP_201_CREATED)
         except User.DoesNotExist or Member.DoesNotExist as e:
             return Response("The user does not exist!", status=status.HTTP_404_NOT_FOUND)
@@ -339,7 +352,7 @@ class MemberViewSet(ModelViewSet):
                                 status=status.HTTP_401_UNAUTHORIZED)
             member = Member.objects.get(user_id=user)
             # Only bord member is allowed to add course.
-            if member.member_type() is not "B":
+            if member.member_type() != "B":
                 return Response("The user has no rights to add course!",
                                 status=status.HTTP_401_UNAUTHORIZED)
             return Response(status=status.HTTP_201_CREATED) 
