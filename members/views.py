@@ -30,7 +30,7 @@ class MemberViewSet(ModelViewSet):
             'first_name': user.first_name,
             'last_name': user.last_name,
             'phone_number:': member.phone_number,
-            'member_type': member.member_type,
+            'member_type': member.getMemberType(),
             'last_login': user.last_login.date(),
             'date_joined': user.date_joined.date(),
             'balance': 0.0
@@ -299,11 +299,26 @@ class MemberViewSet(ModelViewSet):
             return Response('There is no user registered with - ' + request.user,
                              status=status.HTTP_404_NOT_FOUND)
 
-    @action(methods=['PUT'], detail=True, url_path='register-course', name='Register a student to a course',
+    @action(methods=['PUT'], detail=False, url_path='register-course', name='Register a student to a course',
             authentication_classes=[SessionAuthentication, BasicAuthentication],
             permission_classes=[permissions.IsAuthenticated])
-    def register_course(self, request, pk=None):
-        pass
+    def register_course(self, request):
+        try:
+            student_serializer = StudentSerializer(data=request.data)
+            if not student_serializer.is_valid():
+                return Response("Invalid student is provided", status=status.HTTP_400_BAD_REQUEST)
+            validated = student_serializer.validated_data
+
+            user = User.objects.get(username=request.user)
+            matched_members = models.Member.objects.get(user_id=user)
+            persisted_student = Student.objects.get(first_name=validated['first_name'],
+                                                    last_name=validated['last_name'],
+                                                    parent_id=matched_members)
+            return Response(status=status.HTTP_201_CREATED)
+        except User.DoesNotExist or Member.DoesNotExist as e:
+            return Response("The user does not exist!", status=status.HTTP_404_NOT_FOUND)
+        except Student.DoesNotExist as e:
+            return Response("The student does not exsit!", status=status.HTTP_404_NOT_FOUND)
 
     @action(methods=['PUT'], detail=True, url_path='unregister-course', name='Unregister a student to a course',
             authentication_classes=[SessionAuthentication, BasicAuthentication],

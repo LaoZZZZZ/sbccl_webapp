@@ -24,6 +24,16 @@ class Member(models.Model):
     def __str__(self):
         return 'User Id: {user_id}\n Member type: {member_type}'.format(
             user_id=self.user_id, member_type=self.member_type)
+    
+    # Match the MEMBER_TYPE
+    def getMemberType(self):
+        if self.member_type == 'P':
+            return "Parent"
+        if self.member_type == 'B':
+            return "Board Member"
+        if self.member_type == 'V':
+            return "Volunteer"
+        return "Unknown"
 
 # A user might have multiple students. User must add each student
 # explicit to their user profile.
@@ -74,13 +84,14 @@ class Course(models.Model):
 # Capture the registration event for each student
 class Registration(models.Model):
     # unique identifier to the registration. This code will be sent to the user too.
-    confirmation_code = models.CharField(max_length=255, primary_key=True)
+    registration_code = models.CharField(max_length=255)
     school_year = models.DateField(null=False)
     course = models.ForeignKey('Course', on_delete=models.CASCADE)
     student = models.ForeignKey('Student', on_delete=models.CASCADE)
     registration_date = models.DateField(null=False)
-    expiration_date = models.DateField(null=False)
+    expiration_date = models.DateField(null=True)
     # TODO(lu): need to consider un-registration/transfer.
+
 
 # Payment history
 class Payment(models.Model):
