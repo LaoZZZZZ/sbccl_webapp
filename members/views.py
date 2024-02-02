@@ -1,7 +1,9 @@
 # For rest API
+import datetime
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import get_object_or_404
+import pytz
 from rest_framework.viewsets import ModelViewSet
 from .serializers import StudentSerializer, UserSerializer, MemberSerializer, CourseSerializer
 from .models import Course, Member, Student
@@ -339,30 +341,80 @@ class MemberViewSet(ModelViewSet):
     def unregister_course(self, request, pk=None):
         pass   
 
-    @action(methods=['PUT'], detail=True, url_path='add-course', name='Add a new course',
+    # add or update existing course
+    @action(methods=['PUT'], detail=True, url_path='list-courses', name='list all active courses',
         authentication_classes=[SessionAuthentication, BasicAuthentication],
         permission_classes=[permissions.IsAuthenticated])
-    def add_course(self, request, pk=None):
+    def list_courses(self, request, pk=None):
         try:
-            print("Adding a course")
             user = User.objects.get(username=request.user.username)
-            # TODO(lu): Add special 
-            if not user.is_staff():
-                return Response("The user has no rights to add course!",
-                                status=status.HTTP_401_UNAUTHORIZED)
-            member = Member.objects.get(user_id=user)
-            # Only bord member is allowed to add course.
-            if member.member_type() != "B":
-                return Response("The user has no rights to add course!",
-                                status=status.HTTP_401_UNAUTHORIZED)
-            return Response(status=status.HTTP_201_CREATED) 
+            matched_member = Member.objects.get(user_id=user)
+            
         except User.DoesNotExist as e:
             return Response(str(e), status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)  
 
-    @action(methods=['PUT'], detail=True, url_path='delete-course', name='Delete a course',
+    # add or update existing course
+    @action(methods=['PUT'], detail=False, url_path='upsert-course', name='Add a new course',
+        authentication_classes=[SessionAuthentication, BasicAuthentication],
+        permission_classes=[permissions.IsAuthenticated])
+    def upsert_course(self, request):
+        try:
+            course_serializer = CourseSerializer(request.data)
+            if not course_serializer.is_valid():
+                return Response("Invalid course information is provided",
+                                status=status.HTTP_400_BAD_REQUEST)
+            user = User.objects.get(username=request.user.username)
+            matched_member = Member.objects.get(user_id=user.id)
+            if matched_member.member_type != 'B':
+                return Response("The user has no rights to add course!",
+                                status=status.HTTP_401_UNAUTHORIZED)
+            matched_course = Course.objects.filter(name=course.name)
+            if matched_course:
+                if len(matched_course) > 1:
+                    return Response("There are multiple courses with the same name",
+                                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            # Can only update class size limit, cost, course_status
+                if 'size_limit' in course_serializer.validated_data:
+                    matched_course[0].size_limit = course_serializer.validated_data['size_limit']
+                if 'course_status' in course_serializer.validated_data:
+                    matched_course[0].course_status = course_serializer.validated_data['course_status']
+                if 'cost' in course_serializer.validated_data:
+                    matched_course[0].cost = course_serializer.validated_data['cost']
+                matched_course[0].last_update_time = datetime.utcnow().replace(tzinfo=pytz.utc)
+                matched_course[0].last_update_person = matched_member
+                matched_course[0].save()
+                return Response(status=status.HTTP_202_ACCEPTED)
+            course = course_serializer.create(course_serializer.validated_data,
+                                              username=user.username,
+                                              member=matched_member)
+            course.save()
+            return Response(status=status.HTTP_201_CREATED)
+        except User.DoesNotExist as e:
+            return Response(str(e), status=status.HTTP_401_UNAUTHORIZED)
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)  
+
+    @action(methods=['PUT'], detail=False, url_path='delete-course', name='Delete a course',
     authentication_classes=[SessionAuthentication, BasicAuthentication],
     permission_classes=[permissions.IsAuthenticated])
-    def remove_course(self, request, pk=None):
-        pass   
+    def remove_course(self, request):
+        try:
+            course_serializer = CourseSerializer(request.data)
+            if not course_serializer.is_valid():
+                return Response("Invalid course information is provided",
+                                status=status.HTTP_400_BAD_REQUEST)
+            user = User.objects.get(username=request.user.username)
+            matched_member = Member.objects.get(user_id=user.id)
+            if matched_member.member_type != 'B':
+                return Response("The user has no rights to delete course!",
+                                status=status.HTTP_401_UNAUTHORIZED)
+            matched_course = Course.objects.filter(name=course_serializer.validated_data['name'])
+            for c in matched_course:
+                c.delete()
+            return Response(status=status.HTTP_202_ACCEPTED)
+        except User.DoesNotExist as e:
+            return Response(str(e), status=status.HTTP_401_UNAUTHORIZED)
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)     
