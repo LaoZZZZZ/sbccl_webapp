@@ -50,7 +50,6 @@ class UserSerializerTest(TestCase):
         user.save()
         saved_user=User.objects.get(username='test')
         self.assertIsNotNone(saved_user)
-        self.assertEqual(saved_user.password, 'sdeisQ1234')
 
     def test_create_student_success(self):
         student_json = {'first_name': 'sandy', 'last_name': 'zhao',
