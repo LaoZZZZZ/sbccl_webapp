@@ -15,7 +15,7 @@ class PaymentAdmin(admin.ModelAdmin):
     list_display = ('pay_date', 'registration_code', 'original_amount', 'amount_in_dollar', 'PAYMENT_STATUS')
 
 class RegistrationAdmin(admin.ModelAdmin):
-    list_display = ('student', 'course', 'school_year', 'registration_code',
+    list_display = ('student', 'course', 'school_year_start', 'school_year_end', 'registration_code',
                     'registration_date', 'expiration_date')
 
 admin.site.register(Member, MemberAdmin)

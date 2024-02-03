@@ -1,12 +1,9 @@
 from rest_framework import serializers
-from .models import Member, Student, Course
+from .models import Member, Student, Course, Registration
 from django.contrib.auth.models import User
 import re
 import pytz
 from datetime import datetime
-
-class LoginFormSerializer(serializers.Serializer):
-    pass
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -76,8 +73,8 @@ class StudentSerializer(serializers.ModelSerializer):
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
-        fields = ('name', 'course_description', 'course_type',
-                  'course_status', 'size_limit')
+        fields = ('id', 'name', 'course_description', 'course_type',
+                  'course_status', 'size_limit', 'cost')
     
     def validate_course_type(self, course_type):
         if course_type not in ['L', 'E']:
@@ -99,13 +96,32 @@ class CourseSerializer(serializers.ModelSerializer):
         if course_status not in ['A', 'U']:
             raise ValueError("Invalid course status!")
         return course_status
+    
+    def validate_cost(self, cost):
+        if cost < 0:
+            raise ValueError("invalid cost for the new course!")
+        return cost
 
-    def create(self, validated_data, username):
+    def create(self, validated_data, username, member):
         course = Course(**validated_data)
         course.creation_date = datetime.utcnow().replace(tzinfo=pytz.utc)
         course.last_update_time = course.creation_date
         course.creater_name = username
+        course.last_update_person = member
         return course
+    
+class RegistrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Registration
+        fields = ('registration_code', 'school_year_start', 'school_year_end',
+                  'registration_date', 'expiration_date')
+    
+    def create(self, validated_data, student, course):
+        registration = Registration(**validated_data)
+        registration.registration_date = datetime.utcnow().replace(tzinfo=pytz.utc)
+        registration.student = student
+        registration.course = course
+        return registration
     
 
 

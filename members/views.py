@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 import pytz
 from rest_framework.viewsets import ModelViewSet
 from .serializers import StudentSerializer, UserSerializer, MemberSerializer, CourseSerializer
-from .models import Course, Member, Student
+from .models import Course, Member, Student, Registration
 from rest_framework.decorators import action
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.renderers import JSONRenderer
@@ -303,18 +303,33 @@ class MemberViewSet(ModelViewSet):
             return Response('There is no user registered with - ' + request.user,
                              status=status.HTTP_404_NOT_FOUND)
 
+    # list all registrations that associate with the user. If the user is board member, all registration
+    # would be returned with pagination.
+    @action(methods=['GET'], detail=False, url_path='fetch-students',
+            name='Get all students for the member',
+            authentication_classes=[SessionAuthentication, BasicAuthentication],
+            permission_classes=[permissions.IsAuthenticated])
+    def list_registrations(self, request):
+        try:
+            user = User.objects.get(username=request.user)
+            matched_members = models.Member.objects.get(user_id=user)
+            students = models.Student.objects.filter(parent_id=matched_members)
+            content = {
+                'students': [JSONRenderer().render(StudentSerializer(s).data) for s in students]
+            }
+            return Response(data=content, status=status.HTTP_200_OK)
+        except User.DoesNotExist or Member.DoesNotExist:
+            return Response('There is no user registered with - ' + request.user,
+                             status=status.HTTP_404_NOT_FOUND)
+
     @action(methods=['PUT'], detail=False, url_path='register-course', name='Register a student to a course',
             authentication_classes=[SessionAuthentication, BasicAuthentication],
             permission_classes=[permissions.IsAuthenticated])
     def register_course(self, request):
         try:
-            course_serializer = CourseSerializer(request.data['course'])
-            if not course_serializer.is_valid():
-                return Response("Invalid course information is provided",
-                                status=status.HTTP_400_BAD_REQUEST)
-            validated_course = course_serializer.validated_data
-            persisted_course = Course.objects.get(name=validated_course['name'])
-            if not persisted_course.active():
+            course_id = request.data['course_id']
+            persisted_course = Course.objects.get(id=course_id)
+            if persisted_course.course_status != 'A':
                 return Response("The class is no longer open for registration",
                                 status=status.HTTP_400_BAD_REQUEST)
             
@@ -328,12 +343,29 @@ class MemberViewSet(ModelViewSet):
             persisted_student = Student.objects.get(first_name=validated['first_name'],
                                                     last_name=validated['last_name'],
                                                     parent_id=matched_members)
-            
+            matched_registration = Registration.objects.filter(student=persisted_student)
+            for m in matched_registration:
+                if m.course.course_type == persisted_course.course_type and m.course.course_status == 'A':
+                    return Response("The student already registered a same type of course!",
+                                    status=status.HTTP_409_CONFLICT)
+            registration = Registration()
+            registration.registration_code = str(uuid.uuid5(uuid.NAMESPACE_OID, user.username))
+            registration.course = persisted_course
+            registration.student = persisted_student
+            scholl_year_start = '{year}-{month}-{day}'.format(year=datetime.datetime.today().year,
+                                                              month='09', day='01')
+            registration.school_year_start = datetime.datetime.strptime(scholl_year_start, "%Y-%M-%d")
+            registration.school_year_end = registration.school_year_start.replace(year=datetime.datetime.today().year + 1,
+                                                                                  month=7)
+            registration.registration_date = datetime.datetime.today()
+            registration.save()
             return Response(status=status.HTTP_201_CREATED)
         except User.DoesNotExist or Member.DoesNotExist as e:
-            return Response("The user does not exist!", status=status.HTTP_404_NOT_FOUND)
+            return Response(str(e), status=status.HTTP_404_NOT_FOUND)
         except Student.DoesNotExist as e:
-            return Response("The student does not exsit!", status=status.HTTP_404_NOT_FOUND)
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+        except Course.DoesNotExist as e:
+            return Response(str(3), status=status.HTTP_400_BAD_REQUEST)
 
     @action(methods=['PUT'], detail=True, url_path='unregister-course', name='Unregister a student to a course',
             authentication_classes=[SessionAuthentication, BasicAuthentication],
@@ -341,27 +373,41 @@ class MemberViewSet(ModelViewSet):
     def unregister_course(self, request, pk=None):
         pass   
 
-    # add or update existing course
-    @action(methods=['PUT'], detail=True, url_path='list-courses', name='list all active courses',
+    # Return a list of courses
+    @action(methods=['GET'], detail=False, url_path='list-courses', name='list all courses',
         authentication_classes=[SessionAuthentication, BasicAuthentication],
         permission_classes=[permissions.IsAuthenticated])
-    def list_courses(self, request, pk=None):
+    def list_courses(self, request):
         try:
             user = User.objects.get(username=request.user.username)
             matched_member = Member.objects.get(user_id=user)
-            
+            # only board member can see all course.
+            show_inactive_class = matched_member.member_type == 'B'
+            courses = Course.objects.all()
+            courses_json = []
+            # extract enrollment
+            for c in courses:
+                if c.course_status == 'U' and not show_inactive_class:
+                    continue
+                course_data = CourseSerializer(c).data
+                course_data['enrollment'] = len(c.students.all())
+                courses_json.append(JSONRenderer().render(course_data))
+            content = {
+                'courses': courses_json
+            }
+            return Response(content, status=status.HTTP_200_OK)
         except User.DoesNotExist as e:
             return Response(str(e), status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)  
 
     # add or update existing course
-    @action(methods=['PUT'], detail=False, url_path='upsert-course', name='Add a new course',
+    @action(methods=['PUT'], detail=False, url_path='upsert-course', name='Add or update a course',
         authentication_classes=[SessionAuthentication, BasicAuthentication],
         permission_classes=[permissions.IsAuthenticated])
     def upsert_course(self, request):
         try:
-            course_serializer = CourseSerializer(request.data)
+            course_serializer = CourseSerializer(data=request.data)
             if not course_serializer.is_valid():
                 return Response("Invalid course information is provided",
                                 status=status.HTTP_400_BAD_REQUEST)
@@ -370,7 +416,7 @@ class MemberViewSet(ModelViewSet):
             if matched_member.member_type != 'B':
                 return Response("The user has no rights to add course!",
                                 status=status.HTTP_401_UNAUTHORIZED)
-            matched_course = Course.objects.filter(name=course.name)
+            matched_course = Course.objects.filter(name=course_serializer.validated_data['name'])
             if matched_course:
                 if len(matched_course) > 1:
                     return Response("There are multiple courses with the same name",
@@ -382,13 +428,14 @@ class MemberViewSet(ModelViewSet):
                     matched_course[0].course_status = course_serializer.validated_data['course_status']
                 if 'cost' in course_serializer.validated_data:
                     matched_course[0].cost = course_serializer.validated_data['cost']
-                matched_course[0].last_update_time = datetime.utcnow().replace(tzinfo=pytz.utc)
-                matched_course[0].last_update_person = matched_member
+                if 'course_description' in course_serializer.validated_data:
+                    matched_course[0].course_description = course_serializer.validated_data['course_description']
+                matched_course[0].last_update_time = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+                matched_course[0].last_update_person = user.username
                 matched_course[0].save()
                 return Response(status=status.HTTP_202_ACCEPTED)
             course = course_serializer.create(course_serializer.validated_data,
-                                              username=user.username,
-                                              member=matched_member)
+                                              username=user.username, member=user.username)
             course.save()
             return Response(status=status.HTTP_201_CREATED)
         except User.DoesNotExist as e:
