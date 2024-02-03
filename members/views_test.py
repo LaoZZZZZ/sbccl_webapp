@@ -546,5 +546,5 @@ class MemberViewSetTest(APITestCase):
             }
         }
         response = self.client.put('/rest_api/members/register-course/',
-                                   data=payload, format='json')
+                                   data=new_registration, format='json')
         self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
