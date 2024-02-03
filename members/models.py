@@ -80,12 +80,14 @@ class Course(models.Model):
     creater_name = models.CharField(max_length=255, null=False)
     # how much is this course in dollars
     cost = models.FloatField(null=True)
+    last_update_person = models.CharField(max_length=255, null=False)
 
 # Capture the registration event for each student
 class Registration(models.Model):
     # unique identifier to the registration. This code will be sent to the user too.
     registration_code = models.CharField(max_length=255)
-    school_year = models.DateField(null=False)
+    school_year_start = models.DateField(null=False)
+    school_year_end = models.DateField(null=False)
     course = models.ForeignKey('Course', on_delete=models.CASCADE)
     student = models.ForeignKey('Student', on_delete=models.CASCADE)
     registration_date = models.DateField(null=False)
