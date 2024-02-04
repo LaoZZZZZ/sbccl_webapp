@@ -88,8 +88,10 @@ class Registration(models.Model):
     registration_code = models.CharField(max_length=255)
     school_year_start = models.DateField(null=False)
     school_year_end = models.DateField(null=False)
-    course = models.ForeignKey('Course', on_delete=models.CASCADE)
-    student = models.ForeignKey('Student', on_delete=models.CASCADE)
+    # Course should not be deleted if there is any registration tied to it.
+    course = models.ForeignKey('Course', on_delete=models.PROTECT)
+    # needs to remove the registration before delete the students.
+    student = models.ForeignKey('Student', on_delete=models.PROTECT)
     registration_date = models.DateField(null=False)
     expiration_date = models.DateField(null=True)
     last_update_date = models.DateField(null=True)
