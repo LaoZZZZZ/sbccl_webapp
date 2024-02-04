@@ -12,11 +12,16 @@ class CourseAdmin(admin.ModelAdmin):
     list_display = ('name', 'course_description', 'course_type', 'course_status', 'size_limit')
 
 class PaymentAdmin(admin.ModelAdmin):
-    list_display = ('pay_date', 'registration_code', 'original_amount', 'amount_in_dollar', 'PAYMENT_STATUS')
+    list_display = ('pay_date', 'registration_code', 'dropout_info', 'original_amount',
+                    'amount_in_dollar', 'payment_status')
 
 class RegistrationAdmin(admin.ModelAdmin):
     list_display = ('student', 'course', 'school_year_start', 'school_year_end', 'registration_code',
                     'registration_date', 'expiration_date')
+
+class DropoutAdmin(admin.ModelAdmin):
+    list_display = ('student', 'course', 'school_year_start', 'school_year_end',
+                    'original_registration_code', 'dropout_date')
 
 admin.site.register(Member, MemberAdmin)
 admin.site.register(Student, StudentAdmin)
