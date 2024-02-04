@@ -88,17 +88,20 @@ class Registration(models.Model):
     registration_code = models.CharField(max_length=255)
     school_year_start = models.DateField(null=False)
     school_year_end = models.DateField(null=False)
-    course = models.ForeignKey('Course', on_delete=models.CASCADE)
-    student = models.ForeignKey('Student', on_delete=models.CASCADE)
+    # Course should not be deleted if there is any registration tied to it.
+    course = models.ForeignKey('Course', on_delete=models.PROTECT)
+    # needs to remove the registration before delete the students.
+    student = models.ForeignKey('Student', on_delete=models.PROTECT)
     registration_date = models.DateField(null=False)
     expiration_date = models.DateField(null=True)
-    # TODO(lu): need to consider un-registration/transfer.
-
+    last_update_date = models.DateField(null=True)
 
 # Payment history
 class Payment(models.Model):
+    # Either registration_code or droput_info is null. They can not be set at the same time.
     registration_code = models.ForeignKey(
-        'Registration', on_delete=models.CASCADE, verbose_name='Related registration')
+        'Registration', on_delete=models.SET_NULL, verbose_name='Related registration', null=True)
+    dropout_info = models.ForeignKey('Dropout', on_delete=models.SET_NULL, verbose_name='Related dropout', null=True)
     user = models.ForeignKey('members.Member', on_delete=models.CASCADE, verbose_name='Payment sender')
     pay_date = models.DateField(null=False)
     original_amount = models.FloatField(null=False)
@@ -115,6 +118,16 @@ class Payment(models.Model):
         ('PR', 'PartialRefund')
     ]
     payment_status = models.CharField(max_length=2, choices=PAYMENT_STATUS)
+    last_udpate_date = models.DateField(null=False)
+    last_update_person = models.CharField(max_length=255, null=False)
 
-
+# If a registration is cancelled, it would become a dropout record.
+class Dropout(models.Model):
+    school_year_start = models.DateField(null=False)
+    school_year_end = models.DateField(null=False)
+    course_name = models.CharField(max_length=255, null=False)
+    student = models.ForeignKey('Student', on_delete=models.CASCADE)
+    original_registration_code = models.CharField(max_length=225)
+    dropout_date = models.DateField(null=False)
+    user = models.ForeignKey('members.Member', on_delete=models.CASCADE, verbose_name='Dropout requester')
 

@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 import pytz
 from rest_framework.viewsets import ModelViewSet
 from .serializers import StudentSerializer, UserSerializer, MemberSerializer, CourseSerializer
-from .models import Course, Member, Student, Registration
+from .models import Course, Member, Student, Registration, Dropout, Payment
 from rest_framework.decorators import action
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.renderers import JSONRenderer
@@ -358,6 +358,7 @@ class MemberViewSet(ModelViewSet):
             registration.school_year_end = registration.school_year_start.replace(year=datetime.datetime.today().year + 1,
                                                                                   month=7)
             registration.registration_date = datetime.datetime.today()
+            registration.last_update_date = registration.registration_date
             registration.save()
             return Response(status=status.HTTP_201_CREATED)
         except User.DoesNotExist or Member.DoesNotExist as e:
@@ -371,7 +372,37 @@ class MemberViewSet(ModelViewSet):
             authentication_classes=[SessionAuthentication, BasicAuthentication],
             permission_classes=[permissions.IsAuthenticated])
     def unregister_course(self, request, pk=None):
-        pass   
+        try:
+            matched_registration = Registration.objects.get(id=pk)
+            user = User.objects.get(username=request.user)
+            persited_member = Member.objects.get(user_id=user)
+            dropout = Dropout()
+            dropout.dropout_date = datetime.datetime.today()
+            dropout.student =  matched_registration.student
+            dropout.original_registration_code = matched_registration.registration_code
+            dropout.user = persited_member
+            dropout.course_name = matched_registration.course.name
+            dropout.school_year_end = matched_registration.school_year_end
+            dropout.school_year_start = matched_registration.school_year_start
+            dropout.save()
+            persisted_payment = Payment.objects.filter(registration_code=matched_registration)
+            if persisted_payment:
+                if len(persisted_payment) > 1:
+                    return Response("There are more than one payments associated with this registration!",
+                                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                persisted_payment[0].dropout_info = dropout
+                persisted_payment[0].last_udpate_date = dropout.dropout_date
+                persisted_payment[0].last_update_person = user.username
+                persisted_payment[0].save()
+            matched_registration.delete()
+            return Response(status=status.HTTP_202_ACCEPTED)
+        except User.DoesNotExist or Member.DoesNotExist:
+            return Response('There is no user registered with - ' + request.user,
+                             status=status.HTTP_404_NOT_FOUND)
+        except Student.DoesNotExist as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+        except Course.DoesNotExist as e:
+            return Response(str(3), status=status.HTTP_400_BAD_REQUEST)   
 
     # Return a list of courses
     @action(methods=['GET'], detail=False, url_path='list-courses', name='list all courses',
@@ -401,7 +432,7 @@ class MemberViewSet(ModelViewSet):
         except Exception as e:
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)  
 
-    # add or update existing course
+    # Add or update existing course
     @action(methods=['PUT'], detail=False, url_path='upsert-course', name='Add or update a course',
         authentication_classes=[SessionAuthentication, BasicAuthentication],
         permission_classes=[permissions.IsAuthenticated])
