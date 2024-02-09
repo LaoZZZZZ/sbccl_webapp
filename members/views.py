@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import get_object_or_404
 import pytz
 from rest_framework.viewsets import ModelViewSet
-from .serializers import StudentSerializer, UserSerializer, MemberSerializer, CourseSerializer
+from .serializers import StudentSerializer, UserSerializer, MemberSerializer, CourseSerializer, RegistrationSerializer
 from .models import Course, Member, Student, Registration, Dropout, Payment
 from rest_framework.decorators import action
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
@@ -314,8 +314,17 @@ class MemberViewSet(ModelViewSet):
             user = User.objects.get(username=request.user)
             matched_members = models.Member.objects.get(user_id=user)
             students = models.Student.objects.filter(parent_id=matched_members)
+            registrations = []
+            dropouts = []
+            for s in students:
+                matched_registrations = Registration.objects.filter(student=s)
+                registrations = registrations + [JSONRenderer().render(RegistrationSerializer(r).data) for r in matched_registrations]
+                matched_dropouts = Dropout.objects.filter(student=s)
+                dropouts = dropouts + [JSONRenderer().render(d) for d in matched_dropouts]
+
             content = {
-                'students': [JSONRenderer().render(StudentSerializer(s).data) for s in students]
+                'registrations': registrations,
+                'dropouts': dropouts
             }
             return Response(data=content, status=status.HTTP_200_OK)
         except User.DoesNotExist or Member.DoesNotExist:

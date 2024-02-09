@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { redirect, redirectDocument, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import EmailInput from "../common/EmailInput.tsx";
 import axios from "axios";
 import Alert from "../common/Alert.tsx";
 import PasswordInput from "../common/PasswordInput.tsx";
+import { useNavigate } from "react-router-dom";
 
 const PasswordResetStatus = {
   SUCCESS: 0,
@@ -45,8 +46,9 @@ const ResetPasswordByCode = () => {
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
   const [verificationStatus, setVerificationStatus] = useState({});
+  const navigate = useNavigate();
 
-  const onVerify = () => {
+  const onReset = () => {
     if (emailAddress === "") {
       setVerificationStatus({
         status: PasswordResetStatus.FAILED,
@@ -77,7 +79,7 @@ const ResetPasswordByCode = () => {
               type="button"
               value="Reset"
               onClick={() => {
-                onVerify();
+                onReset();
               }}
             />
           </div>
@@ -87,7 +89,7 @@ const ResetPasswordByCode = () => {
             success={false}
             message={verificationStatus["msg"]}
             parentCallback={() => {
-              setVerificationStatus({});
+              navigate("/login");
             }}
           />
         )}
@@ -96,8 +98,7 @@ const ResetPasswordByCode = () => {
             success={true}
             message={verificationStatus["msg"]}
             parentCallback={() => {
-              console.log("Redirect to login");
-              return redirect("/login");
+              navigate("/login");
             }}
           />
         )}
