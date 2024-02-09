@@ -3,6 +3,7 @@ import { redirect, redirectDocument, useParams } from "react-router-dom";
 import EmailInput from "../common/EmailInput.tsx";
 import axios from "axios";
 import Alert from "../common/Alert.tsx";
+import { useNavigate } from "react-router-dom";
 
 const VerificatiionStatus = {
   SUCCESS: 0,
@@ -43,6 +44,7 @@ const VerifyUser = () => {
   let { verification_code } = useParams();
   const [emailAddress, setEmailAddress] = useState("");
   const [verificationStatus, setVerificationStatus] = useState({});
+  const navigator = useNavigate();
 
   const onVerify = () => {
     if (emailAddress === "") {
@@ -89,8 +91,7 @@ const VerifyUser = () => {
             success={true}
             message={verificationStatus["msg"]}
             parentCallback={() => {
-              console.log("Redirect to login");
-              return redirect("/login");
+              navigator("/login");
             }}
           />
         )}
