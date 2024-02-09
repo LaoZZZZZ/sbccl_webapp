@@ -31,11 +31,11 @@ class MemberViewSet(ModelViewSet):
             'email': user.email,
             'first_name': user.first_name,
             'last_name': user.last_name,
-            'phone_number:': member.phone_number,
+            'phone_number': member.phone_number,
             'member_type': member.getMemberType(),
             'last_login': user.last_login.date(),
             'date_joined': user.date_joined.date(),
-            'balance': 0.0
+            'balance': '$0.0'
         }
 
     def list(self, request):
