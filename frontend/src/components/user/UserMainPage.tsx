@@ -1,11 +1,12 @@
-import React, { useContext, useReducer } from "react";
+import React, { useReducer } from "react";
 import AccountDetail from "./AccountDetailPage.tsx";
-import Registration from "./RegistrationPage.tsx";
-import axios from "axios";
+import Logout from "./Logout.tsx";
+import Registrations from "./RegistrationsPage.tsx";
 import StudentsPage from "./StudentsPage.tsx";
+import UserInfo from "./UserInfo.tsx";
 
 interface Props {
-  userInfo: React.ReactNode;
+  userInfo: UserInfo;
   logOutCallback: () => {};
 }
 
@@ -41,24 +42,7 @@ const SwitchPage = (state, action) => {
 // 2. Students under this user
 // 3. Registrations associated with each student
 const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
-  const logOut = async (userInfo) => {
-    await axios
-      .put(
-        "http://localhost:8000/rest_api/members/logout/",
-        {},
-        {
-          auth: userInfo.auth,
-        }
-      )
-      .then(function (response) {
-        if (response.status == 202) {
-          logOutCallback();
-        }
-      })
-      .catch(function (error) {
-        logOutCallback();
-      });
-  };
+  console.log(userInfo);
   const INITIAL_PAGE = {
     /* Default on account detail page*/
     page: Page.AccountDetail,
@@ -67,7 +51,7 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
   return (
     <>
       <div className="navbar navbar-expand-lg bg-light navbar-toggler pb-3 w-100 h-10">
-        <a className="navbar-brand" href="#">
+        <a className="navbar-brand" href="http://https://www.sbcclny.com">
           SBCCL
         </a>
         <button
@@ -117,7 +101,7 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
               <button
                 className="btn btn-borderless"
                 onClick={() => {
-                  logOut(userInfo);
+                  Logout(userInfo, logOutCallback);
                 }}
               >
                 Logout
@@ -126,19 +110,19 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
           </ul>
         </div>
       </div>
-      {state?.page == Page.AccountDetail && (
+      {state?.page === Page.AccountDetail && (
         <div className="pt-3 w-75 mx-auto">
           <AccountDetail userInfo={userInfo.user} />
         </div>
       )}
-      {state?.page == Page.Students && (
+      {state?.page === Page.Students && (
         <div className="pt-3 w-75 mx-auto">
           <StudentsPage userInfo={userInfo} />
         </div>
       )}
-      {state?.page == Page.Registration && (
+      {state?.page === Page.Registration && (
         <div className="pt-3 w-75 mx-auto">
-          <Registration userInfo={userInfo} />
+          <Registrations userInfo={userInfo} />
         </div>
       )}
     </>

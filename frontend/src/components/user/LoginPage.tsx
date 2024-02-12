@@ -3,7 +3,7 @@ import PasswordInput from "../common/PasswordInput.tsx";
 import EmailInput from "../common/EmailInput.tsx";
 import axios from "axios";
 import Alert from "../common/Alert.tsx";
-
+import UserInfo from "./UserInfo.tsx";
 interface Props {
   onLoginSuccess: ({}) => void;
   onSignUp: () => void;
@@ -48,10 +48,13 @@ const LoginPage = ({ onLoginSuccess, onSignUp, onResetPassword }: Props) => {
                   )
                   .then(function (response) {
                     if (response.status == 202) {
-                      const user_info = response.data;
-                      user_info.auth = {
-                        password: password,
-                        username: user_info.user.username,
+                      const user_data = response.data;
+                      const user_info: UserInfo = {
+                        auth: {
+                          password: password,
+                          username: user_data.user.username,
+                        },
+                        user: user_data.user,
                       };
                       onLoginSuccess(user_info);
                     }
