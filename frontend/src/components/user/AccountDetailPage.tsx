@@ -7,14 +7,14 @@ interface Props {
 const AccountDetail = ({ userInfo }: Props) => {
   console.log(userInfo);
   const table_row_names = [
-    { rowName: "Last Name", key: "last_name" },
-    { rowName: "First Name", key: "first_name" },
-    { rowName: "Email", key: "email" },
-    { rowName: "Phone Number", key: "phone_number" },
-    { rowName: "Member Type", key: "member_type" },
-    { rowName: "Last Login", key: "last_login" },
-    { rowName: "Date Joined", key: "date_joined" },
-    { rowName: "Balance", key: "balance" },
+    { rowName: "Last Name", value: userInfo.last_name },
+    { rowName: "First Name", value: userInfo.first_name },
+    { rowName: "Email", value: userInfo.email },
+    { rowName: "Phone Number", value: userInfo.phone_number },
+    { rowName: "Member Type", value: userInfo.member_type },
+    { rowName: "Last Login", value: userInfo.last_login },
+    { rowName: "Date Joined", value: userInfo.date_joined },
+    { rowName: "Balance", value: userInfo.balance },
   ];
 
   // TODO(lu): Make phone number editable for the user.
@@ -26,7 +26,7 @@ const AccountDetail = ({ userInfo }: Props) => {
             return (
               <tr>
                 <th>{key_value.rowName}</th>
-                <th>{userInfo[key_value.key]}</th>
+                <th>{key_value.value}</th>
               </tr>
             );
           })}

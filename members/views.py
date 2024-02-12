@@ -305,7 +305,7 @@ class MemberViewSet(ModelViewSet):
 
     # list all registrations that associate with the user. If the user is board member, all registration
     # would be returned with pagination.
-    @action(methods=['GET'], detail=False, url_path='fetch-students',
+    @action(methods=['GET'], detail=False, url_path='list-registrations',
             name='Get all students for the member',
             authentication_classes=[SessionAuthentication, BasicAuthentication],
             permission_classes=[permissions.IsAuthenticated])
@@ -321,7 +321,6 @@ class MemberViewSet(ModelViewSet):
                 registrations = registrations + [JSONRenderer().render(RegistrationSerializer(r).data) for r in matched_registrations]
                 matched_dropouts = Dropout.objects.filter(student=s)
                 dropouts = dropouts + [JSONRenderer().render(d) for d in matched_dropouts]
-
             content = {
                 'registrations': registrations,
                 'dropouts': dropouts
@@ -337,6 +336,8 @@ class MemberViewSet(ModelViewSet):
     def register_course(self, request):
         try:
             course_id = request.data['course_id']
+            if not course_id:
+                return Response("No course is provided", status=status.HTTP_400_BAD_REQUEST)
             persisted_course = Course.objects.get(id=course_id)
             if persisted_course.course_status != 'A':
                 return Response("The class is no longer open for registration",
@@ -361,9 +362,9 @@ class MemberViewSet(ModelViewSet):
             registration.registration_code = str(uuid.uuid5(uuid.NAMESPACE_OID, user.username))
             registration.course = persisted_course
             registration.student = persisted_student
-            scholl_year_start = '{year}-{month}-{day}'.format(year=datetime.datetime.today().year,
+            school_year_start = '{year}-{month}-{day}'.format(year=datetime.datetime.today().year,
                                                               month='09', day='01')
-            registration.school_year_start = datetime.datetime.strptime(scholl_year_start, "%Y-%M-%d")
+            registration.school_year_start = datetime.datetime.strptime(school_year_start, "%Y-%m-%d")
             registration.school_year_end = registration.school_year_start.replace(year=datetime.datetime.today().year + 1,
                                                                                   month=7)
             registration.registration_date = datetime.datetime.today()

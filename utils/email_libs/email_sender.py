@@ -7,7 +7,6 @@ class EmailSender(object):
         # https://support.google.com/mail/answer/7126229?visit_id=638239046598120194-2330240748&p=BadCredentials&rd=2#cantsignin&zippy=%2Ci-cant-sign-in-to-my-email-client%2Cstep-change-smtp-other-settings-in-your-email-client
         self.smtp_server = "smtp.gmail.com"
         self.port = 465  # for SSL
-        # self.sender_email = "ccl_admin@sbcclny.com"
         self.sender_email = "ccl_admin@sbcclny.com"
         self.password = "Celina@2016"
        

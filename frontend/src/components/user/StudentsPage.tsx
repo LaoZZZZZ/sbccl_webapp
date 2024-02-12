@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import ListStudents from "./ListStudents.tsx";
 import AddStudents from "./AddStudentsPage.tsx";
+import fetchStudents from "./FetchStudents.tsx";
+import UserInfo from "./UserInfo.tsx";
 
 interface Props {
-  userInfo: React.ReactNode;
+  userInfo: UserInfo;
 }
 
 interface StudentState {
@@ -12,34 +13,6 @@ interface StudentState {
   value: [];
   addStudent: boolean;
 }
-
-const fetchStudents = async (user_info, callback) => {
-  const response = await axios.get(
-    "http://localhost:8000/rest_api/members/fetch-students",
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      auth: {
-        username: user_info.auth.username,
-        password: user_info.auth.password,
-      },
-    }
-  );
-
-  if (response.status == 200) {
-    const students = response.data.students.map((json) => {
-      return JSON.parse(json);
-    });
-
-    callback({
-      fetched: true,
-      value: students,
-    });
-  } else {
-    callback({ fetched: false, value: [] });
-  }
-};
 
 const StudentsPage = ({ userInfo }: Props) => {
   const [studentsState, setStudentsState] = useState<StudentState>({
@@ -53,12 +26,6 @@ const StudentsPage = ({ userInfo }: Props) => {
       fetchStudents(userInfo, setStudentsState);
     }
   }, [studentsState]);
-  const table_columns_names = [
-    "Last Name",
-    "First Name",
-    "Gender",
-    "Date Of Birth",
-  ];
 
   // The students list has changed. Trigger refetching from the backend.
   const fetchStudentLists = () => {
@@ -71,15 +38,6 @@ const StudentsPage = ({ userInfo }: Props) => {
 
   return (
     <>
-      {studentsState.value.length > 0 && (
-        <ListStudents
-          students={studentsState.value}
-          userAuth={userInfo.auth}
-          updateStudentList={fetchStudentLists}
-        />
-      )}
-      {/* Add a divider to the remaining part of page */}
-      <hr className="hr pt-2" />
       {!studentsState.addStudent && (
         <button
           type="button"
@@ -94,8 +52,18 @@ const StudentsPage = ({ userInfo }: Props) => {
           Add Student
         </button>
       )}
+      <hr className="hr pt-2" />
       {studentsState.addStudent && (
         <AddStudents
+          userAuth={userInfo.auth}
+          updateStudentList={fetchStudentLists}
+        />
+      )}
+      {/* Add a divider to the remaining part of page */}
+
+      {!studentsState.addStudent && studentsState.value.length > 0 && (
+        <ListStudents
+          students={studentsState.value}
           userAuth={userInfo.auth}
           updateStudentList={fetchStudentLists}
         />

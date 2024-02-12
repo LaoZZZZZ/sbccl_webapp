@@ -10,7 +10,7 @@ def ValidateBoardMember(board_member):
     pass
 
 def ValidateUserEmail(email):
-    pass
+    return 
 
 def ValidatePasswordFormat(password):
     pass

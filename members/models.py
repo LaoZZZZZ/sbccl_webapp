@@ -45,7 +45,7 @@ class Student(models.Model):
     middle_name = models.CharField(max_length=255, null=True)
     GENDER_INFO = [
         ('M', 'Male'),
-        ('F', 'Femail'),
+        ('F', 'Female'),
         ('U', 'Unknown')]
     gender = models.CharField(max_length=1, choices=GENDER_INFO)
     date_of_birth = models.DateField(null=True)
