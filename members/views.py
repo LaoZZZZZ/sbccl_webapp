@@ -386,17 +386,19 @@ class MemberViewSet(ModelViewSet):
             matched_registration = Registration.objects.get(id=pk)
             user = User.objects.get(username=request.user)
             persited_member = Member.objects.get(user_id=user)
-            dropout = Dropout()
-            dropout.dropout_date = datetime.datetime.today()
-            dropout.student =  matched_registration.student
-            dropout.original_registration_code = matched_registration.registration_code
-            dropout.user = persited_member
-            dropout.course_name = matched_registration.course.name
-            dropout.school_year_end = matched_registration.school_year_end
-            dropout.school_year_start = matched_registration.school_year_start
-            dropout.save()
             persisted_payment = Payment.objects.filter(registration_code=matched_registration)
             if persisted_payment:
+                # Only create dropout record if there is a payment record. Dropout record is designed
+                # to track refund and followup if needed.
+                dropout = Dropout()
+                dropout.dropout_date = datetime.datetime.today()
+                dropout.student =  matched_registration.student
+                dropout.original_registration_code = matched_registration.registration_code
+                dropout.user = persited_member
+                dropout.course_name = matched_registration.course.name
+                dropout.school_year_end = matched_registration.school_year_end
+                dropout.school_year_start = matched_registration.school_year_start
+                dropout.save()
                 if len(persisted_payment) > 1:
                     return Response("There are more than one payments associated with this registration!",
                                     status=status.HTTP_500_INTERNAL_SERVER_ERROR)

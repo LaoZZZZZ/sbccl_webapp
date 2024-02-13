@@ -21,6 +21,7 @@ interface Student {
 interface Registration {
   course_id: string;
   student: Student;
+  pod: string;
 }
 
 const AddStatus = {
@@ -71,6 +72,7 @@ interface ClassInformation {
   capacity: number;
   teacher: string;
   cost: string;
+  type: string;
 }
 
 const AddRegistration = ({
@@ -80,6 +82,17 @@ const AddRegistration = ({
   updateRegistrationList,
   cancelCallback,
 }: Props) => {
+  const podDates = [
+    "2024-01-24 10:00am",
+    "2024-01-24 01:00pm",
+    "2024-02-24 10:00am",
+    "2024-02-24 01:00pm",
+    "2024-03-24 10:00am",
+    "2024-04-24 10:00am",
+    "2024-05-24 10:00am",
+    "2024-06-24 10:00am",
+    "2024-07-24 10:00am",
+  ];
   const [addStatus, setAddStatus] = useState({});
   const [classInfo, setClassInfo] = useState<ClassInformation>({
     selected: false,
@@ -87,6 +100,7 @@ const AddRegistration = ({
     capacity: 0,
     teacher: "",
     cost: "",
+    type: "",
   });
 
   const [registration] = useState<Registration>({
@@ -97,12 +111,13 @@ const AddRegistration = ({
       gender: "",
       date_of_birth: new Date("1997-01-01"),
     },
+    pod: "",
   });
 
   return (
     <div className="col w-75 mx-auto align-middle">
       <form className="form-label form-control">
-        <div className="form-group">
+        <div className="form-group pb-2">
           <label>Select student</label>
           <select
             className="form-control"
@@ -139,6 +154,7 @@ const AddRegistration = ({
                   enrollment: selected_course[0].enrollment,
                   capacity: selected_course[0].size_limit,
                   cost: "$" + selected_course[0].cost,
+                  type: selected_course[0].course_type,
                   teacher: "***",
                 });
               } else {
@@ -160,7 +176,7 @@ const AddRegistration = ({
           </select>
         </div>
         {classInfo.selected && (
-          <div className="input-group">
+          <div className="input-group pb-2">
             <span className="input-group-text">Capacity:</span>
             <span className="input-group-text bg-white">
               {classInfo.capacity}
@@ -184,14 +200,31 @@ const AddRegistration = ({
             </span>
           </div>
         )}
+        {classInfo.selected && classInfo.type == "L" && (
+          <div className="form-group pb-2">
+            <label>Select Parent On Duty date</label>
+            <select
+              className="form-control"
+              id="podSelect"
+              onChange={(e) => {
+                registration.pod = e.target.value;
+              }}
+            >
+              <option>Not Selected</option>
+              {podDates.map((date) => {
+                return <option>{date}</option>;
+              })}
+            </select>
+          </div>
+        )}
         <div className="btn-group pt-2">
           <input
             className="btn btn-primary active mr-2"
             type="button"
             value={
-              classInfo.selected && classInfo.enrollment < classInfo.capacity
+              !classInfo.selected || classInfo.enrollment < classInfo.capacity
                 ? "Register"
-                : "Add to Waitlist"
+                : "Add to Waiting list"
             }
             onClick={() => {
               console.log(registration);
