@@ -14,7 +14,7 @@ const fetchRegistrations = async (user_info, callback) => {
     }
   );
 
-  if (response.status == 200) {
+  if (response.status === 200) {
     const registrations = response.data.registrations.map((json) => {
       return JSON.parse(json);
     });

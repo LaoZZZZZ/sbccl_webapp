@@ -10,7 +10,7 @@ const Logout = async (userInfo, logOutCallback) => {
       }
     )
     .then(function (response) {
-      if (response.status == 202) {
+      if (response.status === 202) {
         logOutCallback();
       }
     })

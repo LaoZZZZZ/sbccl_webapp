@@ -14,7 +14,7 @@ const fetchStudents = async (user_info, callback) => {
     }
   );
 
-  if (response.status == 200) {
+  if (response.status === 200) {
     const students = response.data.students.map((json) => {
       return JSON.parse(json);
     });

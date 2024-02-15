@@ -14,7 +14,7 @@ interface ValueState {
   value: [];
 }
 
-const PageState = {
+const PageStateEnum = {
   ListRegistrations: 0,
   AddRegistration: 1,
 };
@@ -39,7 +39,7 @@ const Registrations = ({ userInfo }: Props) => {
     value: [],
   });
   const [pageState, setPageState] = useState<PageState>({
-    pageState: PageState.ListRegistrations,
+    pageState: PageStateEnum.ListRegistrations,
   });
 
   useEffect(() => {
@@ -59,18 +59,18 @@ const Registrations = ({ userInfo }: Props) => {
         setRegistrationState(registrations);
       });
     }
-  }, [registrationState, pageState]);
+  }, [userInfo, studentState, courseState, registrationState, pageState]);
 
   return (
     <>
-      {pageState.pageState === PageState.ListRegistrations && (
+      {pageState.pageState === PageStateEnum.ListRegistrations && (
         <button
           type="button"
           className="btn btn-info"
           onClick={() => {
             setPageState({
               ...pageState,
-              pageState: PageState.AddRegistration,
+              pageState: PageStateEnum.AddRegistration,
             });
           }}
         >
@@ -78,7 +78,7 @@ const Registrations = ({ userInfo }: Props) => {
         </button>
       )}
       <hr className="pb-2" />
-      {pageState.pageState === PageState.ListRegistrations && (
+      {pageState.pageState === PageStateEnum.ListRegistrations && (
         <ul className="list-group pb-2">
           <caption>List of active registrations</caption>
           {registrationState.value.map((r) => {
@@ -90,7 +90,7 @@ const Registrations = ({ userInfo }: Props) => {
           })}
         </ul>
       )}
-      {pageState.pageState === PageState.AddRegistration && (
+      {pageState.pageState === PageStateEnum.AddRegistration && (
         <AddRegistration
           userAuth={userInfo.auth}
           students={studentState.value}
@@ -99,7 +99,7 @@ const Registrations = ({ userInfo }: Props) => {
             setRegistrationState({ fetched: false, value: [] });
             return setPageState({
               ...pageState,
-              pageState: PageState.ListRegistrations,
+              pageState: PageStateEnum.ListRegistrations,
             });
           }}
           cancelCallback={() => {
@@ -109,7 +109,7 @@ const Registrations = ({ userInfo }: Props) => {
             });
             return setPageState({
               ...pageState,
-              pageState: PageState.ListRegistrations,
+              pageState: PageStateEnum.ListRegistrations,
             });
           }}
         />
