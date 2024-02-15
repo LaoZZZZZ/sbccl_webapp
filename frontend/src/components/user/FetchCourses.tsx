@@ -14,7 +14,7 @@ const fetchCourses = async (user_info, callback) => {
     }
   );
 
-  if (response.status == 200) {
+  if (response.status === 200) {
     const courses = response.data.courses.map((json) => {
       return JSON.parse(json);
     });

@@ -201,7 +201,7 @@ const AddRegistration = ({
             </span>
           </div>
         )}
-        {classInfo.selected && classInfo.type == "L" && (
+        {classInfo.selected && classInfo.type === "L" && (
           <div className="form-group pb-2">
             <label>Select Parent On Duty date</label>
             <select
@@ -230,7 +230,7 @@ const AddRegistration = ({
             onClick={() => {
               AddRegistrationRequest(registration, userAuth, (result) => {
                 setAddStatus(result);
-                if (result.status == AddStatus.SUCCESS) {
+                if (result.status === AddStatus.SUCCESS) {
                   updateRegistrationList();
                 }
               });

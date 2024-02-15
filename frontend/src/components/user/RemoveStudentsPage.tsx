@@ -21,7 +21,7 @@ const RemoveStudentRequest = async (student, authInfo, callBack) => {
       auth: authInfo,
     })
     .then(function (response) {
-      if (response.status == 202) {
+      if (response.status === 202) {
         callBack({
           status: RemoveStatus.SUCCESS,
           msg: "The selected student was removed from your account!",
