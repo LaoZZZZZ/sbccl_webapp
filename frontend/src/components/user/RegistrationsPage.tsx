@@ -51,14 +51,12 @@ const Registrations = ({ userInfo }: Props) => {
     if (!courseState.fetched) {
       fetchCourses(userInfo, (courses) => {
         setCourseState(courses);
-        console.log(courses);
       });
     }
 
     if (!registrationState.fetched) {
       fetchRegistrations(userInfo, (registrations) => {
         setRegistrationState(registrations);
-        console.log(registrationState);
       });
     }
   }, [registrationState, pageState]);
@@ -81,9 +79,14 @@ const Registrations = ({ userInfo }: Props) => {
       )}
       <hr className="pb-2" />
       {pageState.pageState === PageState.ListRegistrations && (
-        <ul className="list-group">
+        <ul className="list-group pb-2">
+          <caption>List of active registrations</caption>
           {registrationState.value.map((r) => {
-            return <li>{r["registration_code"]}</li>;
+            return (
+              <li className="pb-2">
+                <button>{r["registration_code"]}</button>
+              </li>
+            );
           })}
         </ul>
       )}
