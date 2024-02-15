@@ -228,7 +228,6 @@ const AddRegistration = ({
                 : "Add to Waiting list"
             }
             onClick={() => {
-              console.log(registration);
               AddRegistrationRequest(registration, userAuth, (result) => {
                 setAddStatus(result);
                 if (result.status == AddStatus.SUCCESS) {

@@ -359,7 +359,8 @@ class MemberViewSet(ModelViewSet):
                     return Response("The student already registered a same type of course!",
                                     status=status.HTTP_409_CONFLICT)
             registration = Registration()
-            registration.registration_code = str(uuid.uuid5(uuid.NAMESPACE_OID, user.username))
+            registration.registration_code = str(uuid.uuid5(uuid.NAMESPACE_OID,
+                                                            persisted_student.first_name + persisted_student.last_name + persisted_course.name))
             registration.course = persisted_course
             registration.student = persisted_student
             school_year_start = '{year}-{month}-{day}'.format(year=datetime.datetime.today().year,
