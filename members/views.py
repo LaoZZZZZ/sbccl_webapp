@@ -17,6 +17,7 @@ from rest_framework.response import Response
 from members import models
 import utils.validators.request_validator
 import uuid
+from django.conf import settings
 
 # REST APIs
 class MemberViewSet(ModelViewSet):
@@ -167,7 +168,7 @@ class MemberViewSet(ModelViewSet):
                 m.verification_code = registration_code
                 m.save()
             verification_url = 'http://localhost:3000/reset-password-by-code/{code}'.format(code=registration_code)
-            msg = "You just requested to reset your password. Please click {link} to verify this account.".format(link=verification_url)
+            msg = "You just requested to reset your password. Please click {link} to reset your password.".format(link=verification_url)
             retrieved_user.email_user(
                 subject="Password reset",
                 message=msg)
