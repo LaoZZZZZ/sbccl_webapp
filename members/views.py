@@ -281,6 +281,10 @@ class MemberViewSet(ModelViewSet):
             if not existing_students:
                 return Response("The student does not exist!", status=status.HTTP_400_BAD_REQUEST)
             for s in existing_students:
+                registration = Registration.objects.filter(student=s)
+                if registration:
+                    return Response("""The student still has active enrollments! Please remove their enrollments first on the registration page before removing the student!""",
+                                    status=status.HTTP_400_BAD_REQUEST)
                 s.delete()
             return Response(status=status.HTTP_202_ACCEPTED)
         except User.DoesNotExist:
