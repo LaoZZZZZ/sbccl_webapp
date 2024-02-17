@@ -1,6 +1,7 @@
 import axios from "axios";
 import ModelWindow from "../common/ModelWindow.tsx";
-import React from "react";
+import React, { useState } from "react";
+import Alert from "../common/Alert.tsx";
 
 interface Props {
   studentInfo: {};
@@ -15,7 +16,6 @@ const RemoveStatus = {
 };
 
 const RemoveStudentRequest = async (student, authInfo, callBack) => {
-  console.log(student);
   await axios
     .put("http://localhost:8000/rest_api/members/remove-student/", student, {
       auth: authInfo,
@@ -29,6 +29,7 @@ const RemoveStudentRequest = async (student, authInfo, callBack) => {
       }
     })
     .catch((e) => {
+      console.log(e.response.data);
       callBack({
         status: RemoveStatus.FAILED,
         msg: JSON.stringify(e.response.data),
@@ -44,25 +45,34 @@ const RemoveStudents = ({
 }: Props) => {
   const title: string = "Remove students";
   const body: string =
-    "Remove " +
+    "Are you sure to remove " +
     studentInfo.last_name +
     " " +
     studentInfo.first_name +
-    " from your account!";
+    " from your account?";
+  const [removeStatus, setRemoveStatus] = useState({
+    status: RemoveStatus.SUCCESS,
+    msg: "",
+  });
   return (
     <>
-      <ModelWindow
-        title={title}
-        bodyMsg={body}
-        callBackUponConfirm={() => {
-          return RemoveStudentRequest(
-            studentInfo,
-            userAuth,
-            callBackUponSuccessRemoval
-          );
-        }}
-        dismissCallback={callBackUponExit}
-      />
+      {removeStatus.status === RemoveStatus.SUCCESS && (
+        <ModelWindow
+          title={title}
+          bodyMsg={body}
+          callBackUponConfirm={() => {
+            return RemoveStudentRequest(studentInfo, userAuth, setRemoveStatus);
+          }}
+          dismissCallback={callBackUponExit}
+        />
+      )}
+      {removeStatus.status === RemoveStatus.FAILED && (
+        <Alert
+          success={false}
+          message={removeStatus.msg}
+          parentCallback={callBackUponSuccessRemoval}
+        />
+      )}
     </>
   );
 };
