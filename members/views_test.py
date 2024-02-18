@@ -719,6 +719,10 @@ class MemberViewSetTest(APITestCase):
         response = self.client.put('/rest_api/members/update-registration/',
                                    data=updated_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+        # No op on the second request
+        response = self.client.put('/rest_api/members/update-registration/',
+                                   data=updated_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
         updated_course = Course.objects.get(name='B2A')
         students = updated_course.students.filter(first_name=student.first_name)
         self.assertEqual(len(students), 1)
