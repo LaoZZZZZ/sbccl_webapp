@@ -113,8 +113,8 @@ class CourseSerializer(serializers.ModelSerializer):
 class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Registration
-        fields = ('registration_code', 'school_year_start', 'school_year_end',
-                  'registration_date', 'expiration_date', 'student')
+        fields = ('id', 'registration_code', 'school_year_start', 'school_year_end',
+                  'registration_date', 'expiration_date', 'course', 'student')
     
     def create(self, validated_data, student, course):
         registration = Registration(**validated_data)

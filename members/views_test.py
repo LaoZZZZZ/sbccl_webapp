@@ -402,7 +402,6 @@ class MemberViewSetTest(APITestCase):
         self.assertIsNotNone(registration.school_year_start)
         self.assertIsNotNone(registration.school_year_end)
         self.assertEqual(registration.registration_date.day, datetime.datetime.today().day)
-        print(registration.school_year_start)
 
         # make sure the student can also be searched 
         updated_course = Course.objects.get(name='B1A')
@@ -558,7 +557,6 @@ class MemberViewSetTest(APITestCase):
         exist_user = self.create_user('test_name', 'david@gmail.com')
         self.create_member(exist_user, sign_up_status='V',
                            verification_code="12345-1231", member_type='B')
-        
         course_json = {
             'name': "B1A",
             'course_description': 'Morning session for grade 1 class.',
@@ -572,6 +570,7 @@ class MemberViewSetTest(APITestCase):
         response = self.client.put('/rest_api/members/upsert-course/',
                                    data=course_json, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        
         persisted_course = Course.objects.get(name="B1A")
         # Add student
         parent_account = self.create_user('parent', 'parent@gmail.com')
@@ -625,3 +624,105 @@ class MemberViewSetTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
         updated_course = Course.objects.get(name='B1A')
         self.assertEqual(len(updated_course.students.filter(first_name=student.first_name)), 0)
+
+    def test_update_registration_course_succeed(self):
+        # Add class first
+        exist_user = self.create_user('test_name', 'david@gmail.com')
+        self.create_member(exist_user, sign_up_status='V',
+                           verification_code="12345-1231", member_type='B')
+        # Add two courses so that the user can udpate their registration.
+        course_json = {
+            'name': "B1A",
+            'course_description': 'Morning session for grade 1 class.',
+            'course_type': "L",
+            'course_status': 'A',
+            'size_limit': 20,
+            'cost': 500
+        }
+
+        self.client.force_authenticate(user=exist_user)
+        response = self.client.put('/rest_api/members/upsert-course/',
+                                   data=course_json, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        another_course_json = {
+            'name': "B2A",
+            'course_description': 'Morning session for grade 2 class.',
+            'course_type': "L",
+            'course_status': 'A',
+            'size_limit': 20,
+            'cost': 500
+        }
+
+        self.client.force_authenticate(user=exist_user)
+        response = self.client.put('/rest_api/members/upsert-course/',
+                                   data=another_course_json, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        persisted_course = Course.objects.get(name="B1A")
+        # Add student
+        parent_account = self.create_user('parent', 'parent@gmail.com')
+        self.create_member(parent_account, sign_up_status='V',
+                           verification_code="12345-1231", member_type='P')
+        student_json = {
+            'first_name': 'david',
+            'last_name': 'chatty',
+            'date_of_birth': '2015-10-01',
+            'gender': 'M'
+        }
+        self.client.force_authenticate(user=parent_account)
+        response = self.client.put('/rest_api/members/add-student/',
+                                   data=student_json, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        member = Member.objects.get(user_id=parent_account)
+        student = Student.objects.get(parent_id=member)
+        self.assertEqual(student.last_name, 'chatty')
+        self.assertEqual(student.first_name, 'david')
+        self.assertIsNotNone(student.joined_date)
+        # Add registration
+        payload = {
+            'course_id': persisted_course.id,
+            'student': {
+                'first_name': student.first_name,
+                'last_name': student.last_name,
+                'date_of_birth': student.date_of_birth,
+                'gender': 'M'
+            }
+        }
+        response = self.client.put('/rest_api/members/register-course/',
+                                   data=payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        registration = Registration.objects.get(student=student)
+        self.assertEqual(registration.course.name, "B1A")
+        self.assertEqual(registration.student.last_name, student.last_name)
+        self.assertEqual(registration.student.first_name, student.first_name)
+        self.assertIsNotNone(registration.school_year_start)
+        self.assertIsNotNone(registration.school_year_end)
+        self.assertEqual(registration.registration_date.day, datetime.datetime.today().day)
+
+        # make sure the student can also be searched 
+        updated_course = Course.objects.get(name='B1A')
+        students = updated_course.students.filter(first_name=student.first_name)
+        self.assertEqual(len(students), 1)
+
+        # Update registration
+        persisted_course = Course.objects.get(name="B2A")
+        updated_payload = {
+            'id': registration.id,
+            'course': persisted_course.id,
+            'student': registration.student.id,
+            'school_year_start': registration.school_year_start,
+            'school_year_end': registration.school_year_end,
+            'registration_code': registration.registration_code,
+            'registration_date': registration.registration_date
+        }
+        response = self.client.put('/rest_api/members/update-registration/',
+                                   data=updated_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+        updated_course = Course.objects.get(name='B2A')
+        students = updated_course.students.filter(first_name=student.first_name)
+        self.assertEqual(len(students), 1)
+
+        updated_course = Course.objects.get(name='B1A')
+        students = updated_course.students.filter(first_name=student.first_name)
+        self.assertEqual(len(students), 0)
