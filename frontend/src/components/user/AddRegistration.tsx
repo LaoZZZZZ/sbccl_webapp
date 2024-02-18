@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import Alert from "../common/Alert.tsx";
 import axios from "axios";
 import CourseSelection from "../common/CourseSelection.tsx";
-import { ClassInformation } from "../common/CourseSelection.tsx";
 
 interface Props {
   userAuth: {};
@@ -60,7 +59,6 @@ const AddRegistrationRequest = async (registration, authInfo, callBack) => {
       }
     })
     .catch((e) => {
-      console.log(e.response.data);
       callBack({
         status: AddStatus.FAILED,
         msg: JSON.stringify(e.response.data),
@@ -76,14 +74,7 @@ const AddRegistration = ({
   cancelCallback,
 }: Props) => {
   const [addStatus, setAddStatus] = useState({});
-  const [classInfo, setClassInfo] = useState<ClassInformation>({
-    selected: false,
-    enrollment: 0,
-    capacity: 0,
-    teacher: "",
-    cost: "",
-    type: "",
-  });
+  const [waitingList, setWaitingList] = useState<boolean>(false);
 
   const [registration] = useState<Registration>({
     course_id: "",
@@ -125,6 +116,7 @@ const AddRegistration = ({
           defaultCourseSelection={"Not Selected"}
           defaultPoDSelection={"Not Selected"}
           setCourseSelection={(course) => {
+            setWaitingList(course.enrollment >= course.capacity);
             return (registration.course_id = course.id);
           }}
           setPoDSelection={(pod) => {
@@ -136,7 +128,7 @@ const AddRegistration = ({
             className="btn btn-primary active mr-2"
             type="button"
             value={
-              !classInfo.selected || classInfo.enrollment < classInfo.capacity
+              registration.course_id === "" || !waitingList
                 ? "Register"
                 : "Add to Waiting list"
             }

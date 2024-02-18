@@ -2,19 +2,13 @@ import React, { useState } from "react";
 import Alert from "../common/Alert.tsx";
 import axios from "axios";
 import CourseSelection from "../common/CourseSelection.tsx";
+import { signal } from "@preact/signals";
 
 interface Student {
   first_name: string;
   last_name: string;
   date_of_birth: Date;
   gender: string;
-}
-
-interface Registration {
-  registration_code: string;
-  school_year_start: Date;
-  school_year_end: Date;
-  registration_date: Date;
 }
 
 interface Props {
@@ -25,13 +19,7 @@ interface Props {
   cancelCallback: () => {};
 }
 
-// Json format for the data model of backend API call.
-interface Registration {
-  course_id: string;
-  student: Student;
-}
-
-const AddStatus = {
+const UpdateStatus = {
   SUCCESS: 0,
   FAILED: 1,
 };
@@ -47,7 +35,7 @@ const GenerateStudentInfo = (student: Student) => {
   );
 };
 
-const AddRegistrationRequest = async (registration, authInfo, callBack) => {
+const UpdateRegistrationRequest = async (registration, authInfo, callBack) => {
   await axios
     .put(
       "http://localhost:8000/rest_api/members/update-registration/",
@@ -57,21 +45,22 @@ const AddRegistrationRequest = async (registration, authInfo, callBack) => {
       }
     )
     .then(function (response) {
-      if (response.status === 201) {
+      if (response.status === 202) {
         callBack({
-          status: AddStatus.SUCCESS,
-          msg: "Congratulations. A student was successfully added to your account!",
+          status: UpdateStatus.SUCCESS,
+          msg: "Congratulations. The registration has been successfully updated!",
         });
       }
     })
     .catch((e) => {
-      console.log(e.response.data);
       callBack({
-        status: AddStatus.FAILED,
+        status: UpdateStatus.FAILED,
         msg: JSON.stringify(e.response.data),
       });
     });
 };
+
+const waitingList = signal(false);
 
 const EditableRegistration = ({
   userAuth,
@@ -80,12 +69,12 @@ const EditableRegistration = ({
   updateRegistrationList,
   cancelCallback,
 }: Props) => {
-  console.log(selectedRegistration);
-  console.log(userAuth);
-  console.log(courses);
+  const [updateStatus, setUpdateStatus] = useState({});
   const student = selectedRegistration["student"];
   const registration = selectedRegistration["registration"];
   const originalCourse = selectedRegistration["course"];
+  waitingList.value = originalCourse.enrollment >= originalCourse.capacity;
+  const full = waitingList.value;
 
   return (
     <div className="col w-75 mx-auto align-middle">
@@ -103,11 +92,14 @@ const EditableRegistration = ({
           />
         </div>
         <CourseSelection
-          courses={courses}
+          courses={courses.filter((course) => {
+            return course.course_type === originalCourse.course_type;
+          })}
           defaultCourseSelection={originalCourse.name}
           defaultPoDSelection={"Not Selected"}
           setCourseSelection={(course) => {
-            return (registration.course_id = course.id);
+            waitingList.value = course.enrollment >= course.capacity;
+            return (registration.course = course.id);
           }}
           setPoDSelection={(pod) => {
             return (registration.pod = pod);
@@ -117,15 +109,11 @@ const EditableRegistration = ({
           <input
             className="btn btn-primary active mr-2"
             type="button"
-            value={
-              !classInfo.selected || classInfo.enrollment < classInfo.capacity
-                ? "Register"
-                : "Add to Waiting list"
-            }
+            value={full ? "Add to waiting list" : "Update"}
             onClick={() => {
-              AddRegistrationRequest(registration, userAuth, (result) => {
-                setAddStatus(result);
-                if (result.status === AddStatus.SUCCESS) {
+              UpdateRegistrationRequest(registration, userAuth, (result) => {
+                setUpdateStatus(result);
+                if (result.status === UpdateStatus.SUCCESS) {
                   updateRegistrationList();
                 }
               });
@@ -141,15 +129,15 @@ const EditableRegistration = ({
           />
         </div>
       </form>
-      {/* {addStatus["status"] === AddStatus.FAILED && (
+      {updateStatus["status"] === UpdateStatus.FAILED && (
         <Alert
           success={false}
-          message={addStatus["msg"]}
+          message={updateStatus["msg"]}
           parentCallback={() => {
-            setAddStatus({});
+            setUpdateStatus({});
           }}
         />
-      )} */}
+      )}
     </div>
   );
 };

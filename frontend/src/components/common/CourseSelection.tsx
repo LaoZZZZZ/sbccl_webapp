@@ -54,8 +54,9 @@ const CourseSelection = ({
     capacity: selectedCourse !== null ? selectedCourse.size_limit : 0,
     teacher: "",
     cost: selectedCourse !== null ? "$" + selectedCourse.cost : "",
-    type: selectedCourse !== null ? "$" + selectedCourse.course_type : "",
+    type: selectedCourse !== null ? selectedCourse.course_type : "",
   });
+  console.log(classInfo);
   return (
     <>
       <div className="form-group">

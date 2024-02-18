@@ -26,7 +26,6 @@ interface PageState {
 }
 
 const renderRegistration = (registration) => {
-  console.log(registration);
   return (
     registration["student"]["last_name"] +
     " " +
@@ -128,6 +127,7 @@ const Registrations = ({ userInfo }: Props) => {
           courses={courseState.value}
           updateRegistrationList={() => {
             setRegistrationState({ fetched: false, value: [] });
+            setCourseState({ fetched: false, value: [] });
             return setPageState({
               ...pageState,
               pageState: PageStateEnum.ListRegistrations,
@@ -135,7 +135,7 @@ const Registrations = ({ userInfo }: Props) => {
           }}
           cancelCallback={() => {
             setRegistrationState({
-              fetched: false,
+              fetched: true,
               value: registrationState.value,
             });
             return setPageState({
@@ -151,6 +151,24 @@ const Registrations = ({ userInfo }: Props) => {
           userAuth={userInfo.auth}
           selectedRegistration={selectedRegistration}
           courses={courseState.value}
+          updateRegistrationList={() => {
+            setRegistrationState({ fetched: false, value: [] });
+            setCourseState({ fetched: false, value: [] });
+            return setPageState({
+              ...pageState,
+              pageState: PageStateEnum.ListRegistrations,
+            });
+          }}
+          cancelCallback={() => {
+            setRegistrationState({
+              fetched: true,
+              value: registrationState.value,
+            });
+            return setPageState({
+              ...pageState,
+              pageState: PageStateEnum.ListRegistrations,
+            });
+          }}
         />
       )}
     </>
