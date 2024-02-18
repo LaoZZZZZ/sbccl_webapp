@@ -4,6 +4,7 @@ import fetchStudents from "./FetchStudents.tsx";
 import fetchCourses from "./FetchCourses.tsx";
 import UserInfo from "./UserInfo.tsx";
 import fetchRegistrations from "./FetchRegistrations.tsx";
+import EditableRegistration from "./EditableRegistration.tsx";
 
 interface Props {
   userInfo: UserInfo;
@@ -17,11 +18,23 @@ interface ValueState {
 const PageStateEnum = {
   ListRegistrations: 0,
   AddRegistration: 1,
+  EditRegistration: 2,
 };
 
 interface PageState {
   pageState: number;
 }
+
+const renderRegistration = (registration) => {
+  console.log(registration);
+  return (
+    registration["student"]["last_name"] +
+    " " +
+    registration["student"]["first_name"] +
+    " - " +
+    registration["course"]["name"]
+  );
+};
 
 const Registrations = ({ userInfo }: Props) => {
   const [registrationState, setRegistrationState] = useState<ValueState>({
@@ -38,9 +51,12 @@ const Registrations = ({ userInfo }: Props) => {
     fetched: false,
     value: [],
   });
+
   const [pageState, setPageState] = useState<PageState>({
     pageState: PageStateEnum.ListRegistrations,
   });
+
+  const [selectedRegistration, setSelectedRegistration] = useState({});
 
   useEffect(() => {
     if (!studentState.fetched) {
@@ -64,31 +80,46 @@ const Registrations = ({ userInfo }: Props) => {
   return (
     <>
       {pageState.pageState === PageStateEnum.ListRegistrations && (
-        <button
-          type="button"
-          className="btn btn-info"
-          onClick={() => {
-            setPageState({
-              ...pageState,
-              pageState: PageStateEnum.AddRegistration,
-            });
-          }}
-        >
-          Register class
-        </button>
+        <div>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => {
+              setPageState({
+                ...pageState,
+                pageState: PageStateEnum.AddRegistration,
+              });
+            }}
+          >
+            Register class
+          </button>
+          <hr className="pb-2" />
+        </div>
       )}
-      <hr className="pb-2" />
       {pageState.pageState === PageStateEnum.ListRegistrations && (
-        <ul className="list-group pb-2">
-          <caption>List of active registrations</caption>
-          {registrationState.value.map((r) => {
-            return (
-              <li className="pb-2">
-                <button>{r["registration_code"]}</button>
-              </li>
-            );
-          })}
-        </ul>
+        <div>
+          <ul className="list-group pb-2">
+            <caption>List of active registrations</caption>
+            {registrationState.value.map((r) => {
+              return (
+                <li className="pb-2">
+                  <button
+                    className="btn btn-secondary bg-info"
+                    onClick={(e) => {
+                      setSelectedRegistration(r);
+                      setPageState({
+                        ...pageState,
+                        pageState: PageStateEnum.EditRegistration,
+                      });
+                    }}
+                  >
+                    {renderRegistration(r)}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       )}
       {pageState.pageState === PageStateEnum.AddRegistration && (
         <AddRegistration
@@ -115,7 +146,13 @@ const Registrations = ({ userInfo }: Props) => {
         />
       )}
       <hr className="pb-2" />
-      <p>Past Registrations</p>
+      {pageState.pageState === PageStateEnum.EditRegistration && (
+        <EditableRegistration
+          userAuth={userInfo.auth}
+          selectedRegistration={selectedRegistration}
+          courses={courseState.value}
+        />
+      )}
     </>
   );
 };

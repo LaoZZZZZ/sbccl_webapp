@@ -42,7 +42,6 @@ const SwitchPage = (state, action) => {
 // 2. Students under this user
 // 3. Registrations associated with each student
 const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
-  console.log(userInfo);
   const INITIAL_PAGE = {
     /* Default on account detail page*/
     page: Page.AccountDetail,
