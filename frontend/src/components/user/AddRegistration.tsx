@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Alert from "../common/Alert.tsx";
 import axios from "axios";
+import CourseSelection from "../common/CourseSelection.tsx";
 
 interface Props {
   userAuth: {};
@@ -58,22 +59,12 @@ const AddRegistrationRequest = async (registration, authInfo, callBack) => {
       }
     })
     .catch((e) => {
-      console.log(e.response.data);
       callBack({
         status: AddStatus.FAILED,
         msg: JSON.stringify(e.response.data),
       });
     });
 };
-
-interface ClassInformation {
-  selected: boolean;
-  enrollment: number;
-  capacity: number;
-  teacher: string;
-  cost: string;
-  type: string;
-}
 
 const AddRegistration = ({
   userAuth,
@@ -82,27 +73,8 @@ const AddRegistration = ({
   updateRegistrationList,
   cancelCallback,
 }: Props) => {
-  // TODO(lu): Read the available dates from the backend.
-  const podDates = [
-    "2024-01-24 10:00am",
-    "2024-01-24 01:00pm",
-    "2024-02-24 10:00am",
-    "2024-02-24 01:00pm",
-    "2024-03-24 10:00am",
-    "2024-04-24 10:00am",
-    "2024-05-24 10:00am",
-    "2024-06-24 10:00am",
-    "2024-07-24 10:00am",
-  ];
   const [addStatus, setAddStatus] = useState({});
-  const [classInfo, setClassInfo] = useState<ClassInformation>({
-    selected: false,
-    enrollment: 0,
-    capacity: 0,
-    teacher: "",
-    cost: "",
-    type: "",
-  });
+  const [waitingList, setWaitingList] = useState<boolean>(false);
 
   const [registration] = useState<Registration>({
     course_id: "",
@@ -139,91 +111,24 @@ const AddRegistration = ({
             })}
           </select>
         </div>
-        <div className="form-group">
-          <label>Select class</label>
-          <select
-            className="form-control"
-            id="selectCourse"
-            onChange={(e) => {
-              const selected_course = courses.filter(
-                (course) => e.target.value === course.name
-              );
-              if (selected_course.length === 1) {
-                registration.course_id = selected_course[0].id;
-                setClassInfo({
-                  selected: true,
-                  enrollment: selected_course[0].enrollment,
-                  capacity: selected_course[0].size_limit,
-                  cost: "$" + selected_course[0].cost,
-                  type: selected_course[0].course_type,
-                  teacher: "***",
-                });
-              } else {
-                setClassInfo({
-                  selected: false,
-                  enrollment: 0,
-                  capacity: 0,
-                  cost: 0,
-                  teacher: "",
-                });
-              }
-            }}
-          >
-            <option>Not Selected</option>
-
-            {courses.map((course) => {
-              return <option>{course.name}</option>;
-            })}
-          </select>
-        </div>
-        {classInfo.selected && (
-          <div className="input-group pb-2">
-            <span className="input-group-text">Capacity:</span>
-            <span className="input-group-text bg-white">
-              {classInfo.capacity}
-            </span>
-            <span className="input-group-text">Enrollment:</span>
-            <span
-              className={
-                "input-group-text " +
-                (classInfo.enrollment >= classInfo.capacity
-                  ? "bg-danger"
-                  : "bg-white")
-              }
-            >
-              {classInfo.enrollment}
-            </span>
-            <span className="input-group-text">Cost</span>
-            <span className="input-group-text bg-white">{classInfo.cost}</span>
-            <span className="input-group-text">Teacher</span>
-            <span className="input-group-text bg-white">
-              {classInfo.teacher}
-            </span>
-          </div>
-        )}
-        {classInfo.selected && classInfo.type === "L" && (
-          <div className="form-group pb-2">
-            <label>Select Parent On Duty date</label>
-            <select
-              className="form-control"
-              id="podSelect"
-              onChange={(e) => {
-                registration.pod = e.target.value;
-              }}
-            >
-              <option>Not Selected</option>
-              {podDates.map((date) => {
-                return <option>{date}</option>;
-              })}
-            </select>
-          </div>
-        )}
+        <CourseSelection
+          courses={courses}
+          defaultCourseSelection={"Not Selected"}
+          defaultPoDSelection={"Not Selected"}
+          setCourseSelection={(course) => {
+            setWaitingList(course.enrollment >= course.capacity);
+            return (registration.course_id = course.id);
+          }}
+          setPoDSelection={(pod) => {
+            return (registration.pod = pod);
+          }}
+        />
         <div className="btn-group pt-2">
           <input
             className="btn btn-primary active mr-2"
             type="button"
             value={
-              !classInfo.selected || classInfo.enrollment < classInfo.capacity
+              registration.course_id === "" || !waitingList
                 ? "Register"
                 : "Add to Waiting list"
             }

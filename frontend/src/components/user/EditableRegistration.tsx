@@ -1,14 +1,8 @@
 import React, { useState } from "react";
 import Alert from "../common/Alert.tsx";
 import axios from "axios";
-
-interface Props {
-  userAuth: {};
-  students: [];
-  courses: [];
-  updateRegistrationList: () => {};
-  cancelCallback: () => {};
-}
+import CourseSelection from "../common/CourseSelection.tsx";
+import { signal } from "@preact/signals";
 
 interface Student {
   first_name: string;
@@ -17,13 +11,15 @@ interface Student {
   gender: string;
 }
 
-// Json format for the data model of backend API call.
-interface Registration {
-  course_id: string;
-  student: Student;
+interface Props {
+  userAuth: {};
+  selectedRegistration: {};
+  courses: [];
+  updateRegistrationList: () => {};
+  cancelCallback: () => {};
 }
 
-const AddStatus = {
+const UpdateStatus = {
   SUCCESS: 0,
   FAILED: 1,
 };
@@ -39,112 +35,85 @@ const GenerateStudentInfo = (student: Student) => {
   );
 };
 
-const AddRegistrationRequest = async (registration, authInfo, callBack) => {
+const UpdateRegistrationRequest = async (registration, authInfo, callBack) => {
   await axios
     .put(
-      "http://localhost:8000/rest_api/members/register-course/",
+      "http://localhost:8000/rest_api/members/update-registration/",
       registration,
       {
         auth: authInfo,
       }
     )
     .then(function (response) {
-      if (response.status === 201) {
+      if (response.status === 202) {
         callBack({
-          status: AddStatus.SUCCESS,
-          msg: "Congratulations. A student was successfully added to your account!",
+          status: UpdateStatus.SUCCESS,
+          msg: "Congratulations. The registration has been successfully updated!",
         });
       }
     })
     .catch((e) => {
-      console.log(e.response.data);
       callBack({
-        status: AddStatus.FAILED,
+        status: UpdateStatus.FAILED,
         msg: JSON.stringify(e.response.data),
       });
     });
 };
 
-const AddRegistration = ({
+const waitingList = signal(false);
+
+const EditableRegistration = ({
   userAuth,
-  students,
+  selectedRegistration,
   courses,
   updateRegistrationList,
   cancelCallback,
 }: Props) => {
-  const [addStatus, setAddStatus] = useState({});
-  const [registration] = useState<Registration>({
-    course_id: "",
-    student: {
-      last_name: "",
-      first_name: "",
-      gender: "",
-      date_of_birth: new Date("1997-01-01"),
-    },
-  });
+  const [updateStatus, setUpdateStatus] = useState({});
+  const student = selectedRegistration["student"];
+  const registration = selectedRegistration["registration"];
+  const originalCourse = selectedRegistration["course"];
+  waitingList.value = originalCourse.enrollment >= originalCourse.capacity;
+  const full = waitingList.value;
 
   return (
     <div className="col w-75 mx-auto align-middle">
       <form className="form-label form-control">
-        <input
-          className="form-control"
-          type="text"
-          placeholder="Disabled input"
-          aria-label="Disabled input example"
-          disabled
+        <div className="form-group pb-2 mb-2">
+          <label className="sr-only" htmlFor="student">
+            Student
+          </label>
+          <input
+            className="form-control"
+            type="text"
+            id="student"
+            readOnly
+            value={student.last_name + " " + student.first_name}
+          />
+        </div>
+        <CourseSelection
+          courses={courses.filter((course) => {
+            return course.course_type === originalCourse.course_type;
+          })}
+          defaultCourseSelection={originalCourse.name}
+          defaultPoDSelection={"Not Selected"}
+          setCourseSelection={(course) => {
+            waitingList.value = course.enrollment >= course.capacity;
+            return (registration.course = course.id);
+          }}
+          setPoDSelection={(pod) => {
+            return (registration.pod = pod);
+          }}
         />
-
-        <div className="form-group">
-          <label>Select student</label>
-          <select
-            className="form-control"
-            id="studentSelect"
-            onChange={(e) => {
-              const selected_student = students.filter(
-                (student: Student) =>
-                  e.target.value.includes(student.date_of_birth) &&
-                  e.target.value.includes(student.first_name)
-              );
-              if (selected_student.length === 1)
-                registration.student = selected_student[0];
-            }}
-          >
-            <option>Not Selected</option>
-            {students.map((student) => {
-              return <option>{GenerateStudentInfo(student)}</option>;
-            })}
-          </select>
-        </div>
-        <div className="form-group">
-          <label>Select class</label>
-          <select
-            className="form-control"
-            id="selectCourse"
-            onChange={(e) => {
-              const selected_course = courses.filter(
-                (course) => e.target.value === course.name
-              );
-              if (selected_course.length === 1)
-                registration.course_id = selected_course[0].id;
-            }}
-          >
-            <option>Not Selected</option>
-
-            {courses.map((course) => {
-              return <option>{course.name}</option>;
-            })}
-          </select>
-        </div>
         <div className="btn-group pt-2">
           <input
             className="btn btn-primary active mr-2"
             type="button"
-            value="Add"
+            value={full ? "Add to waiting list" : "Update"}
             onClick={() => {
-              console.log(registration);
-              AddRegistrationRequest(registration, userAuth, (result) => {
-                setAddStatus(result);
-                if (result.status == AddStatus.SUCCESS) {
+              UpdateRegistrationRequest(registration, userAuth, (result) => {
+                setUpdateStatus(result);
+                if (result.status === UpdateStatus.SUCCESS) {
                   updateRegistrationList();
                 }
               });
@@ -160,12 +129,12 @@ const AddRegistration = ({
           />
         </div>
       </form>
-      {addStatus["status"] === AddStatus.FAILED && (
+      {updateStatus["status"] === UpdateStatus.FAILED && (
         <Alert
           success={false}
-          message={addStatus["msg"]}
+          message={updateStatus["msg"]}
           parentCallback={() => {
-            setAddStatus({});
+            setUpdateStatus({});
           }}
         />
       )}
@@ -173,4 +142,4 @@ const AddRegistration = ({
   );
 };
 
-export default AddRegistration;
+export default EditableRegistration;

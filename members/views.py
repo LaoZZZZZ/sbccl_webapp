@@ -18,6 +18,7 @@ from members import models
 import utils.validators.request_validator
 import uuid
 from django.conf import settings
+import json
 
 # REST APIs
 class MemberViewSet(ModelViewSet):
@@ -38,6 +39,12 @@ class MemberViewSet(ModelViewSet):
             'date_joined': user.date_joined.date(),
             'balance': '$0.0'
         }
+
+    def __generate_registration_info__(self, registration):
+        return json.dumps({
+            'student': StudentSerializer(registration.student).data,
+            'registration': RegistrationSerializer(registration).data,
+            'course': CourseSerializer(registration.course).data})
 
     def list(self, request):
         serializer = self.get_serializer(self.queryset, many=True)
@@ -323,7 +330,7 @@ class MemberViewSet(ModelViewSet):
             dropouts = []
             for s in students:
                 matched_registrations = Registration.objects.filter(student=s)
-                registrations = registrations + [JSONRenderer().render(RegistrationSerializer(r).data) for r in matched_registrations]
+                registrations = registrations + [self.__generate_registration_info__(r) for r in matched_registrations]
                 matched_dropouts = Dropout.objects.filter(student=s)
                 dropouts = dropouts + [JSONRenderer().render(d) for d in matched_dropouts]
             content = {
@@ -377,6 +384,47 @@ class MemberViewSet(ModelViewSet):
             registration.last_update_date = registration.registration_date
             registration.save()
             return Response(status=status.HTTP_201_CREATED)
+        except User.DoesNotExist or Member.DoesNotExist as e:
+            return Response(str(e), status=status.HTTP_404_NOT_FOUND)
+        except Student.DoesNotExist as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+        except Course.DoesNotExist as e:
+            return Response(str(3), status=status.HTTP_400_BAD_REQUEST)
+
+    @action(methods=['PUT'], detail=False, url_path='update-registration', name='Update a registration',
+        authentication_classes=[SessionAuthentication, BasicAuthentication],
+        permission_classes=[permissions.IsAuthenticated])
+    def update_registration(self, request):
+        try:
+            registration_serializer = RegistrationSerializer(data=request.data)
+            if not registration_serializer.is_valid():
+                return Response("Received invalid registration object!",
+                                status=status.HTTP_400_BAD_REQUEST)
+            registraion_id = int(request.data['id'])
+            matched_registration = Registration.objects.get(id = registraion_id)
+            new_course_id = int(request.data['course'])
+            if not new_course_id:
+                return Response("No course is provided", status=status.HTTP_400_BAD_REQUEST)
+            
+            # No-op
+            if matched_registration.course.id == new_course_id:
+                return Response(status=status.HTTP_202_ACCEPTED)
+            
+            new_course = Course.objects.get(id=new_course_id)
+            if new_course.course_status != 'A':
+                return Response("The selected class ({name}) is no longer open for registration".format(name=new_course.name),
+                                status=status.HTTP_400_BAD_REQUEST)
+            # Registration can only be updated for the same type of class.     
+            if new_course.course_type != matched_registration.course.course_type:
+                return Response(
+                    "The registration is for {old_type} class. If you're interested in {new_type} class, please submit a new registration!".format(
+                    old_type=matched_registration.course.course_type, new_type=new_course.type),
+                    status=status.HTTP_400_BAD_REQUEST)
+
+            matched_registration.course = new_course
+            matched_registration.last_update_date = datetime.datetime.today()
+            matched_registration.save()
+            return Response(status=status.HTTP_202_ACCEPTED)
         except User.DoesNotExist or Member.DoesNotExist as e:
             return Response(str(e), status=status.HTTP_404_NOT_FOUND)
         except Student.DoesNotExist as e:
