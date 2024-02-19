@@ -89,6 +89,7 @@ const DeleteRegistration = async (registration, authInfo, callBack) => {
 };
 
 const waitingList = signal(false);
+const changed = signal(false);
 
 const EditableRegistration = ({
   userAuth,
@@ -103,13 +104,14 @@ const EditableRegistration = ({
   const originalCourse = selectedRegistration["course"];
   waitingList.value = originalCourse.enrollment >= originalCourse.capacity;
   const full = waitingList.value;
+  const hasChange = changed.value;
 
   return (
     <div className="col w-75 mx-auto align-middle">
       <form className="form-label form-control">
         <div className="form-group pb-2 mb-2">
           <label className="sr-only" htmlFor="student">
-            Student
+            <strong>Student</strong>
           </label>
           <input
             className="form-control"
@@ -127,16 +129,30 @@ const EditableRegistration = ({
           defaultPoDSelection={"Not Selected"}
           setCourseSelection={(course) => {
             waitingList.value = course.enrollment >= course.capacity;
+            changed.value = originalCourse.name !== course.name;
             return (registration.course = course.id);
           }}
           setPoDSelection={(pod) => {
             return (registration.pod = pod);
           }}
         />
+        <div className="form-group pb-2 mb-2">
+          <label className="sr-only" htmlFor="student">
+            <strong>Registration Date</strong>
+          </label>
+          <input
+            className="form-control"
+            type="text"
+            id="student"
+            readOnly
+            value={registration.registration_date}
+          />
+        </div>
         <div className="btn-group pt-2">
           <input
             className="btn btn-primary active mr-3"
             type="button"
+            disabled={!hasChange}
             value={full ? "Add to waiting list" : "Update"}
             onClick={() => {
               UpdateRegistrationRequest(registration, userAuth, (result) => {

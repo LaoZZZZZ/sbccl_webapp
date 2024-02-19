@@ -25,7 +25,9 @@ const AccountDetail = ({ userInfo }: Props) => {
           {table_row_names.map((key_value) => {
             return (
               <tr>
-                <th>{key_value.rowName}</th>
+                <th>
+                  <strong>{key_value.rowName}</strong>
+                </th>
                 <th>{key_value.value}</th>
               </tr>
             );
