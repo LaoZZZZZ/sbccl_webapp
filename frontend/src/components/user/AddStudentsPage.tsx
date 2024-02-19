@@ -26,7 +26,6 @@ const AddStatus = {
 };
 
 const AddStudentRequest = async (student, authInfo, callBack) => {
-  console.log(student);
   await axios
     .put("http://localhost:8000/rest_api/members/add-student/", student, {
       auth: authInfo,
@@ -40,7 +39,6 @@ const AddStudentRequest = async (student, authInfo, callBack) => {
       }
     })
     .catch((e) => {
-      console.log(e.response.data);
       callBack({
         status: AddStatus.FAILED,
         msg: JSON.stringify(e.response.data),

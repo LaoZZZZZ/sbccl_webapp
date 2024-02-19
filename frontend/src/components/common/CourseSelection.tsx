@@ -56,7 +56,6 @@ const CourseSelection = ({
     cost: selectedCourse !== null ? "$" + selectedCourse.cost : "",
     type: selectedCourse !== null ? selectedCourse.course_type : "",
   });
-  console.log(classInfo);
   return (
     <>
       <div className="form-group">
@@ -120,7 +119,8 @@ const CourseSelection = ({
           <span className="input-group-text bg-white">{classInfo.teacher}</span>
         </div>
       )}
-      {classInfo.selected && classInfo.type === "L" && (
+      {/* TODO(lu): Bring it back once the PoD workflow is figured out. 
+        {classInfo.selected && classInfo.type === "L" && (
         <div className="form-group pb-2">
           <label>Select Parent On Duty date</label>
           <select
@@ -136,7 +136,7 @@ const CourseSelection = ({
             })}
           </select>
         </div>
-      )}
+      )} */}
     </>
   );
 };
