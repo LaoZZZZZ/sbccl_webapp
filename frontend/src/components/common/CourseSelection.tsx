@@ -59,7 +59,9 @@ const CourseSelection = ({
   return (
     <>
       <div className="form-group">
-        <label>Select class</label>
+        <label>
+          <strong>Select class</strong>
+        </label>
         <select
           className="form-control"
           id="selectCourse"

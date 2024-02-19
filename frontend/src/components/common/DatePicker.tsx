@@ -25,7 +25,9 @@ const DatePicker = ({ requiredInput, retrieveInput }: Props) => {
   const completeLabel = (requiredInput ? "*" : "").concat(labelString);
   return (
     <div className="pb-2">
-      <label htmlFor="textInput">{completeLabel}</label>
+      <label htmlFor="textInput">
+        <strong>{completeLabel}</strong>
+      </label>
       <input
         type="date"
         className="form-control"

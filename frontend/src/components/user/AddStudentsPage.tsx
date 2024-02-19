@@ -105,7 +105,9 @@ const AddStudents = ({ userAuth, updateStudentList }: Props) => {
           }}
         />
         <div className="pb-2">
-          <label htmlFor="textInput">*Gender</label>
+          <label htmlFor="textInput">
+            <strong>*Gender</strong>
+          </label>
           <select
             className="form-control "
             id="gender"
