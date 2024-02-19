@@ -60,6 +60,34 @@ const UpdateRegistrationRequest = async (registration, authInfo, callBack) => {
     });
 };
 
+const DeleteRegistration = async (registration, authInfo, callBack) => {
+  const registration_id = registration["id"];
+  await axios
+    .put(
+      "http://localhost:8000/rest_api/members/" +
+        registration_id +
+        "/unregister-course/",
+      {},
+      {
+        auth: authInfo,
+      }
+    )
+    .then(function (response) {
+      if (response.status === 202) {
+        callBack({
+          status: UpdateStatus.SUCCESS,
+          msg: "Congratulations. The registration has been successfully updated!",
+        });
+      }
+    })
+    .catch((e) => {
+      callBack({
+        status: UpdateStatus.FAILED,
+        msg: JSON.stringify(e.response.data),
+      });
+    });
+};
+
 const waitingList = signal(false);
 
 const EditableRegistration = ({
@@ -107,7 +135,7 @@ const EditableRegistration = ({
         />
         <div className="btn-group pt-2">
           <input
-            className="btn btn-primary active mr-2"
+            className="btn btn-primary active mr-3"
             type="button"
             value={full ? "Add to waiting list" : "Update"}
             onClick={() => {
@@ -120,11 +148,24 @@ const EditableRegistration = ({
             }}
           />
           <input
-            className="btn btn-secondary mr-2"
+            className="btn btn-secondary mr-3"
             type="button"
             value="Cancel"
             onClick={() => {
               cancelCallback();
+            }}
+          />
+          <input
+            className="btn btn-warning mr-3"
+            type="button"
+            value="Delete"
+            onClick={() => {
+              DeleteRegistration(registration, userAuth, (result) => {
+                setUpdateStatus(result);
+                if (result.status === UpdateStatus.SUCCESS) {
+                  updateRegistrationList();
+                }
+              });
             }}
           />
         </div>
