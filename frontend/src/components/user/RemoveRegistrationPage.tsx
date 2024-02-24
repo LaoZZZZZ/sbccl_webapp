@@ -4,33 +4,40 @@ import React, { useState } from "react";
 import Alert from "../common/Alert.tsx";
 
 interface Props {
-  studentInfo: {};
+  student: {};
+  courseName: string;
+  registration: {};
   userAuth: {};
   callBackUponSuccessRemoval: {};
   callBackUponExit: () => {};
 }
 
 const RemoveStatus = {
-  UNSPECIFIED: 1,
-  SUCCESS: 2,
-  FAILED: 3,
+  UNSPECIFIED: 0,
+  SUCCESS: 1,
+  FAILED: 2,
 };
 
-const RemoveStudentRequest = async (student, authInfo, callBack) => {
+const DeleteRegistrationRequest = async (registration, authInfo, callBack) => {
   await axios
-    .put("http://localhost:8000/rest_api/members/remove-student/", student, {
-      auth: authInfo,
-    })
+    .put(
+      "http://localhost:8000/rest_api/members/" +
+        registration.id +
+        "/unregister-course/",
+      {},
+      {
+        auth: authInfo,
+      }
+    )
     .then(function (response) {
       if (response.status === 202) {
         callBack({
           status: RemoveStatus.SUCCESS,
-          msg: "The selected student was removed from your account!",
+          msg: "The registration has been successfully removed!",
         });
       }
     })
     .catch((e) => {
-      console.log(e.response.data);
       callBack({
         status: RemoveStatus.FAILED,
         msg: JSON.stringify(e.response.data),
@@ -38,19 +45,22 @@ const RemoveStudentRequest = async (student, authInfo, callBack) => {
     });
 };
 
-const RemoveStudents = ({
-  studentInfo,
+const RemoveRegistration = ({
+  student,
+  courseName,
+  registration,
   userAuth,
   callBackUponSuccessRemoval,
   callBackUponExit,
 }: Props) => {
-  const title: string = "Remove students";
+  const title: string = "Class drop out";
   const body: string =
     "Are you sure to remove " +
-    studentInfo.last_name +
+    student.last_name +
     " " +
-    studentInfo.first_name +
-    " from your account?";
+    student.first_name +
+    " from class " +
+    courseName;
   const [removeStatus, setRemoveStatus] = useState({
     status: RemoveStatus.UNSPECIFIED,
     msg: "",
@@ -62,7 +72,11 @@ const RemoveStudents = ({
           title={title}
           bodyMsg={body}
           callBackUponConfirm={() => {
-            return RemoveStudentRequest(studentInfo, userAuth, setRemoveStatus);
+            return DeleteRegistrationRequest(
+              registration,
+              userAuth,
+              setRemoveStatus
+            );
           }}
           dismissCallback={callBackUponExit}
         />
@@ -78,4 +92,4 @@ const RemoveStudents = ({
   );
 };
 
-export default RemoveStudents;
+export default RemoveRegistration;

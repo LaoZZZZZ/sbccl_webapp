@@ -5,7 +5,6 @@ interface Props {
 }
 
 const AccountDetail = ({ userInfo }: Props) => {
-  console.log(userInfo);
   const table_row_names = [
     { rowName: "Last Name", value: userInfo.last_name },
     { rowName: "First Name", value: userInfo.first_name },
