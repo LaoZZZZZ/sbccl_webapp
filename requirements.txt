@@ -2,4 +2,3 @@ Django==4.2.2
 djangorestframework==3.14.0
 PyLaTeX==1.4.1
 pytz==2023.3.post1
-python==3.9
