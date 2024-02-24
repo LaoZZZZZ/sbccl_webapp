@@ -50,7 +50,7 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
   return (
     <>
       <div className="navbar navbar-expand-lg bg-light navbar-toggler pb-3 w-100 h-10">
-        <a className="navbar-brand" href="http://https://www.sbcclny.com">
+        <a className="navbar-brand" href="https://www.sbcclny.com">
           SBCCL
         </a>
         <button

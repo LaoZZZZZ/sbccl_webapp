@@ -28,6 +28,7 @@ class MemberViewSet(ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication]
 
     def __generate_user_info__(self, user, member):
+        balance = self.__calculate_balance__(member)
         return {
             'username': user.username,
             'email': user.email,
@@ -37,7 +38,8 @@ class MemberViewSet(ModelViewSet):
             'member_type': member.getMemberType(),
             'last_login': user.last_login.date(),
             'date_joined': user.date_joined.date(),
-            'balance': '$0.0'
+            'balance': '{negative}${amount}'.format(negative='-' if balance < 0 else '',
+                                                    amount=self.__calculate_balance__(member))
         }
 
     def __generate_registration_info__(self, registration):
@@ -45,6 +47,18 @@ class MemberViewSet(ModelViewSet):
             'student': StudentSerializer(registration.student).data,
             'registration': RegistrationSerializer(registration).data,
             'course': CourseSerializer(registration.course).data})
+
+    def __calculate_balance__(self, member):
+        students = Student.objects.filter(parent_id=member)
+        balance = 0.0
+        for s in students:
+            registrations = Registration.objects.filter(student=s)
+            for r in registrations:
+                balance += r.course.cost
+                payment = Payment.objects.filter(registration_code=r.id)
+                for p in payment:
+                    balance -= p.amount_in_dollar
+        return balance
 
     def list(self, request):
         serializer = self.get_serializer(self.queryset, many=True)
