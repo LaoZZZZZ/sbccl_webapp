@@ -465,10 +465,10 @@ class MemberViewSet(ModelViewSet):
         except User.DoesNotExist or Member.DoesNotExist:
             return Response('There is no user registered with - ' + request.user,
                              status=status.HTTP_404_NOT_FOUND)
-        except Student.DoesNotExist as e:
+        except Student.DoesNotExist or Course.DoesNotExist as e:
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
-        except Course.DoesNotExist as e:
-            return Response(str(3), status=status.HTTP_400_BAD_REQUEST)   
+        except Registration.DoesNotExist as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)   
 
     # Return a list of courses
     @action(methods=['GET'], detail=False, url_path='list-courses', name='list all courses',
