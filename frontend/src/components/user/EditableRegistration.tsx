@@ -88,9 +88,6 @@ const DeleteRegistration = async (registration, authInfo, callBack) => {
     });
 };
 
-const waitingList = signal(false);
-const changed = signal(false);
-
 const EditableRegistration = ({
   userAuth,
   selectedRegistration,
@@ -102,9 +99,8 @@ const EditableRegistration = ({
   const student = selectedRegistration["student"];
   const registration = selectedRegistration["registration"];
   const originalCourse = selectedRegistration["course"];
-  waitingList.value = originalCourse.enrollment >= originalCourse.capacity;
-  const full = waitingList.value;
-  const hasChange = changed.value;
+  const [buttonMsg, setButtonMsg] = useState("Update");
+  const [needsUpdate, setNeedsUpdate] = useState<boolean>(false);
 
   return (
     <div className="col w-75 mx-auto align-middle">
@@ -128,8 +124,13 @@ const EditableRegistration = ({
           defaultCourseSelection={originalCourse.name}
           defaultPoDSelection={"Not Selected"}
           setCourseSelection={(course) => {
-            waitingList.value = course.enrollment >= course.capacity;
-            changed.value = originalCourse.name !== course.name;
+            const updated = originalCourse.id !== course.id;
+            setNeedsUpdate(updated);
+            setButtonMsg(
+              course.enrollment >= course.size_limit && updated
+                ? "Add to waiting list"
+                : "Update"
+            );
             return (registration.course = course.id);
           }}
           setPoDSelection={(pod) => {
@@ -152,8 +153,8 @@ const EditableRegistration = ({
           <input
             className="btn btn-primary active mr-3"
             type="button"
-            disabled={!hasChange}
-            value={full ? "Add to waiting list" : "Update"}
+            disabled={!needsUpdate}
+            value={buttonMsg}
             onClick={() => {
               UpdateRegistrationRequest(registration, userAuth, (result) => {
                 setUpdateStatus(result);
