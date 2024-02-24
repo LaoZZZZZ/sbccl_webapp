@@ -74,7 +74,7 @@ const AddRegistration = ({
   cancelCallback,
 }: Props) => {
   const [addStatus, setAddStatus] = useState({});
-  const [waitingList, setWaitingList] = useState<boolean>(false);
+  const [buttonMsg, setButtonMsg] = useState("Register");
 
   const [registration] = useState<Registration>({
     course_id: "",
@@ -116,8 +116,12 @@ const AddRegistration = ({
           defaultCourseSelection={"Not Selected"}
           defaultPoDSelection={"Not Selected"}
           setCourseSelection={(course) => {
-            setWaitingList(course.enrollment >= course.capacity);
-            return (registration.course_id = course.id);
+            setButtonMsg(
+              course.enrollment < course.size_limit
+                ? "Register"
+                : "Add to waiting list"
+            );
+            registration.course_id = course.id;
           }}
           setPoDSelection={(pod) => {
             return (registration.pod = pod);
@@ -127,11 +131,7 @@ const AddRegistration = ({
           <input
             className="btn btn-primary active mr-2"
             type="button"
-            value={
-              registration.course_id === "" || !waitingList
-                ? "Register"
-                : "Add to Waiting list"
-            }
+            value={buttonMsg}
             onClick={() => {
               AddRegistrationRequest(registration, userAuth, (result) => {
                 setAddStatus(result);
