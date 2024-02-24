@@ -17,7 +17,6 @@ from rest_framework.response import Response
 from members import models
 import utils.validators.request_validator
 import uuid
-from django.conf import settings
 import json
 
 # REST APIs
