@@ -3,4 +3,4 @@ djangorestframework==3.14.0
 PyLaTeX==1.4.1
 pytz==2023.3.post1
 django-cors-headers==4.3
-psycopg==3.1
+psycopg==3.1.8
