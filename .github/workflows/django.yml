@@ -16,6 +16,7 @@ jobs:
           POSTGRES_DB: postgres
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: huiyang@2023
+          POSTGRES_HOST: localhost
         ports:
           - 5433:5433
         # need to wait for the database to be ready.
