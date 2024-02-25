@@ -135,7 +135,7 @@ DATABASES = {
         "NAME": "postgres",
         "USER": "postgres",
         "PASSWORD": "huiyang@2023",
-        "HOST": "0.0.0.0",
+        "HOST": "postgres",
         "PORT": "5433",
         # "OPTIONS": {
         #     "service": "sbccl",
