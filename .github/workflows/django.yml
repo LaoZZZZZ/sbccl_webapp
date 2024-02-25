@@ -5,10 +5,6 @@ on: push
 jobs:
   container-job:
     runs-on: ubuntu-latest
-    # runs all of the steps inside the specified container rather than on the VM host.
-    # Because of this the network configuration changes from host based network to a container network.
-    container:
-      image: node:10.16-jessie
     strategy:
       max-parallel: 4
       matrix:
@@ -36,6 +32,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install PostgreSQL client
         run: |
+          apt-get update
           apt-get install --yes postgresql-client
       - name: Test database connection
         run: psql -h localhost -p 5433 -d postgres -U postgres -c 'SELECT 1;'
@@ -46,6 +43,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+      - name: Install database
+        run: |
+          psql -h localhost -d postgres -U postgres -c  'GRANT ALL PRIVILEGES ON DATABASE postgres TO postgres;' -U postgres
+        env:
+          PGPASSWORD: huiyang@2023
       - name: Run Tests
         run: |
           python manage.py test members.serializers_test
