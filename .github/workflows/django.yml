@@ -48,4 +48,5 @@ jobs:
       #     PGPASSWORD: huiyang@2023
       - name: Run Tests
         run: |
+          python manage.y runserver
           python manage.py test members.serializers_test
