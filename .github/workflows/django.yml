@@ -36,8 +36,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install PostgreSQL client
         run: |
-          sudo apt-get update
-          sudo apt-get install --yes postgresql-client
+          apt-get install --yes postgresql-client
       - name: Test database connection
         run: psql -h localhost -p 5433 -d postgres -U postgres -c 'SELECT 1;'
         env:
