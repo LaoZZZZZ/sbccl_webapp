@@ -5,11 +5,12 @@ on: push
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Docker Hub image that `container-job` executes in
+    container: node:10.18-jessie
     strategy:
       max-parallel: 4
       matrix:
         python-version: [3.8, 3.9]
-
     services:
       postgres:
         image: postgres:15
@@ -17,8 +18,14 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: huiyang@2023
           POSTGRES_DB: db_test
+          POSTGRES_HOST: postgres
         ports:
           - 5433/tcp
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
