@@ -11,7 +11,7 @@ jobs:
         python-version: [3.9]
     services:
       postgres:
-        image: postgres:latest
+        image: postgres
         env:
           POSTGRES_DB: postgres
           POSTGRES_USER: postgres
