@@ -3,8 +3,9 @@ name: Django CI
 on: push
 
 jobs:
-  runner-job:
+  container-job:
     runs-on: ubuntu-latest
+    container: node:10.18-jessie
     strategy:
       max-parallel: 4
       matrix:
@@ -34,7 +35,7 @@ jobs:
         run: |
           sudo apt-get install --yes postgresql-client
       - name: Test database connection
-        run: psql -h localhost -p 5433 -d postgres -U postgres -c 'SELECT 1;'
+        run: psql -h postgres -p 5433 -d postgres -U postgres -c 'SELECT 1;'
         env:
           PGPASSWORD: huiyang@2023
       - name: Install Dependencies
