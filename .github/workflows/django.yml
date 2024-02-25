@@ -41,12 +41,18 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      # - name: Install database
-      #   run: |
-      #     psql -h localhost -d postgres -U postgres -c  'GRANT ALL PRIVILEGES ON DATABASE postgres TO postgres;' -U postgres
-      #   env:
-      #     PGPASSWORD: huiyang@2023
+      - name: Connect to PostgreSQL
+        # Runs a script that creates a PostgreSQL table, populates
+        # the table with data, and then retrieves the data
+        run: node client.js
+        # Environment variables used by the `client.js` script to create
+        # a new PostgreSQL table.
+        env:
+          # The hostname used to communicate with the PostgreSQL service container
+          POSTGRES_HOST: localhost
+          # The default PostgreSQL port
+          POSTGRES_PORT: 5433
       - name: Run Tests
         run: |
-          python manage.py runserver
           python manage.py test members.serializers_test
+          python manage.py test members.views_test
