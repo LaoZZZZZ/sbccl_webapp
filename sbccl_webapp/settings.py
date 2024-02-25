@@ -136,7 +136,7 @@ DATABASES = {
         "USER": "postgres",
         "PASSWORD": "huiyang@2023",
         "HOST": "localhost",
-        "PORT": "5433",
+        "PORT": "5432",
         # "OPTIONS": {
         #     "service": "sbccl",
         #     "passfile": "/Users/luzhao/.my_pgpass",
