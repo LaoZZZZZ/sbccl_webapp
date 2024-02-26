@@ -32,26 +32,11 @@ jobs:
           - 5433:5432
     steps:
       - uses: actions/checkout@v4
-      # - name: Set up Python ${{ matrix.python-version }}
-      #   uses: actions/setup-python@v3
-      #   with:
-      #     python-version: ${{ matrix.python-version }}
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           npm ci
-      - name: Connect to PostgreSQL
-        # Runs a script that creates a PostgreSQL table, populates
-        # the table with data, and then retrieves the data
-        run: node client.js
-        # Environment variables used by the `client.js` script to create
-        # a new PostgreSQL table.
-        env:
-          # The hostname used to communicate with the PostgreSQL service container
-          POSTGRES_HOST: localhost
-          # The default PostgreSQL port
-          POSTGRES_PORT: 5433
       - name: Run Tests
         run: |
           python manage.py test members.serializers_test
