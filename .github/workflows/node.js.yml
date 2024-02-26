@@ -30,7 +30,10 @@ jobs:
           rm -rf package-lock.json
           npm install react-scripts
           npm install
+          npm ci
       - run: |
           cd frontend
           npm run build --if-present
-      - run: npm test
+      - run: |
+          cd frontend
+          npm test
