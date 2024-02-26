@@ -129,14 +129,13 @@ WSGI_APPLICATION = 'sbccl_webapp.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-# TODO(lu): Fix the database setup for unit test.
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "postgres",
         "USER": "postgres",
         "PASSWORD": "huiyang@2023",
-        "HOST": "127.0.0.1",
+        "HOST": "localhost",
         "PORT": "5433",
         # "OPTIONS": {
         #     "service": "sbccl",
