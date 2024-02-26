@@ -27,8 +27,8 @@ jobs:
           --health-timeout 5s
           --health-retries 5
         ports:
-          # Maps tcp port 5432 on service container to the host
-          - 5432:5432
+          # Maps tcp port 5433 on service container to the host
+          - 5433:5433
     steps:
       - uses: actions/checkout@v4
       # - name: Set up Python ${{ matrix.python-version }}
@@ -50,7 +50,7 @@ jobs:
           # The hostname used to communicate with the PostgreSQL service container
           POSTGRES_HOST: localhost
           # The default PostgreSQL port
-          POSTGRES_PORT: 5432
+          POSTGRES_PORT: 5433
       - name: Run Tests
         run: |
           python manage.py test members.serializers_test
