@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "@preact/signals": "^1.2.2",
     "pg": "^8.11.3",
     "prop-types": "^15.8.1"
   },

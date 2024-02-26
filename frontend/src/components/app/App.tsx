@@ -1,10 +1,4 @@
-import React, {
-  Children,
-  Component,
-  useEffect,
-  useReducer,
-  useState,
-} from "react";
+import React, { useReducer } from "react";
 
 import UserMainPage from "../user/UserMainPage.tsx";
 import UserFrontPage from "../user/UserFrontPage.tsx";
