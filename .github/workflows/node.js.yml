@@ -23,16 +23,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: go to frontend folder
-        run: |
-          pwd
-          cd frontend
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
-          path: ./frontend
       - run: |
           cd ./frontend
           npm ci
