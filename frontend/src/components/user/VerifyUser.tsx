@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { redirect, redirectDocument, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import EmailInput from "../common/EmailInput.tsx";
 import axios from "axios";
 import Alert from "../common/Alert.tsx";
