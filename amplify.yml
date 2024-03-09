@@ -17,6 +17,7 @@ frontend:
     baseDirectory: dist
     files:
       - '**/*'
+    name: sbccl-$(date +%Y-%m-%d) 
   cache:
     paths:
       - node_modules/**/*
