@@ -3,6 +3,7 @@ frontend:
   phases:
     preBuild:
       commands:
+        - pwd
         - cd ./frontend
         - npm ci
     # IMPORTANT - Please verify your build commands
