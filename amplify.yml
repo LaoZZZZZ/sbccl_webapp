@@ -1,0 +1,22 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - cd ./frontend
+        - npm ci
+    # IMPORTANT - Please verify your build commands
+    build:
+      env:
+        CI: false
+      commands: [
+        npm run build --if-present
+      ]
+  artifacts:
+    baseDirectory: dist
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
+   
