@@ -13,7 +13,7 @@ frontend:
         npm run build --if-present
       ]
   artifacts:
-    baseDirectory: ./frontend/dist
+    baseDirectory: ./dist
     files:
       - '**/*'
     name: sbccl-$(date +%Y-%m-%d) 
