@@ -9,15 +9,12 @@ frontend:
     build:
       env:
         CI: false
-      commands: [
-        npm run build --if-present
-      ]
+      commands: [npm run build --if-present]
   artifacts:
-    baseDirectory: ./dist
+    baseDirectory: public
     files:
-      - '**/*'
-    name: sbccl-$(date +%Y-%m-%d) 
+      - "**/*"
+    name: sbccl-$(date +%Y-%m-%d)
   cache:
     paths:
       - node_modules/**/*
-   
