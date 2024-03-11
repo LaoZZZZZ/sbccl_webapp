@@ -2,8 +2,7 @@ import axios from "axios";
 
 const fetchRegistrations = async (user_info, callback) => {
   const response = await axios.get(
-    "http://" +
-      process.env.REACT_APP_BE_URL_PREFIX +
+    process.env.REACT_APP_BE_URL_PREFIX +
       "/rest_api/members/list-registrations",
     {
       headers: {
