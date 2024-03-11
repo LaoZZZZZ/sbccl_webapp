@@ -28,9 +28,7 @@ const AddStatus = {
 const AddStudentRequest = async (student, authInfo, callBack) => {
   await axios
     .put(
-      "http://" +
-        process.env.REACT_APP_BE_URL_PREFIX +
-        "/rest_api/members/add-student/",
+      process.env.REACT_APP_BE_URL_PREFIX + "/rest_api/members/add-student/",
       student,
       {
         auth: authInfo,
