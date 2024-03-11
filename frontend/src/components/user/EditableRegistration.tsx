@@ -38,7 +38,9 @@ const GenerateStudentInfo = (student: Student) => {
 const UpdateRegistrationRequest = async (registration, authInfo, callBack) => {
   await axios
     .put(
-      "http://localhost:8000/rest_api/members/update-registration/",
+      "http://" +
+        process.env.REACT_APP_BE_URL_PREFIX +
+        "/rest_api/members/update-registration/",
       registration,
       {
         auth: authInfo,
@@ -64,7 +66,9 @@ const DeleteRegistration = async (registration, authInfo, callBack) => {
   const registration_id = registration["id"];
   await axios
     .put(
-      "http://localhost:8000/rest_api/members/" +
+      "http://" +
+        process.env.BE_URL_PREFIX +
+        "/rest_api/members/" +
         registration_id +
         "/unregister-course/",
       {},

@@ -3,7 +3,9 @@ import axios from "axios";
 const Logout = async (userInfo, logOutCallback) => {
   await axios
     .put(
-      "http://localhost:8000/rest_api/members/logout/",
+      "http://" +
+        process.env.REACT_APP_BE_URL_PREFIX +
+        "/rest_api/members/logout/",
       {},
       {
         auth: userInfo.auth,
