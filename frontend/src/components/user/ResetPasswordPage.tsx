@@ -39,6 +39,10 @@ const ResetPasswordPage = ({ onBackToLogin }: Props) => {
               return;
             }
             const url =
+<<<<<<< HEAD
+=======
+              "http://" +
+>>>>>>> 5ec5b723 (Parameterize backend hostname.)
               process.env.REACT_APP_BE_URL_PREFIX +
               "/rest_api/members/create-password-reset-code/?email=" +
               emailAddress;
