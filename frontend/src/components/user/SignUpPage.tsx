@@ -20,7 +20,11 @@ const SignUpStatus = {
 const sendSignUpRequest = async (user_info, callback) => {
   try {
     const response = await axios.post(
+<<<<<<< HEAD
       process.env.REACT_APP_BE_URL_PREFIX + "/rest_api/members/",
+=======
+      "http://" + process.env.REACT_APP_BE_URL_PREFIX + "/rest_api/members/",
+>>>>>>> 5ec5b723 (Parameterize backend hostname.)
       user_info,
       {
         headers: {
