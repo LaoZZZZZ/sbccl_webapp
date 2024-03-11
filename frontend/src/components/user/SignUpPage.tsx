@@ -21,10 +21,14 @@ const sendSignUpRequest = async (user_info, callback) => {
   try {
     const response = await axios.post(
 <<<<<<< HEAD
+<<<<<<< HEAD
       process.env.REACT_APP_BE_URL_PREFIX + "/rest_api/members/",
 =======
       "http://" + process.env.REACT_APP_BE_URL_PREFIX + "/rest_api/members/",
 >>>>>>> a0582317 (Parameterize backend hostname.)
+=======
+      process.env.REACT_APP_BE_URL_PREFIX + "/rest_api/members/",
+>>>>>>> 4e711736 (use https in remote deployment.)
       user_info,
       {
         headers: {
