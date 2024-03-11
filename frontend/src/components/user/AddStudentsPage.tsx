@@ -28,17 +28,7 @@ const AddStatus = {
 const AddStudentRequest = async (student, authInfo, callBack) => {
   await axios
     .put(
-<<<<<<< HEAD
-<<<<<<< HEAD
       process.env.REACT_APP_BE_URL_PREFIX + "/rest_api/members/add-student/",
-=======
-      "http://" +
-        process.env.REACT_APP_BE_URL_PREFIX +
-        "/rest_api/members/add-student/",
->>>>>>> a0582317 (Parameterize backend hostname.)
-=======
-      process.env.REACT_APP_BE_URL_PREFIX + "/rest_api/members/add-student/",
->>>>>>> 4e711736 (use https in remote deployment.)
       student,
       {
         auth: authInfo,
