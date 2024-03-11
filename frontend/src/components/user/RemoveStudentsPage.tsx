@@ -19,7 +19,13 @@ const RemoveStatus = {
 const RemoveStudentRequest = async (student, authInfo, callBack) => {
   await axios
     .put(
+<<<<<<< HEAD
       process.env.REACT_APP_BE_URL_PREFIX + "/rest_api/members/remove-student/",
+=======
+      "http://" +
+        process.env.REACT_APP_BE_URL_PREFIX +
+        "/rest_api/members/remove-student/",
+>>>>>>> a0582317 (Parameterize backend hostname.)
       student,
       {
         auth: authInfo,
