@@ -2,7 +2,9 @@ import axios from "axios";
 
 const fetchStudents = async (user_info, callback) => {
   const response = await axios.get(
-    "http://localhost:8000/rest_api/members/fetch-students",
+    "http://" +
+      process.env.REACT_APP_BE_URL_PREFIX +
+      "/rest_api/members/fetch-students",
     {
       headers: {
         "Content-Type": "application/json",

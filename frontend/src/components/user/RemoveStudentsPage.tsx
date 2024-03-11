@@ -18,9 +18,15 @@ const RemoveStatus = {
 
 const RemoveStudentRequest = async (student, authInfo, callBack) => {
   await axios
-    .put("http://localhost:8000/rest_api/members/remove-student/", student, {
-      auth: authInfo,
-    })
+    .put(
+      "http://" +
+        process.env.REACT_APP_BE_URL_PREFIX +
+        "/rest_api/members/remove-student/",
+      student,
+      {
+        auth: authInfo,
+      }
+    )
     .then(function (response) {
       if (response.status === 202) {
         callBack({

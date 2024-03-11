@@ -20,7 +20,7 @@ const SignUpStatus = {
 const sendSignUpRequest = async (user_info, callback) => {
   try {
     const response = await axios.post(
-      "http://localhost:8000/rest_api/members/",
+      "http://" + process.env.REACT_APP_BE_URL_PREFIX + "/rest_api/members/",
       user_info,
       {
         headers: {
