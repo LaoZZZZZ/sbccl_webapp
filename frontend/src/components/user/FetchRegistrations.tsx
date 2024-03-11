@@ -2,7 +2,9 @@ import axios from "axios";
 
 const fetchRegistrations = async (user_info, callback) => {
   const response = await axios.get(
-    "http://localhost:8000/rest_api/members/list-registrations",
+    "http://" +
+      process.env.REACT_APP_BE_URL_PREFIX +
+      "/rest_api/members/list-registrations",
     {
       headers: {
         "Content-Type": "application/json",
