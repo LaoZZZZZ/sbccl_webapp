@@ -38,16 +38,7 @@ const GenerateStudentInfo = (student: Student) => {
 const UpdateRegistrationRequest = async (registration, authInfo, callBack) => {
   await axios
     .put(
-<<<<<<< HEAD
-<<<<<<< HEAD
       process.env.REACT_APP_BE_URL_PREFIX +
-=======
-      "http://" +
-        process.env.REACT_APP_BE_URL_PREFIX +
->>>>>>> a0582317 (Parameterize backend hostname.)
-=======
-      process.env.REACT_APP_BE_URL_PREFIX +
->>>>>>> 4e711736 (use https in remote deployment.)
         "/rest_api/members/update-registration/",
       registration,
       {

@@ -15,17 +15,7 @@ const VerificatiionStatus = {
 const sendUserVerificationRequest = async (user_info, callback) => {
   try {
     const response = await axios.put(
-<<<<<<< HEAD
-<<<<<<< HEAD
       process.env.REACT_APP_BE_URL_PREFIX + "/rest_api/members/verify-user/",
-=======
-      "http://" +
-        process.env.REACT_APP_BE_URL_PREFIX +
-        "/rest_api/members/verify-user/",
->>>>>>> a0582317 (Parameterize backend hostname.)
-=======
-      process.env.REACT_APP_BE_URL_PREFIX + "/rest_api/members/verify-user/",
->>>>>>> 4e711736 (use https in remote deployment.)
       null,
       {
         headers: {
