@@ -39,7 +39,9 @@ const ResetPasswordPage = ({ onBackToLogin }: Props) => {
               return;
             }
             const url =
-              "http://localhost:8000/rest_api/members/create-password-reset-code/?email=" +
+              "http://" +
+              process.env.REACT_APP_BE_URL_PREFIX +
+              "/rest_api/members/create-password-reset-code/?email=" +
               emailAddress;
             await axios
               .put(url, {}, {})

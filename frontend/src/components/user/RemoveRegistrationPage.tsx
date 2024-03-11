@@ -21,7 +21,9 @@ const RemoveStatus = {
 const DeleteRegistrationRequest = async (registration, authInfo, callBack) => {
   await axios
     .put(
-      "http://localhost:8000/rest_api/members/" +
+      "http://" +
+        process.env.REACT_APP_BE_URL_PREFIX +
+        "/rest_api/members/" +
         registration.id +
         "/unregister-course/",
       {},

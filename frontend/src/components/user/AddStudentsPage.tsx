@@ -27,9 +27,15 @@ const AddStatus = {
 
 const AddStudentRequest = async (student, authInfo, callBack) => {
   await axios
-    .put("http://localhost:8000/rest_api/members/add-student/", student, {
-      auth: authInfo,
-    })
+    .put(
+      "http://" +
+        process.env.REACT_APP_BE_URL_PREFIX +
+        "/rest_api/members/add-student/",
+      student,
+      {
+        auth: authInfo,
+      }
+    )
     .then(function (response) {
       if (response.status == 201) {
         callBack({
