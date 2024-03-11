@@ -2,7 +2,13 @@ import axios from "axios";
 
 const fetchStudents = async (user_info, callback) => {
   const response = await axios.get(
+<<<<<<< HEAD
     process.env.REACT_APP_BE_URL_PREFIX + "/rest_api/members/fetch-students",
+=======
+    "http://" +
+      process.env.REACT_APP_BE_URL_PREFIX +
+      "/rest_api/members/fetch-students",
+>>>>>>> a0582317 (Parameterize backend hostname.)
     {
       headers: {
         "Content-Type": "application/json",
