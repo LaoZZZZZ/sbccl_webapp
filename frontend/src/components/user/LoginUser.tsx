@@ -6,7 +6,13 @@ export const LoginUser = ({ username, password }) => {
   useEffect(() => {
     const login = async () => {
       const response = await axios.put(
+<<<<<<< HEAD
         process.env.REACT_APP_BE_URL_PREFIX + "/rest_api/members/login/",
+=======
+        "http://" +
+          process.env.REACT_APP_BE_URL_PREFIX +
+          "/rest_api/members/login/",
+>>>>>>> a0582317 (Parameterize backend hostname.)
         {},
         {
           auth: {
