@@ -39,7 +39,6 @@ const ResetPasswordPage = ({ onBackToLogin }: Props) => {
               return;
             }
             const url =
-              "http://" +
               process.env.REACT_APP_BE_URL_PREFIX +
               "/rest_api/members/create-password-reset-code/?email=" +
               emailAddress;
