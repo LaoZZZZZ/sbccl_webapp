@@ -37,7 +37,8 @@ const LoginPage = ({ onLoginSuccess, onSignUp, onResetPassword }: Props) => {
                 }
                 await axios
                   .put(
-                    "http://localhost:8000/rest_api/members/login/",
+                    process.env.REACT_APP_BE_URL_PREFIX +
+                      +"/rest_api/members/login/",
                     {},
                     {
                       auth: {

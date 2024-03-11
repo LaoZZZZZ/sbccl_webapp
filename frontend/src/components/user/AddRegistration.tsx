@@ -44,8 +44,7 @@ const GenerateStudentInfo = (student: Student) => {
 const AddRegistrationRequest = async (registration, authInfo, callBack) => {
   await axios
     .put(
-      "http://" +
-        process.env.REACT_APP_BE_URL_PREFIX +
+      process.env.REACT_APP_BE_URL_PREFIX +
         "/rest_api/members/register-course/",
       registration,
       {
