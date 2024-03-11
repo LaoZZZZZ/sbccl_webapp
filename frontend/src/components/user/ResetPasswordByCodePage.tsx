@@ -17,11 +17,15 @@ const sendPasswordResetRequest = async (user_info, callback) => {
   try {
     const response = await axios.put(
 <<<<<<< HEAD
+<<<<<<< HEAD
       process.env.REACT_APP_BE_URL_PREFIX +
 =======
       "http://" +
         process.env.REACT_APP_BE_URL_PREFIX +
 >>>>>>> 5ec5b723 (Parameterize backend hostname.)
+=======
+      process.env.REACT_APP_BE_URL_PREFIX +
+>>>>>>> 28456bb6 (use https in remote deployment.)
         "/rest_api/members/reset-password-by-code/",
       null,
       {
