@@ -204,6 +204,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:3000',
-    'https://sbccl-be-staging.eba-z2za2tfq.us-east-1.elasticbeanstalk.com',
-    'https://main.d3mkx65my7y2ey.amplifyapp.com'
+    'https://ccl-be-staging.eba-z2za2tfq.us-east-1.elasticbeanstalk.com',
+    'https://main.d3mkx65my7y2ey.amplifyapp.com',
 ]
