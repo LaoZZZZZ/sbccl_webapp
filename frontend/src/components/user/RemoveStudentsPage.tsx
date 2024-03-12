@@ -19,17 +19,7 @@ const RemoveStatus = {
 const RemoveStudentRequest = async (student, authInfo, callBack) => {
   await axios
     .put(
-<<<<<<< HEAD
-<<<<<<< HEAD
       process.env.REACT_APP_BE_URL_PREFIX + "/rest_api/members/remove-student/",
-=======
-      "http://" +
-        process.env.REACT_APP_BE_URL_PREFIX +
-        "/rest_api/members/remove-student/",
->>>>>>> 5ec5b723 (Parameterize backend hostname.)
-=======
-      process.env.REACT_APP_BE_URL_PREFIX + "/rest_api/members/remove-student/",
->>>>>>> 28456bb6 (use https in remote deployment.)
       student,
       {
         auth: authInfo,
