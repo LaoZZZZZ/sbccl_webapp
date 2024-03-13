@@ -35,10 +35,11 @@ const LoginPage = ({ onLoginSuccess, onSignUp, onResetPassword }: Props) => {
                   setLoginFailed(true);
                   return;
                 }
+                console.log(process.env);
                 await axios
                   .put(
                     process.env.REACT_APP_BE_URL_PREFIX +
-                      +"/rest_api/members/login/",
+                      "/rest_api/members/login/",
                     {},
                     {
                       auth: {
