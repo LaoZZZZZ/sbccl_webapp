@@ -27,17 +27,12 @@ SECRET_KEY = 'django-insecure-@z1^z$$a8hfm5e%#ryj@c=ddddb6zp)lo6nv695%%0p*9$wnhu
 
 if 'RDS_DB_NAME' in os.environ:
     DEBUG = False
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
+    # SECURE_SSL_REDIRECT = True
+    # SESSION_COOKIE_SECURE = True
+    # CSRF_COOKIE_SECURE = True
 else:
     DEBUG = True
 
-# SECURE_PROXY_SSL_HEADER = True
-# SECURE_SSL_REDIRECT = True
-# CSRF_COOKIE_SECURE = True
-# SESSION_COOKIE_SECURE = True
-# SECURE_HSTS_SECONDS = 30
 
 ALLOWED_HOSTS = ['*']
 
