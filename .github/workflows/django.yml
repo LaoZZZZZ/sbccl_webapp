@@ -22,6 +22,7 @@ jobs:
           POSTGRES_DB: postgres
           POSTGRES_USER: postgres
           POSTGRES_HOST_AUTH_METHOD: trust
+          FRONTEND_URL: http://localhost:3000
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
