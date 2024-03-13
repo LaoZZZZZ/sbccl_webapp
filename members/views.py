@@ -1,5 +1,6 @@
 # For rest API
 import datetime
+import os
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import get_object_or_404
@@ -83,7 +84,7 @@ class MemberViewSet(ModelViewSet):
                                      status=status.HTTP_400_BAD_REQUEST)
                 new_member.phone_number = request.data['phone_number']
             new_member.save()
-            verification_url = 'http://localhost:3000/verify-user/{code}'.format(code=registration_code)
+            verification_url = os.path.join(os.environ["FRONTEND_URL"], "verify-user", registration_code)
             msg = "Thanks for registering account in SBCCL school. Please click {link} to verify this account.".format(link=verification_url)
             new_user.email_user(
                 subject="Registration confirmation",
@@ -187,7 +188,7 @@ class MemberViewSet(ModelViewSet):
             for m in matched_members:
                 m.verification_code = registration_code
                 m.save()
-            verification_url = 'http://localhost:3000/reset-password-by-code/{code}'.format(code=registration_code)
+            verification_url = os.path.join(os.environ["FRONTEND_URL"], "reset-password-by-code", registration_code)
             msg = "You just requested to reset your password. Please click {link} to reset your password.".format(link=verification_url)
             retrieved_user.email_user(
                 subject="Password reset",

@@ -200,9 +200,18 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# URL used in the email. Use cases:
+# 1. User reset their password
+# 2. user verify their account
+# 3. Others that require follow-up step to complete the workflow in asynchronously.
+
 CORS_ORIGIN_WHITELIST = [
+    os.environ["FRONTEND_URL"],
+    # for local testing purpose, react app uses 3000 port by default
     'http://localhost:3000',
+    # Running backends in either dev, staging or prod environment.
     'https://ccl-be-staging.eba-z2za2tfq.us-east-1.elasticbeanstalk.com',
     'https://ccl-be-dev.eba-z2za2tfq.us-east-1.elasticbeanstalk.com',
+    # Frontend delopyed by AWS amplify
     'https://main.d3mkx65my7y2ey.amplifyapp.com',
 ]
