@@ -32,6 +32,10 @@ const AddStudentRequest = async (student, authInfo, callBack) => {
       student,
       {
         auth: authInfo,
+        // TODO: remove this for production deployment
+        httpsAgent: new https.Agent({
+          rejectUnauthorized: process.env.NODE_ENV === "prod",
+        }),
       }
     )
     .then(function (response) {

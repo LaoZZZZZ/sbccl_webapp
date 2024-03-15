@@ -7,6 +7,10 @@ const Logout = async (userInfo, logOutCallback) => {
       {},
       {
         auth: userInfo.auth,
+        // TODO: remove this for production deployment
+        httpsAgent: new https.Agent({
+          rejectUnauthorized: process.env.NODE_ENV === "prod",
+        }),
       }
     )
     .then(function (response) {
