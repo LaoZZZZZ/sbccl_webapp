@@ -192,7 +192,6 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-#STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 if 'RDS_DB_NAME' in os.environ:
     STATIC_ROOT = '/var/app/current/static/'
 else:
