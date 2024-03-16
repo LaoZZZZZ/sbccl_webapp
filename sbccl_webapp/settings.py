@@ -192,19 +192,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-#STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
-if 'RDS_DB_NAME' in os.environ:
-    STATIC_ROOT = '/var/app/current/static/'
-else:
-    STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 STATIC_URL = '/static/'
 
-STATICFILES_DIRS = [
-    # for elasticbeanstalk deployment.
-    ("admin", os.path.join(STATIC_ROOT, "admin/")),
-    ("rest_framework", os.path.join(STATIC_ROOT, "rest_framework/"))
-]
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
@@ -215,7 +206,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # 3. Others that require follow-up step to complete the workflow in asynchronously.
 
 CORS_ORIGIN_WHITELIST = [
-    os.environ["FRONTEND_URL"],
     # for local testing purpose, react app uses 3000 port by default
     'http://localhost:3000',
     # Running backends in either dev, staging or prod environment.
