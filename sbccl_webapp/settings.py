@@ -196,6 +196,11 @@ USE_TZ = True
 STATIC_ROOT = 'static'
 STATIC_URL = '/static/'
 
+STATICFILES_DIRS = [
+    # for elasticbeanstalk deployment.
+    ("admin", os.path.join(STATIC_ROOT, "admin/")),
+    ("rest_framework", os.path.join(STATIC_ROOT, "rest_framework/"))
+]
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
