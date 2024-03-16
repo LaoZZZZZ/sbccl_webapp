@@ -95,33 +95,32 @@ const Registrations = ({ userInfo }: Props) => {
           <hr className="pb-2" />
         </div>
       )}
-      {pageState.pageState === PageStateEnum.ListRegistrations && (
-        <div>
-          <ul className="list-group pb-2">
-            {registrationState.fetched && (
+      {pageState.pageState === PageStateEnum.ListRegistrations &&
+        registrationState.fetched && (
+          <div>
+            <ul className="list-group pb-2">
               <caption>List of active registrations</caption>
-            )}
-            {registrationState.value.map((r) => {
-              return (
-                <li className="pb-2">
-                  <button
-                    className="btn btn-secondary bg-info"
-                    onClick={(e) => {
-                      setSelectedRegistration(r);
-                      setPageState({
-                        ...pageState,
-                        pageState: PageStateEnum.EditRegistration,
-                      });
-                    }}
-                  >
-                    {renderRegistration(r)}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      )}
+              {registrationState.value.map((r) => {
+                return (
+                  <li className="pb-2">
+                    <button
+                      className="btn btn-secondary bg-info"
+                      onClick={(e) => {
+                        setSelectedRegistration(r);
+                        setPageState({
+                          ...pageState,
+                          pageState: PageStateEnum.EditRegistration,
+                        });
+                      }}
+                    >
+                      {renderRegistration(r)}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
       {pageState.pageState === PageStateEnum.AddRegistration && (
         <AddRegistration
           userAuth={userInfo.auth}
