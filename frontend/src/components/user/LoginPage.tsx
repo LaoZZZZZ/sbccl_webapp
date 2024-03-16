@@ -4,6 +4,8 @@ import EmailInput from "../common/EmailInput.tsx";
 import axios from "axios";
 import Alert from "../common/Alert.tsx";
 import UserInfo from "./UserInfo.tsx";
+import https from "https";
+
 interface Props {
   onLoginSuccess: () => void;
   onSignUp: () => void;
@@ -45,6 +47,10 @@ const LoginPage = ({ onLoginSuccess, onSignUp, onResetPassword }: Props) => {
                         username: emailAddress,
                         password: password,
                       },
+                      // TODO: remove this for production deployment
+                      httpsAgent: new https.Agent({
+                        rejectUnauthorized: process.env.NODE_ENV === "prod",
+                      }),
                     }
                   )
                   .then(function (response) {

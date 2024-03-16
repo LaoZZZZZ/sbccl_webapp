@@ -49,6 +49,10 @@ const AddRegistrationRequest = async (registration, authInfo, callBack) => {
       registration,
       {
         auth: authInfo,
+        // TODO: remove this for production deployment
+        httpsAgent: new https.Agent({
+          rejectUnauthorized: process.env.NODE_ENV === "prod",
+        }),
       }
     )
     .then(function (response) {

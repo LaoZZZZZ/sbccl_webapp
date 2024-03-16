@@ -24,6 +24,10 @@ const sendPasswordResetRequest = async (user_info, callback) => {
           "Content-Type": "application/json",
         },
         params: user_info,
+        // TODO: remove this for production deployment
+        httpsAgent: new https.Agent({
+          rejectUnauthorized: process.env.NODE_ENV === "prod",
+        }),
       }
     );
     const confirm_msg =

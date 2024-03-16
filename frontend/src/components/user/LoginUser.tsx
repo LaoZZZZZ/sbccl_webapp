@@ -13,6 +13,10 @@ export const LoginUser = ({ username, password }) => {
             username: username,
             password: password,
           },
+          // TODO: remove this for production deployment
+          httpsAgent: new https.Agent({
+            rejectUnauthorized: process.env.NODE_ENV === "prod",
+          }),
         }
       );
 

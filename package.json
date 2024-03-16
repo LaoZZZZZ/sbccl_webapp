@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "https": "^1.0.0",
+    "https-agent": "^1.0.0",
+    "https-browserify": "^1.0.0",
+    "util": "^0.12.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.28",
+    "webpack": "^5.90.3"
+  }
+}

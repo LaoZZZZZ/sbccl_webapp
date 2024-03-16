@@ -21,6 +21,10 @@ const sendUserVerificationRequest = async (user_info, callback) => {
         headers: {
           "Content-Type": "application/json",
         },
+        // TODO: remove this for production deployment
+        httpsAgent: new https.Agent({
+          rejectUnauthorized: process.env.NODE_ENV === "prod",
+        }),
         params: user_info,
       }
     );

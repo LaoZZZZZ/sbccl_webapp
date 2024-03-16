@@ -12,6 +12,10 @@ const fetchRegistrations = async (user_info, callback) => {
         username: user_info.auth.username,
         password: user_info.auth.password,
       },
+      // TODO: remove this for production deployment
+      httpsAgent: new https.Agent({
+        rejectUnauthorized: process.env.NODE_ENV === "prod",
+      }),
     }
   );
 
