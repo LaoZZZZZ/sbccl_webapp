@@ -49,7 +49,7 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
   const [state, transitionPageState] = useReducer(SwitchPage, INITIAL_PAGE);
   return (
     <>
-      <div className="navbar navbar-expand-lg bg-light navbar-toggler pb-3 w-100 h-10">
+      <div className="navbar navbar-expand-lg bg-info navbar-toggler pb-3 w-100 h-10">
         <a className="navbar-brand" href="https://www.sbcclny.com">
           SBCCL
         </a>
@@ -98,7 +98,7 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
             </li>
             <li className="nav-item ">
               <button
-                className="btn btn-borderless"
+                className="btn btn-borderless position-absolute end-0"
                 onClick={() => {
                   Logout(userInfo, logOutCallback);
                 }}
