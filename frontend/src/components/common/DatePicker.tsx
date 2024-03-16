@@ -8,8 +8,8 @@ interface Props {
 // Calculate the latest acceptable DoB.
 // The student must be at least 4.5 years old to attend the school
 const getLatestDobMonthAndYear = () => {
-  const current_year = new Date().getFullYear() - 4;
-  return current_year.toString() + "-03-01";
+  const current_year = new Date().getFullYear() - 5;
+  return current_year.toString() + "-12-01";
 };
 
 const isDoBValid = (dobString) => {
