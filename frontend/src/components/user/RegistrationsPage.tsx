@@ -92,12 +92,12 @@ const Registrations = ({ userInfo }: Props) => {
           >
             Register class
           </button>
-          <hr className="pb-2" />
         </div>
       )}
       {pageState.pageState === PageStateEnum.ListRegistrations &&
         registrationState.fetched && (
           <div>
+            <hr className="pb-2" />
             <ul className="list-group pb-2">
               <caption>List of active registrations</caption>
               {registrationState.value.map((r) => {
@@ -119,6 +119,7 @@ const Registrations = ({ userInfo }: Props) => {
                 );
               })}
             </ul>
+            <hr className="pb-2" />
           </div>
         )}
       {pageState.pageState === PageStateEnum.AddRegistration && (
@@ -146,7 +147,6 @@ const Registrations = ({ userInfo }: Props) => {
           }}
         />
       )}
-      <hr className="pb-2" />
       {pageState.pageState === PageStateEnum.EditRegistration && (
         <EditableRegistration
           userAuth={userInfo.auth}
