@@ -128,11 +128,10 @@ const SignUpPage = ({ onBackToLogin }: Props) => {
         <TextInput
           labelText="Phone number"
           inputType={"tel"}
-          requiredInput={false}
+          requiredInput={true}
           retrieveInput={setPhoneNumber}
           validationFunc={(phone_number) => {
-            // phone number is no required so empty string is acceptable input.
-            return phone_number === "" || validator.isMobilePhone(phone_number);
+            return validator.isMobilePhone(phone_number);
           }}
         />
         <div className="btn-group">
