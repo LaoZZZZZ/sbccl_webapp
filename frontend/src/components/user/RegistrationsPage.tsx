@@ -98,7 +98,7 @@ const Registrations = ({ userInfo }: Props) => {
       {pageState.pageState === PageStateEnum.ListRegistrations && (
         <div>
           <ul className="list-group pb-2">
-            <caption>List of active registrations</caption>
+            {registrationState.value.length > 0 && <caption>List of active registrations</caption>}
             {registrationState.value.map((r) => {
               return (
                 <li className="pb-2">
