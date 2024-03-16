@@ -18,6 +18,7 @@ class Member(models.Model):
         ('P', 'Parent'),
         ('B', 'BoardMember'),
         ('V', 'Volunteer'),
+        ('T', 'Teacher')
     ]
     member_type = models.CharField(max_length=1, choices=MEMBER_TYPE, null=True)
 
@@ -33,6 +34,8 @@ class Member(models.Model):
             return "Board Member"
         if self.member_type == 'V':
             return "Volunteer"
+        if self.member_type == 'T':
+            return 'Teacher'
         return "Unknown"
 
 # A user might have multiple students. User must add each student
@@ -130,4 +133,3 @@ class Dropout(models.Model):
     original_registration_code = models.CharField(max_length=225)
     dropout_date = models.DateField(null=False)
     user = models.ForeignKey('members.Member', on_delete=models.CASCADE, verbose_name='Dropout requester')
-
