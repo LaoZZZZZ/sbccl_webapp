@@ -60,6 +60,14 @@ class MemberViewSet(ModelViewSet):
                     balance -= p.amount_in_dollar
         return balance
 
+    def get_permissions(self):
+        if self.action == "list":
+            return [permissions.IsAdminUser()]
+        elif self.action in ("create", "verify_user", "create_password_reset_code",
+                             "reset_password_by_code"):
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
+
     def list(self, request):
         serializer = self.get_serializer(self.queryset, many=True)
         return Response(serializer.data)
