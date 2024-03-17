@@ -87,9 +87,18 @@ class MemberViewSet(ModelViewSet):
     def create(self, request):
         new_user = None
         try:
+            existing_user = User.objects.filter(username=request.data['email'])
+            if existing_user:
+                return Response("This email address has been registered!",
+                                status=status.HTTP_409_CONFLICT)
             serialized = UserSerializer(data=request.data)
             if not serialized.is_valid():
-                return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response("Invalid data is provided", status=status.HTTP_400_BAD_REQUEST)
+
+            if 'phone_number' in request.data:
+                if not utils.validators.request_validator.ValidatePhoneNumber(request.data['phone_number']):
+                    return Response("Invalid phone number is provided",
+                                     status=status.HTTP_400_BAD_REQUEST)
             new_user = serialized.create(serialized.validated_data)
             registration_code = str(uuid.uuid5(uuid.NAMESPACE_URL, new_user.username))
             new_user.save()
@@ -99,9 +108,6 @@ class MemberViewSet(ModelViewSet):
                 verification_code=registration_code,
                 member_type='P') # parent
             if 'phone_number' in request.data:
-                if not utils.validators.request_validator.ValidatePhoneNumber(request.data['phone_number']):
-                    return Response("Invalid phone number is provided",
-                                     status=status.HTTP_400_BAD_REQUEST)
                 new_member.phone_number = request.data['phone_number']
             new_member.save()
             verification_url = os.path.join(os.environ["FRONTEND_URL"], "verify-user", registration_code)
@@ -121,7 +127,7 @@ class MemberViewSet(ModelViewSet):
             # User can not login for unverified account. Delete the user so that the user can retry.
             if new_user:
                 new_user.delete()
-            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+            return Response("Account creation failed: " + str(e), status=status.HTTP_400_BAD_REQUEST)
 
 
     @action(methods=['PUT'], detail=False, url_path='login', name='login user',

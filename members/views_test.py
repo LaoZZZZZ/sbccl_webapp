@@ -29,13 +29,13 @@ class MemberViewSetTest(APITestCase):
         return member
 
     def test_create_member_succeed(self):
-        user_json = {'username': 'test3@gmail.com', 'email': 'test3@gmail.com',
+        user_json = {'username': 'test_name', 'email': 'test4@gmail.com',
                       'first_name': 'Sandy', 'last_name': 'Zhao', 'password': 'Helloworld1'}
         response = self.client.post('/rest_api/members/', data=user_json, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Member.objects.count(), 1)
-        self.assertEqual(Member.objects.get().user_id.username, 'test3@gmail.com')
-        user = User.objects.get(username='test3@gmail.com')
+        self.assertEqual(Member.objects.get().user_id.username, 'test_name')
+        user = User.objects.get(username='test_name')
         created_member = Member.objects.get(user_id=user)
         self.assertEqual(created_member.sign_up_status, 'S')
         self.assertEqual(created_member.member_type, 'P')
@@ -52,6 +52,21 @@ class MemberViewSetTest(APITestCase):
                      'email': 'david@gmail.com', 'first_name': 'david', 'last_name': 'Rob'}
         response = self.client.post('/rest_api/members/', data=user_json, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_member_conflit_email_fail(self):
+        # set up
+        exist_user = User.objects.create(
+            username='david@gmail.com',
+            password='helloworld12H'
+        )
+        exist_user.email = "david@gmail.com"
+        exist_user.save()
+
+        user_json = {'username': 'david@gmail.com', 'password': 'helloworld12H',
+                     'email': 'david@gmail.com', 'first_name': 'David', 'last_name': 'Rob'}
+        response = self.client.post('/rest_api/members/', data=user_json, format='json')
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+
 
     def test_create_member_invalid_password_fail(self):
         user_json = {'username': 'different_name', 'password': 'invalid',
