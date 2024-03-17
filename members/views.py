@@ -90,6 +90,10 @@ class MemberViewSet(ModelViewSet):
             serialized = UserSerializer(data=request.data)
             if not serialized.is_valid():
                 return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
+            existing_user = User.objects.get(email=serialized.validated_data['email'])
+            if existing_user:
+                return Response("This email address has been registered!",
+                                status=status.HTTP_409_CONFLICT)
             new_user = serialized.create(serialized.validated_data)
             registration_code = str(uuid.uuid5(uuid.NAMESPACE_URL, new_user.username))
             new_user.save()
