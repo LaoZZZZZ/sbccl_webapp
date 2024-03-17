@@ -98,6 +98,7 @@ class Registration(models.Model):
     registration_date = models.DateField(null=False)
     expiration_date = models.DateField(null=True)
     last_update_date = models.DateField(null=True)
+    on_waiting_list = models.BooleanField(null=True)
 
 # Payment history
 class Payment(models.Model):

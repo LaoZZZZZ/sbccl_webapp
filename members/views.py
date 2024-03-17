@@ -60,6 +60,18 @@ class MemberViewSet(ModelViewSet):
                     balance -= p.amount_in_dollar
         return balance
 
+    def __send_registration_email__(self, user, registration):
+        pass
+
+    def __send_unregistration_email__(self, user, dropout):
+        pass
+
+    def __update_waiting_list__(self, user, course):
+        pass
+
+    def __email_waiting_list_removal__(self, user, registration):
+        pass
+
     def get_permissions(self):
         if self.action == "list":
             return [permissions.IsAdminUser()]
@@ -395,9 +407,11 @@ class MemberViewSet(ModelViewSet):
             registration = Registration()
             registration.registration_code = str(uuid.uuid5(uuid.NAMESPACE_OID,
                                                             persisted_student.first_name + persisted_student.last_name + persisted_course.name))
+            registration.on_waiting_list = persisted_course.size_limit <= persisted_course.students.count()
+            
             registration.course = persisted_course
             registration.student = persisted_student
-            school_year_start = '{year}-{month}-{day}'.format(year=datetime.datetime.today().year,
+            school_year_start = '{year}-{month}-{day}'.format(year=persisted_course.creation_date.year,
                                                               month='09', day='01')
             registration.school_year_start = datetime.datetime.strptime(school_year_start, "%Y-%m-%d")
             registration.school_year_end = registration.school_year_start.replace(year=datetime.datetime.today().year + 1,
@@ -405,6 +419,7 @@ class MemberViewSet(ModelViewSet):
             registration.registration_date = datetime.datetime.today()
             registration.last_update_date = registration.registration_date
             registration.save()
+            self.__send_registration_email__(user, registration)
             return Response(status=status.HTTP_201_CREATED)
         except User.DoesNotExist or Member.DoesNotExist as e:
             return Response(str(e), status=status.HTTP_404_NOT_FOUND)
@@ -442,10 +457,12 @@ class MemberViewSet(ModelViewSet):
                     "The registration is for {old_type} class. If you're interested in {new_type} class, please submit a new registration!".format(
                     old_type=matched_registration.course.course_type, new_type=new_course.type),
                     status=status.HTTP_400_BAD_REQUEST)
-
+            old_course = matched_registration.course
             matched_registration.course = new_course
             matched_registration.last_update_date = datetime.datetime.today()
             matched_registration.save()
+            user = User.objects.get(username=request.user)
+            self.__update_waiting_list__(user, old_course)
             return Response(status=status.HTTP_202_ACCEPTED)
         except User.DoesNotExist or Member.DoesNotExist as e:
             return Response(str(e), status=status.HTTP_404_NOT_FOUND)
@@ -453,6 +470,7 @@ class MemberViewSet(ModelViewSet):
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
         except Course.DoesNotExist as e:
             return Response(str(3), status=status.HTTP_400_BAD_REQUEST)
+
 
     @action(methods=['PUT'], detail=True, url_path='unregister-course', name='Unregister a student to a course',
             authentication_classes=[SessionAuthentication, BasicAuthentication],
@@ -482,7 +500,9 @@ class MemberViewSet(ModelViewSet):
                 persisted_payment[0].last_udpate_date = dropout.dropout_date
                 persisted_payment[0].last_update_person = user.username
                 persisted_payment[0].save()
+                self.__send_unregistration_email__(user, dropout)
             matched_registration.delete()
+            self.__update_waiting_list__(user, matched_registration.course)
             return Response(status=status.HTTP_202_ACCEPTED)
         except User.DoesNotExist or Member.DoesNotExist:
             return Response('There is no user registered with - ' + request.user,
@@ -552,6 +572,8 @@ class MemberViewSet(ModelViewSet):
                 matched_course[0].last_update_time = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
                 matched_course[0].last_update_person = user.username
                 matched_course[0].save()
+                if matched_course[0].size_limit > matched_course[0].students.count():
+                    self.__update_waiting_list__(user, matched_course[0])
                 return Response(status=status.HTTP_202_ACCEPTED)
             course = course_serializer.create(course_serializer.validated_data,
                                               username=user.username, member=user.username)
