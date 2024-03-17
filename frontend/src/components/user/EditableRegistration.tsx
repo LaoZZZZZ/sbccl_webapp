@@ -120,6 +120,7 @@ const EditableRegistration = ({
               id="student"
               readOnly
               value={student.last_name + " " + student.first_name}
+              disabled
             />
           </div>
           <div className="form-group pb-2 mb-2">
@@ -136,6 +137,7 @@ const EditableRegistration = ({
                 "-" +
                 new Date(registration.school_year_end).getFullYear()
               }
+              disabled
             />
           </div>
           <CourseSelection
@@ -168,6 +170,7 @@ const EditableRegistration = ({
               id="registration-date"
               readOnly
               value={registration.registration_code}
+              disabled
             />
           </div>
 
@@ -181,6 +184,7 @@ const EditableRegistration = ({
               id="registration-date"
               readOnly
               value={registration.registration_date}
+              disabled
             />
           </div>
           <div className="btn-group pt-2">
