@@ -5,7 +5,6 @@ import ErrorPage from "./error-page.jsx";
 import App from "./components/app/App.tsx";
 import VerifyUser from "./components/user/VerifyUser.tsx";
 import reportWebVitals from "./reportWebVitals";
-import { redirect } from "react-router-dom";
 
 import {
   Route,
