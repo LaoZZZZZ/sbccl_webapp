@@ -4,6 +4,7 @@ import EmailInput from "../common/EmailInput.tsx";
 import axios from "axios";
 import Alert from "../common/Alert.tsx";
 import UserInfo from "./UserInfo.tsx";
+
 interface Props {
   onLoginSuccess: () => void;
   onSignUp: () => void;
@@ -14,7 +15,7 @@ const LoginPage = ({ onLoginSuccess, onSignUp, onResetPassword }: Props) => {
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
   const [loginFailed, setLoginFailed] = useState(false);
-
+  const [loginErrorMsg, setLoginErrorMsg] = useState("");
   return (
     <div className="w-50 form-control mx-auto align-middle">
       <form className="control-form">
@@ -62,6 +63,8 @@ const LoginPage = ({ onLoginSuccess, onSignUp, onResetPassword }: Props) => {
                   })
                   .catch(function (error) {
                     setLoginFailed(true);
+                    if (error.response.data)
+                      setLoginErrorMsg(error.response.data.detail);
                   });
               }}
             />
@@ -87,9 +90,10 @@ const LoginPage = ({ onLoginSuccess, onSignUp, onResetPassword }: Props) => {
       {loginFailed && (
         <Alert
           success={false}
-          message="Invalid username or password is provided!"
+          message={loginErrorMsg}
           parentCallback={() => {
             setLoginFailed(false);
+            setLoginErrorMsg("");
           }}
         />
       )}
