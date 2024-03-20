@@ -49,66 +49,72 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
   const [state, transitionPageState] = useReducer(SwitchPage, INITIAL_PAGE);
   return (
     <>
-      <div className="navbar navbar-expand-lg bg-info navbar-toggler pb-3 w-100 h-10">
-        <a className="navbar-brand" href="https://www.sbcclny.com">
-          SBCCL
-        </a>
-        <button
-          className="navbar-toggler"
-          type="button"
-          data-toggle="collapse"
-          data-target="#navbarSupportedContent"
-          aria-controls="navbarSupportedContent"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span className="navbar-toggler-icon"></span>
-        </button>
-        <div className="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul className="navbar-nav mr-auto">
-            <li className="nav-item active">
-              <button
-                className="btn btn-borderless"
-                onClick={() => {
-                  transitionPageState({ type: "go_to_account" });
-                }}
-              >
-                Account Profile
-              </button>
-            </li>
-            <li className="nav-item">
-              <button
-                className="btn btn-borderless"
-                onClick={() => {
-                  transitionPageState({ type: "go_to_students" });
-                }}
-              >
-                Students
-              </button>
-            </li>
-            <li className="nav-item">
-              <button
-                className="btn btn-borderless"
-                onClick={() => {
-                  transitionPageState({ type: "go_to_registration" });
-                }}
-              >
-                Registration
-              </button>
-            </li>
-            <li className="nav-item ">
-              <button
-                className="btn btn-borderless position-absolute end-0"
-                onClick={() => {
-                  Logout(userInfo, logOutCallback);
-                }}
-              >
-                Logout
-              </button>
-            </li>
-          </ul>
+      <nav className="navbar navbar-expand-lg navbar-light bg-light pb-3 w-100 h-10">
+        <div className="container-fluid">
+          <a className="navbar-brand" href="https://www.sbcclny.com">
+            SBCCL
+          </a>
+          <button
+            className="navbar-toggler position-absolute end-0"
+            type="button"
+            data-toggle="collapse"
+            data-target="#navbarNav"
+            aria-controls="navbarNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span className="navbar-toggler-icon"></span>
+          </button>
+          <div className="collapse navbar-collapse" id="navbarNav">
+            <ul className="navbar-nav">
+              <li className="nav-item active">
+                <button
+                  className="btn btn-borderless"
+                  onClick={() => {
+                    transitionPageState({ type: "go_to_account" });
+                  }}
+                  id="accountPage"
+                >
+                  Account Profile
+                </button>
+              </li>
+              <li className="nav-item active">
+                <button
+                  className="btn btn-borderless"
+                  onClick={() => {
+                    transitionPageState({ type: "go_to_students" });
+                  }}
+                  id="student"
+                >
+                  Students
+                </button>
+              </li>
+              <li className="nav-item active">
+                <button
+                  className="btn btn-borderless"
+                  onClick={() => {
+                    transitionPageState({ type: "go_to_registration" });
+                  }}
+                  id="registration"
+                >
+                  Registration
+                </button>
+              </li>
+              <li className="nav-item active">
+                <button
+                  className="btn btn-borderless position-absolute end-0"
+                  onClick={() => {
+                    Logout(userInfo, logOutCallback);
+                  }}
+                  id="logout"
+                >
+                  Logout
+                </button>
+              </li>
+            </ul>
+          </div>
         </div>
-      </div>
+      </nav>
       {state?.page === Page.AccountDetail && (
         <div className="pt-3 w-75 mx-auto">
           <AccountDetail userInfo={userInfo.user} />
