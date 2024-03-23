@@ -134,8 +134,8 @@ const SignUpPage = ({ onBackToLogin }: Props) => {
           >
             <option>Not Selected</option>
             <option>Parent</option>
-            <option>Teacher</option>
-            <option>Volunteer</option>
+            <option disabled>Teacher</option>
+            <option disabled>Volunteer</option>
           </select>
         </div>
         <TextInput
