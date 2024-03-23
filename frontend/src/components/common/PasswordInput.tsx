@@ -22,7 +22,7 @@ const PasswordConfirmation = ({
   return (
     <div className="form-label">
       <label htmlFor="passwordConfirm" className="form-label">
-        Confirm password
+        <strong>Confirm password</strong>
       </label>
       <input
         type={showPassword ? "text" : "password"}
@@ -80,7 +80,7 @@ const PasswordInput = ({ confirmPassword, retrievePassword }: Props) => {
     <>
       <div>
         <label htmlFor="passwordInput" className="form-label">
-          *Password
+          <strong>*Password</strong>
         </label>
         <input
           type={showPassword ? "text" : "password"}
