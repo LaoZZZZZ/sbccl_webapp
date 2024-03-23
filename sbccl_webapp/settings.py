@@ -27,9 +27,6 @@ SECRET_KEY = 'django-insecure-@z1^z$$a8hfm5e%#ryj@c=ddddb6zp)lo6nv695%%0p*9$wnhu
 
 if 'RDS_DB_NAME' in os.environ:
     DEBUG = False
-    # SECURE_SSL_REDIRECT = True
-    # SESSION_COOKIE_SECURE = True
-    # CSRF_COOKIE_SECURE = True
 else:
     DEBUG = True
 
@@ -111,17 +108,17 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ],
-    # 'DEFAULT_PERMISSION_CLASSES': [
-        # 'rest_framework.authentication.BasicAuthentication',
-        # 'rest_framework.authentication.SessionAuthentication',
-    # ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
     'DEFAULT_THROTTLE_CLASSES': [
-        # 'rest_framework.throttling.AnonRateThrottle',
-        # 'rest_framework.throttling.UserRateThrottle'
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
     ],
     'DEFAULT_THROTTLE_RATES': {
-        # 'anon': '100/day',
-        # 'user': '1000/day',
+        'anon': '100/day',
+        'user': '2000/day',
     }
 
 }
