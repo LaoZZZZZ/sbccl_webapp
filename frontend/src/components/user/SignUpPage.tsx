@@ -124,7 +124,9 @@ const SignUpPage = ({ onBackToLogin }: Props) => {
           }}
         />
         <div className="form-group pb-2">
-          <label>Account type *</label>
+          <label>
+            <strong>*Account type</strong>
+          </label>
           <select
             className="form-control"
             id="accountSelect"
