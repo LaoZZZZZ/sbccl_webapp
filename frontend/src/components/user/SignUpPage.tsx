@@ -19,7 +19,7 @@ const SignUpStatus = {
 
 const sendSignUpRequest = async (user_info, callback) => {
   try {
-    const response = await axios.post(
+    await axios.post(
       process.env.REACT_APP_BE_URL_PREFIX + "/rest_api/members/",
       user_info,
       {
@@ -51,6 +51,7 @@ const SignUpPage = ({ onBackToLogin }: Props) => {
   const [lastName, setLastName] = useState("");
   const [firstName, setFirstName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("000");
+  const [memberType, setMemberType] = useState("");
 
   const [signUpStatus, setSignupStatus] = useState({});
   const [, dispatch] = useContext(UserContext);
@@ -90,6 +91,7 @@ const SignUpPage = ({ onBackToLogin }: Props) => {
       password: password,
       last_name: lastName,
       first_name: firstName,
+      member_type: memberType,
     };
     // The phone number is provided and validated.
     if (phoneNumber !== "") {
@@ -121,6 +123,21 @@ const SignUpPage = ({ onBackToLogin }: Props) => {
             return validator.isAlpha(value);
           }}
         />
+        <div className="form-group pb-2">
+          <label>Account type *</label>
+          <select
+            className="form-control"
+            id="accountSelect"
+            onChange={(e) => {
+              setMemberType(e.target.value);
+            }}
+          >
+            <option>Not Selected</option>
+            <option>Parent</option>
+            <option>Teacher</option>
+            <option>Volunteer</option>
+          </select>
+        </div>
         <TextInput
           labelText="Phone number"
           inputType={"tel"}
