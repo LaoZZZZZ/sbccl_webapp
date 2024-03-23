@@ -3,6 +3,7 @@ import datetime
 import os
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
+from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 import pytz
 from rest_framework.viewsets import ModelViewSet
@@ -60,6 +61,40 @@ class MemberViewSet(ModelViewSet):
                     balance -= p.amount_in_dollar
         return balance
 
+    def __validate_member_type__(self, member_type):
+        if not member_type:
+            return None
+        m = member_type.lower()
+        if m == 'parent':
+            return 'P'
+        elif m == 'teacher':
+            return 'T'
+        elif m == 'volunteer':
+            return 'V'
+        else:
+            return None
+
+    def __send_account_creation_email__(self, new_user, new_member, verification_url):
+        user_email_body = "Thanks for registering account in SBCCL school."
+        if new_member.member_type != 'P':
+            admin_msg = "{email} register a {type} account. Please review this registration!".format(email=new_user.email, type=new_member.getMemberType())
+            admin_email_body = admin_msg + "Please click {link} to verify this account.".format(link=verification_url)
+            # Email to admin to verify this account.
+            send_mail(
+                subject="Account registration request",
+                message=admin_email_body,
+                from_email="no-reply@sbcclny.com",
+                # TODO(lu): Remove luzhao@sbcclny.com once the functionality is stable.
+                recipient_list=['ccl_admin@sbcclny.com', 'luzhao@sbcclny.com'])
+            # Email to user for confirmation.
+            user_email_body = user_email_body + """ CCL account admin will review your registration soon. If you have not received any update within a week, please inquery the state by sending email to ccl_board@sbcclny.com."""
+        else:
+            user_email_body = user_email_body + "Please click {link} to verify this account.".format(link=verification_url)
+        new_user.email_user(
+            subject="Registration confirmation",
+            message=user_email_body)
+
+
     def __send_registration_email__(self, user, registration):
         pass
 
@@ -95,26 +130,30 @@ class MemberViewSet(ModelViewSet):
             if not serialized.is_valid():
                 return Response("Invalid data is provided", status=status.HTTP_400_BAD_REQUEST)
 
+            member_type = self.__validate_member_type__(request.data['member_type'])
+            if not member_type:
+                return Response("Invalid account type is not provided!", status=status.HTTP_400_BAD_REQUEST)
+
             if 'phone_number' in request.data:
                 if not utils.validators.request_validator.ValidatePhoneNumber(request.data['phone_number']):
                     return Response("Invalid phone number is provided",
                                      status=status.HTTP_400_BAD_REQUEST)
+                
             new_user = serialized.create(serialized.validated_data)
             registration_code = str(uuid.uuid5(uuid.NAMESPACE_URL, new_user.username))
             new_user.save()
+
             new_member = Member.objects.create(
                 user_id=new_user,
                 sign_up_status='S',
                 verification_code=registration_code,
-                member_type='P') # parent
+                member_type=member_type)
             if 'phone_number' in request.data:
                 new_member.phone_number = request.data['phone_number']
-            new_member.save()
             verification_url = os.path.join(os.environ["FRONTEND_URL"], "verify-user", registration_code)
-            msg = "Thanks for registering account in SBCCL school. Please click {link} to verify this account.".format(link=verification_url)
-            new_user.email_user(
-                subject="Registration confirmation",
-                message=msg)
+            self.__send_account_creation_email__(new_user, new_member, verification_url)
+            new_member.save()
+
             content = {
                 'user': serialized.validated_data,
                 'auth': None,
@@ -185,6 +224,13 @@ class MemberViewSet(ModelViewSet):
                                 status=status.HTTP_409_CONFLICT)
             if matched_members.verification_code != verification_code:
                 return Response("Incorrect verification code is provided!",status=status.HTTP_400_BAD_REQUEST)
+            # Send verification email
+            if matched_members.member_type != 'P':
+                send_mail(
+                    subject="Account is verified",
+                    message="The account registered with {email} has been verified. You can start using your account now. Congratulations!".format(email=user.email),
+                    from_email="no-reply@sbcclny.com",
+                    recipient_list=[user.email, 'ccl_admin@sbcclny.com'])
             matched_members.sign_up_status = 'V'
             matched_members.verification_code = None
             matched_members.save()
