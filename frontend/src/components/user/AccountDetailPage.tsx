@@ -19,21 +19,18 @@ const AccountDetail = ({ userInfo }: Props) => {
   // TODO(lu): Make phone number editable for the user.
   return (
     <>
-      <table className="table table-bordered table-hover">
+      <table className="table table-bordered table-hover" id="AccountDetails">
         <tbody>
           {table_row_names.map((key_value) => {
             return (
-              <tr>
-                <th>
-                  <strong>{key_value.rowName}</strong>
-                </th>
-                <th>{key_value.value}</th>
+              <tr id={key_value.rowName}>
+                <th>{key_value.rowName}</th>
+                <td>{key_value.value}</td>
               </tr>
             );
           })}
         </tbody>
       </table>
-      <div></div>
     </>
   );
 };
