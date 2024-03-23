@@ -35,11 +35,11 @@ const ListStudents = ({ students, userAuth, updateStudentList }: Props) => {
           <table className="table table-bordered table-hover table-striped">
             <caption>List of students</caption>
             <thead>
-              <tr>
+              <tr id="column_name">
                 {table_columns_names.map((colmunName) => {
                   return <th scope="col">{colmunName}</th>;
                 })}
-                <th></th>
+                <th>#</th>
               </tr>
             </thead>
             <tbody>

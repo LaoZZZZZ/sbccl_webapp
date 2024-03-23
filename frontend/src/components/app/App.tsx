@@ -3,6 +3,11 @@ import React, { useReducer } from "react";
 import UserMainPage from "../user/UserMainPage.tsx";
 import UserFrontPage from "../user/UserFrontPage.tsx";
 
+// Bootstrap CSS
+import "bootstrap/dist/css/bootstrap.min.css";
+// Bootstrap Bundle JS
+import "bootstrap/dist/js/bootstrap.bundle.min";
+
 // Some Hardcoded user information for development purpose. Read data will be loaded from the
 // backend.
 const Page = {
@@ -35,7 +40,7 @@ const INITIAL_STATE = {
   // Basic user information including
   // a. username, password
   // b. Auth token
-  user_info: null,
+  user_info: {},
 };
 
 export const UserContext = React.createContext([]);

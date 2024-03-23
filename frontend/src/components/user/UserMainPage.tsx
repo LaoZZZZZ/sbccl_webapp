@@ -55,17 +55,17 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
             SBCCL
           </a>
           <button
-            className="navbar-toggler position-absolute end-0"
+            className="navbar-toggler"
             type="button"
-            data-toggle="collapse"
-            data-target="#navbarNav"
-            aria-controls="navbarNav"
+            data-bs-toggle="collapse"
+            data-bs-target="#menubar"
+            aria-controls="navbarSupportedContent"
             aria-expanded="false"
             aria-label="Toggle navigation"
           >
             <span className="navbar-toggler-icon"></span>
           </button>
-          <div className="collapse navbar-collapse" id="navbarNav">
+          <div className="collapse navbar-collapse" id="menubar">
             <ul className="navbar-nav">
               <li className="nav-item active">
                 <button
@@ -78,7 +78,7 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
                   Account Profile
                 </button>
               </li>
-              <li className="nav-item active">
+              <li className="nav-item">
                 <button
                   className="btn btn-borderless"
                   onClick={() => {
@@ -89,7 +89,7 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
                   Students
                 </button>
               </li>
-              <li className="nav-item active">
+              <li className="nav-item">
                 <button
                   className="btn btn-borderless"
                   onClick={() => {
@@ -100,9 +100,9 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
                   Registration
                 </button>
               </li>
-              <li className="nav-item active">
+              <li className="nav-item">
                 <button
-                  className="btn btn-borderless position-absolute end-0"
+                  className="btn btn-borderless fixed-right"
                   onClick={() => {
                     Logout(userInfo, logOutCallback);
                   }}
