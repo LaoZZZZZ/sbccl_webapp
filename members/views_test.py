@@ -104,7 +104,7 @@ class MemberViewSetTest(APITestCase):
 
     def test_verify_user_succeed(self):
         verification_code = "12345-abc"
-        exist_user = self.create_user('test_name', 'david@gmail.com')
+        exist_user = self.create_user('david@gmail.com', 'david@gmail.com')
         self.create_member(exist_user, sign_up_status='S', verification_code=verification_code)
         url = '/rest_api/members/verify-user/?verification_code={code}&email={email}'.format(
             code=verification_code, email='david@gmail.com')

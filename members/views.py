@@ -177,7 +177,7 @@ class MemberViewSet(ModelViewSet):
         if email is None:
             return Response("No email was provided!", status=status.HTTP_400_BAD_REQUEST)
         try:
-            user = User.objects.get(email=email)
+            user = User.objects.get(username=email)
             matched_members = models.Member.objects.get(user_id=user.id)
             # User has already been verified
             if matched_members.sign_up_status == 'V':
