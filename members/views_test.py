@@ -30,7 +30,8 @@ class MemberViewSetTest(APITestCase):
 
     def test_create_member_succeed(self):
         user_json = {'username': 'test_name', 'email': 'test4@gmail.com',
-                      'first_name': 'Sandy', 'last_name': 'Zhao', 'password': 'Helloworld1'}
+                      'first_name': 'Sandy', 'last_name': 'Zhao', 'password': 'Helloworld1',
+                      'member_type': 'parent'}
         response = self.client.post('/rest_api/members/', data=user_json, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Member.objects.count(), 1)
@@ -40,6 +41,45 @@ class MemberViewSetTest(APITestCase):
         self.assertEqual(created_member.sign_up_status, 'S')
         self.assertEqual(created_member.member_type, 'P')
     
+    def test_create_teacher_succeed(self):
+        user_json = {'username': 'test_name', 'email': 'test4@gmail.com',
+                      'first_name': 'Sandy', 'last_name': 'Zhao', 'password': 'Helloworld1',
+                      'member_type': 'teacheR'}
+        response = self.client.post('/rest_api/members/', data=user_json, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Member.objects.count(), 1)
+        self.assertEqual(Member.objects.get().user_id.username, 'test_name')
+        user = User.objects.get(username='test_name')
+        created_member = Member.objects.get(user_id=user)
+        self.assertEqual(created_member.sign_up_status, 'S')
+        self.assertEqual(created_member.member_type, 'T')
+
+    def test_create_parent_succeed(self):
+        user_json = {'username': 'test_name', 'email': 'test4@gmail.com',
+                      'first_name': 'Sandy', 'last_name': 'Zhao', 'password': 'Helloworld1',
+                      'member_type': 'Parent'}
+        response = self.client.post('/rest_api/members/', data=user_json, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Member.objects.count(), 1)
+        self.assertEqual(Member.objects.get().user_id.username, 'test_name')
+        user = User.objects.get(username='test_name')
+        created_member = Member.objects.get(user_id=user)
+        self.assertEqual(created_member.sign_up_status, 'S')
+        self.assertEqual(created_member.member_type, 'P')
+
+    def test_create_volunteer_succeed(self):
+        user_json = {'username': 'test_name', 'email': 'test4@gmail.com',
+                      'first_name': 'Sandy', 'last_name': 'Zhao', 'password': 'Helloworld1',
+                      'member_type': 'Volunteer'}
+        response = self.client.post('/rest_api/members/', data=user_json, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Member.objects.count(), 1)
+        self.assertEqual(Member.objects.get().user_id.username, 'test_name')
+        user = User.objects.get(username='test_name')
+        created_member = Member.objects.get(user_id=user)
+        self.assertEqual(created_member.sign_up_status, 'S')
+        self.assertEqual(created_member.member_type, 'V')
+
     def test_create_member_conflit_username_fail(self):
         # set up
         exist_user = User.objects.create(
