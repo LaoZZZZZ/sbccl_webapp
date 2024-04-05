@@ -30,21 +30,52 @@ const ListStudents = ({ students, userAuth, updateStudentList }: Props) => {
 
   return (
     <>
+      <form className="row g-3 align-items-center pb-2">
+        <div className="col-auto">
+          <input
+            type="text"
+            className="form-control"
+            id="first_name"
+            placeholder="First Name"
+          />
+        </div>
+        <div className="col-auto">
+          <input
+            type="text"
+            className="form-control"
+            id="last_name"
+            placeholder="Last Name"
+          />
+        </div>
+        <div className="col-auto btn-group">
+          <button type="submit" className="btn btn-outline-primary">
+            Search
+          </button>
+          <button type="submit" className="btn btn-outline-secondary">
+            Add Student
+          </button>
+        </div>
+      </form>
       {!removeStudent.needRemoval && (
         <div className="table-responsive">
           <table className="table table-bordered table-hover table-striped">
             <caption>List of students</caption>
             <thead>
               <tr id="column_name">
+                <th></th>
                 {table_columns_names.map((colmunName) => {
                   return <th scope="col">{colmunName}</th>;
                 })}
-                <th>#</th>
               </tr>
             </thead>
             <tbody>
               {students.map((student_info) => (
                 <tr>
+                  <td>
+                    <div className="centered">
+                      <input type="radio" aria-label="Check for selection" />
+                    </div>
+                  </td>
                   {keys.map((column) => {
                     return <td> {student_info[column]}</td>;
                   })}
