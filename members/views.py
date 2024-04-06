@@ -37,7 +37,7 @@ class MemberViewSet(ModelViewSet):
             'last_name': user.last_name,
             'phone_number': member.phone_number,
             'member_type': member.getMemberType(),
-            'last_login': user.last_login.date(),
+            'last_login': user.last_login.date() if user.last_login else '',
             'date_joined': user.date_joined.date(),
             'balance': '{negative}${amount}'.format(negative='-' if balance < 0 else '',
                                                     amount=self.__calculate_balance__(member))
@@ -199,6 +199,22 @@ class MemberViewSet(ModelViewSet):
         try:
             logout(request)
             return Response(status=status.HTTP_200_OK)
+        except User.DoesNotExist or models.Member.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+    @action(methods=['GET'], detail=False, url_path='account_details', name='Account details',
+            authentication_classes=[SessionAuthentication, BasicAuthentication],
+            permission_classes=[permissions.IsAuthenticated])
+    def account_details(self, request):
+        try:
+            matched_member = models.Member.objects.get(user_id=request.user)
+            if matched_member.sign_up_status == 'S':
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
+            user = User.objects.get(username=request.user)
+            content = {
+                'account_details': self.__generate_user_info__(user, matched_member)
+            }
+            return Response(content, status=status.HTTP_200_OK)
         except User.DoesNotExist or models.Member.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 

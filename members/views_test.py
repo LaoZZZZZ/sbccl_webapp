@@ -142,6 +142,16 @@ class MemberViewSetTest(APITestCase):
         response = self.client.put('/rest_api/members/test_name/login/',format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_user_account_details_succeed(self):
+        exist_user = self.create_user('test_name', 'david@gmail.com')
+        self.create_member(exist_user)
+
+        self.client.force_authenticate(user=exist_user)
+        response = self.client.get('/rest_api/members/account_details/',format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue('account_details' in response.data)
+
+
     def test_verify_user_succeed(self):
         verification_code = "12345-abc"
         exist_user = self.create_user('david@gmail.com', 'david@gmail.com')
