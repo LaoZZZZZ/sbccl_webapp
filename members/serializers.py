@@ -1,9 +1,12 @@
 from rest_framework import serializers
-from .models import Member, Student, Course, Registration
+from .models import Member, Student, Course
 from django.contrib.auth.models import User
 import re
 import pytz
 from datetime import datetime
+
+class LoginFormSerializer(serializers.Serializer):
+    pass
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -55,26 +58,30 @@ class StudentSerializer(serializers.ModelSerializer):
     """
     def validate_date_of_birth(self, date_of_birth_str):
         dob = datetime.strptime(str(date_of_birth_str), '%Y-%m-%d')
-        if datetime.now().year - dob.year < 4:
+        if datetime.now().year - dob.year < 5:
             raise ValueError('Minimum age requirement is not satisfied!')
         return dob
     
+    def validate_first_name(self, first_name):
+        if first_name is None or first_name == '':
+            raise ValueError("First name is empty!")
+        return first_name
+    
+    def validate_last_name(self, last_name):
+        if last_name is None or last_name == '':
+            raise ValueError("Last name is empty!")
+        return last_name
+    
     def validate_gender(self, gender):
-        if not gender or gender.upper() not in ('U', 'M', 'F', 'FEMALE', 'MALE'):
+        if not gender or gender.upper() not in ('M', 'F', 'FEMALE', 'MALE'):
             raise ValueError("invalid gender information!")
         return gender
-    def to_internal_value(self, data):
-        if data.get('chinese_name', None) == '':
-            data.pop('chinese_name')
-        if data.get('middle_name', None) == '':
-            data.pop('middle_name')
-        return super().to_internal_value(data)
     
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
-        fields = ('id', 'name', 'course_description', 'course_type',
-                  'course_status', 'size_limit', 'cost')
+        fields = ('name', 'course_description', 'course_type',
+                  'course_status', 'size_limit')
     
     def validate_course_type(self, course_type):
         if course_type not in ['L', 'E']:
@@ -84,7 +91,9 @@ class CourseSerializer(serializers.ModelSerializer):
     def validate_name(self, name):
         if not name:
             raise ValueError("No name is provided for the course")
-        
+        existing_one = Course.objects.filter(name = name)
+        if existing_one:
+            raise ValueError("There already exists a course with the same name!")
         return name
 
     def validate_size_limit(self, size_limit):
@@ -96,33 +105,18 @@ class CourseSerializer(serializers.ModelSerializer):
         if course_status not in ['A', 'U']:
             raise ValueError("Invalid course status!")
         return course_status
-    
-    def validate_cost(self, cost):
-        if cost < 0:
-            raise ValueError("invalid cost for the new course!")
-        return cost
 
-    def create(self, validated_data, username, member):
+    def validate_classroom(self, classroom):
+        if len(classroom) <= 0:
+            raise ValueError("Invalid classroom assignment!")
+        return classroom
+
+    def create(self, validated_data, username):
         course = Course(**validated_data)
         course.creation_date = datetime.utcnow().replace(tzinfo=pytz.utc)
         course.last_update_time = course.creation_date
         course.creater_name = username
-        course.last_update_person = member
         return course
-    
-class RegistrationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Registration
-        fields = ('id', 'registration_code', 'school_year_start', 'school_year_end',
-                  'registration_date', 'expiration_date', 'course', 'student',
-                  'on_waiting_list')
-    
-    def create(self, validated_data, student, course):
-        registration = Registration(**validated_data)
-        registration.registration_date = datetime.utcnow().replace(tzinfo=pytz.utc)
-        registration.student = student
-        registration.course = course
-        return registration
     
 
 

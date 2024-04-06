@@ -25,7 +25,7 @@ class Member(models.Model):
     def __str__(self):
         return 'User Id: {user_id}\n Member type: {member_type}'.format(
             user_id=self.user_id, member_type=self.member_type)
-    
+
     # Match the MEMBER_TYPE
     def getMemberType(self):
         if self.member_type == 'P':
@@ -75,37 +75,30 @@ class Course(models.Model):
         ('U', 'Unavailable') # not available for registration
     ]
     course_status = models.CharField(max_length=1, choices=COURSE_STATUS)
+    # The maximum number of students in this course. If the registration
+    # exceeds this limit, this course will not be available anymore.
     size_limit =models.IntegerField(null=False)
-    # the date that this course is created.
+    # The date that this course is created.
     creation_date = models.DateField(null=True)
-    # the last time that this course was updated
+    # The last time that this course was updated
     last_update_time = models.DateField(null=True)
     creater_name = models.CharField(max_length=255, null=False)
-    # how much is this course in dollars
-    cost = models.FloatField(null=True)
-    last_update_person = models.CharField(max_length=255, null=False)
+    classroom = models.CharField(max_length=255, null=True)
 
 # Capture the registration event for each student
 class Registration(models.Model):
     # unique identifier to the registration. This code will be sent to the user too.
-    registration_code = models.CharField(max_length=255)
-    school_year_start = models.DateField(null=False)
-    school_year_end = models.DateField(null=False)
-    # Course should not be deleted if there is any registration tied to it.
-    course = models.ForeignKey('Course', on_delete=models.PROTECT)
-    # needs to remove the registration before delete the students.
-    student = models.ForeignKey('Student', on_delete=models.PROTECT)
+    confirmation_code = models.CharField(max_length=255, primary_key=True)
+    school_year = models.DateField(null=False)
+    course = models.ForeignKey('Course', on_delete=models.CASCADE)
+    student = models.ForeignKey('Student', on_delete=models.CASCADE)
     registration_date = models.DateField(null=False)
-    expiration_date = models.DateField(null=True)
-    last_update_date = models.DateField(null=True)
-    on_waiting_list = models.BooleanField(null=True)
+    # TODO(lu): need to consider un-registration/transfer.
 
 # Payment history
 class Payment(models.Model):
-    # Either registration_code or droput_info is null. They can not be set at the same time.
     registration_code = models.ForeignKey(
-        'Registration', on_delete=models.SET_NULL, verbose_name='Related registration', null=True)
-    dropout_info = models.ForeignKey('Dropout', on_delete=models.SET_NULL, verbose_name='Related dropout', null=True)
+        'Registration', on_delete=models.CASCADE, verbose_name='Related registration')
     user = models.ForeignKey('members.Member', on_delete=models.CASCADE, verbose_name='Payment sender')
     pay_date = models.DateField(null=False)
     original_amount = models.FloatField(null=False)
@@ -122,8 +115,6 @@ class Payment(models.Model):
         ('PR', 'PartialRefund')
     ]
     payment_status = models.CharField(max_length=2, choices=PAYMENT_STATUS)
-    last_udpate_date = models.DateField(null=False)
-    last_update_person = models.CharField(max_length=255, null=False)
 
 # If a registration is cancelled, it would become a dropout record.
 class Dropout(models.Model):
@@ -134,3 +125,6 @@ class Dropout(models.Model):
     original_registration_code = models.CharField(max_length=225)
     dropout_date = models.DateField(null=False)
     user = models.ForeignKey('members.Member', on_delete=models.CASCADE, verbose_name='Dropout requester')
+
+
+

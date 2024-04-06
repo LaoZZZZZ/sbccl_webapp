@@ -9,7 +9,7 @@ class StudentAdmin(admin.ModelAdmin):
     list_display = ('first_name', "last_name", 'gender', 'joined_date')
 
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ('name', 'course_description', 'course_type', 'course_status', 'size_limit')
+    list_display = ('name', 'course_description', 'course_type', 'course_status', 'size_limit', 'classroom')
 
 class PaymentAdmin(admin.ModelAdmin):
     list_display = ('pay_date', 'registration_code', 'dropout_info', 'original_amount',
