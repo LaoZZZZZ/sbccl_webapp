@@ -48,7 +48,7 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
   };
   const [state, transitionPageState] = useReducer(SwitchPage, INITIAL_PAGE);
   return (
-    <>
+    <div>
       <nav className="navbar navbar-expand-lg navbar-light bg-light pb-3 w-100 h-10">
         <div className="container-fluid">
           <a className="navbar-brand" href="https://www.sbcclny.com">
@@ -130,7 +130,7 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
           <Registrations userInfo={userInfo} />
         </div>
       )}
-    </>
+    </div>
   );
 };
 

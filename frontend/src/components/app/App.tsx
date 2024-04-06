@@ -40,7 +40,7 @@ const INITIAL_STATE = {
   // Basic user information including
   // a. username, password
   // b. Auth token
-  user_info: {},
+  user_info: null,
 };
 
 export const UserContext = React.createContext([]);
@@ -67,8 +67,8 @@ const App = () => {
   };
 
   return (
-    <Provider value={[user_profile, transitionUserState]}>
-      <div className="container-xl">
+    <div>
+      <Provider value={[user_profile, transitionUserState]}>
         {user_profile.page === Page.StartLogin && (
           <UserFrontPage loginSuccessCallback={loginSuccess} />
         )}
@@ -79,8 +79,8 @@ const App = () => {
             logOutCallback={logOut}
           />
         )}
-      </div>
-    </Provider>
+      </Provider>
+    </div>
   );
 };
 

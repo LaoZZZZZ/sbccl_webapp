@@ -69,7 +69,6 @@ const UserFrontPage = ({ loginSuccessCallback }: Props) => {
           }}
         />
       )}
-
       {userState.page === Page.StartSignUp && (
         <SignUpPage
           onBackToLogin={() => {
