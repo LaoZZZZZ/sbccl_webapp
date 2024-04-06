@@ -202,6 +202,23 @@ class MemberViewSet(ModelViewSet):
         except User.DoesNotExist or models.Member.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
+    @action(methods=['GET'], detail=False, url_path='account_details', name='Account details',
+            authentication_classes=[SessionAuthentication, BasicAuthentication],
+            permission_classes=[permissions.IsAuthenticated])
+    def account_details(self, request):
+        try:
+            matched_member = models.Member.objects.get(user_id=request.user)
+            if matched_member.sign_up_status == 'S':
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
+            user = User.objects.get(username=request.user)
+            content = {
+                'user': self.__generate_user_info__(user, matched_member),
+                'auth': str(request.auth)
+            }
+            return Response(content, status=status.HTTP_200_OK)
+        except User.DoesNotExist or models.Member.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
     """
      Verify the signup for the user.
     """
