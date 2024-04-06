@@ -74,7 +74,7 @@ class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = ('id', 'name', 'course_description', 'course_type',
-                  'course_status', 'size_limit', 'cost')
+                  'course_status', 'size_limit', 'cost', 'classroom')
     
     def validate_course_type(self, course_type):
         if course_type not in ['L', 'E']:
@@ -101,6 +101,11 @@ class CourseSerializer(serializers.ModelSerializer):
         if cost < 0:
             raise ValueError("invalid cost for the new course!")
         return cost
+    
+    def validate_classroom(self, classroom):
+        if not classroom:
+            raise ValueError("Invalid classroom assignment")
+        return classroom
 
     def create(self, validated_data, username, member):
         course = Course(**validated_data)
@@ -124,6 +129,3 @@ class RegistrationSerializer(serializers.ModelSerializer):
         registration.course = course
         return registration
     
-
-
-

@@ -84,6 +84,8 @@ class Course(models.Model):
     # how much is this course in dollars
     cost = models.FloatField(null=True)
     last_update_person = models.CharField(max_length=255, null=False)
+    # classroom assignment to this course.
+    classroom = models.CharField(max_length=255, null=True)
 
 # Capture the registration event for each student
 class Registration(models.Model):
