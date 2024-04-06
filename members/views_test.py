@@ -149,6 +149,7 @@ class MemberViewSetTest(APITestCase):
         self.client.force_authenticate(user=exist_user)
         response = self.client.get('/rest_api/members/account_details/',format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue('account_details' in response.data)
 
 
     def test_verify_user_succeed(self):

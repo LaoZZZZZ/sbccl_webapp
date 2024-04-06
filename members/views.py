@@ -37,7 +37,7 @@ class MemberViewSet(ModelViewSet):
             'last_name': user.last_name,
             'phone_number': member.phone_number,
             'member_type': member.getMemberType(),
-            'last_login': user.last_login.date(),
+            'last_login': user.last_login.date() if user.last_login else '',
             'date_joined': user.date_joined.date(),
             'balance': '{negative}${amount}'.format(negative='-' if balance < 0 else '',
                                                     amount=self.__calculate_balance__(member))
@@ -212,8 +212,7 @@ class MemberViewSet(ModelViewSet):
                 return Response(status=status.HTTP_401_UNAUTHORIZED)
             user = User.objects.get(username=request.user)
             content = {
-                'user': self.__generate_user_info__(user, matched_member),
-                'auth': str(request.auth)
+                'account_details': self.__generate_user_info__(user, matched_member)
             }
             return Response(content, status=status.HTTP_200_OK)
         except User.DoesNotExist or models.Member.DoesNotExist:
