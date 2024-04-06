@@ -326,7 +326,8 @@ class MemberViewSetTest(APITestCase):
             'course_type': "L",
             'course_status': 'A',
             'size_limit': 20,
-            'cost': 500
+            'cost': 500,
+            'classroom': 'N402'
         }
 
         self.client.force_authenticate(user=exist_user)
@@ -352,7 +353,8 @@ class MemberViewSetTest(APITestCase):
             'course_type': "L",
             'course_status': 'U',
             'size_limit': 1,
-            'cost': 400
+            'cost': 400,
+            'classroom': 'S402'
         }
         response = self.client.put('/rest_api/members/upsert-course/',
                                    data=updated_course, format='json')
@@ -381,7 +383,8 @@ class MemberViewSetTest(APITestCase):
             'course_type': "L",
             'course_status': 'A',
             'size_limit': 20,
-            'cost': 500
+            'cost': 500,
+            'classroom': 'N402'
         }
 
         self.client.force_authenticate(user=exist_user)
@@ -409,7 +412,8 @@ class MemberViewSetTest(APITestCase):
             'course_type': "L",
             'course_status': 'A',
             'size_limit': 20,
-            'cost': 500
+            'cost': 500,
+            'classroom': 'N101'
         }
 
         self.client.force_authenticate(user=exist_user)
@@ -505,7 +509,8 @@ class MemberViewSetTest(APITestCase):
             'course_type': "L",
             'course_status': 'A',
             'size_limit': 20,
-            'cost': 500
+            'cost': 500,
+            'classroom': 'N228'
         }
 
         self.client.force_authenticate(user=board_user)
@@ -545,7 +550,8 @@ class MemberViewSetTest(APITestCase):
             'course_type': "L",
             'course_status': 'A',
             'size_limit': 20,
-            'cost': 500
+            'cost': 500,
+            'classroom': 'N442'
         }
 
         self.client.force_authenticate(user=exist_user)
@@ -558,7 +564,8 @@ class MemberViewSetTest(APITestCase):
             'course_type': "L",
             'course_status': 'A',
             'size_limit': 20,
-            'cost': 500
+            'cost': 500,
+            'classroom': 'N118'
         }
         response = self.client.put('/rest_api/members/upsert-course/',
                                    data=second_course, format='json')
@@ -634,7 +641,8 @@ class MemberViewSetTest(APITestCase):
             'course_type': "L",
             'course_status': 'A',
             'size_limit': 20,
-            'cost': 500
+            'cost': 500,
+            'classroom': 'N110'
         }
         response = self.client.put('/rest_api/members/upsert-course/',
                                    data=second_course, format='json')
@@ -712,7 +720,8 @@ class MemberViewSetTest(APITestCase):
             'course_type': "L",
             'course_status': 'A',
             'size_limit': 20,
-            'cost': 500
+            'cost': 500,
+            'classroom': 'N116'
         }
 
         self.client.force_authenticate(user=exist_user)
@@ -786,7 +795,8 @@ class MemberViewSetTest(APITestCase):
             'course_type': "L",
             'course_status': 'A',
             'size_limit': 20,
-            'cost': 500
+            'cost': 500,
+            'classroom': 'N108'
         }
 
         self.client.force_authenticate(user=exist_user)
