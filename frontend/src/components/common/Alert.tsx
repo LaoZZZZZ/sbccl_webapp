@@ -16,7 +16,7 @@ export const Alert = ({ success, message, parentCallback }: Props) => {
       }
       role="alert"
     >
-      {message}
+      {message.length > 0 && message}
       <button
         type="button"
         className="btn-close"
