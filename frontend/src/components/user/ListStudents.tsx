@@ -70,19 +70,21 @@ const ListStudents = ({ students, userAuth, updateStudentList }: Props) => {
         </div>
       )}
       {removeStudent.needRemoval && (
-        <RemoveStudents
-          studentInfo={removeStudent.student}
-          userAuth={userAuth}
-          callBackUponSuccessRemoval={() => {
-            updateStudentList();
-          }}
-          callBackUponExit={() => {
-            setRemoveStudent({
-              needRemoval: false,
-              student: {},
-            });
-          }}
-        />
+        <div>
+          <RemoveStudents
+            studentInfo={removeStudent.student}
+            userAuth={userAuth}
+            callBackUponSuccessRemoval={() => {
+              updateStudentList();
+            }}
+            callBackUponExit={() => {
+              setRemoveStudent({
+                needRemoval: false,
+                student: {},
+              });
+            }}
+          />
+        </div>
       )}
     </>
   );
