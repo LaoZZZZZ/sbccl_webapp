@@ -202,7 +202,7 @@ class MemberViewSet(ModelViewSet):
         except User.DoesNotExist or models.Member.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-    @action(methods=['GET'], detail=False, url_path='account_details', name='Account details',
+    @action(methods=['GET'], detail=False, url_path='account-details', name='Account details',
             authentication_classes=[SessionAuthentication, BasicAuthentication],
             permission_classes=[permissions.IsAuthenticated])
     def account_details(self, request):

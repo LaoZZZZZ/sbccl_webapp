@@ -64,7 +64,7 @@ class Student(models.Model):
 class Course(models.Model):
     name = models.CharField(max_length=255)
     students = models.ManyToManyField(Student, through="Registration")
-    course_description = models.CharField(max_length = 255)
+    course_description = models.CharField(max_length=1024)
     COURSE_TYPE = [
         ('L', 'Language'),
         ('E', 'Enrichment')
@@ -85,7 +85,7 @@ class Course(models.Model):
     cost = models.FloatField(null=True)
     last_update_person = models.CharField(max_length=255, null=False)
     # classroom assignment to this course.
-    classroom = models.CharField(max_length=255, null=True)
+    classroom = models.CharField(max_length=255, null=True, default="Unassigned")
 
 # Capture the registration event for each student
 class Registration(models.Model):

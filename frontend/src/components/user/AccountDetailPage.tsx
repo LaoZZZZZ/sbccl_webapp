@@ -1,5 +1,6 @@
 import React from "react";
 
+import fetchAccountDetails from "./FetchAccountDetails.tsx";
 interface Props {
   userInfo: {};
 }
