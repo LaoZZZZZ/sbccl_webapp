@@ -22,17 +22,6 @@ const AccountDetail = ({ userInfo }: Props) => {
     }
   }, [userState]);
 
-  // const table_row_names = [
-  //   { rowName: "Last Name", value: userInfo.user.last_name },
-  //   { rowName: "First Name", value: userInfo.user.first_name },
-  //   { rowName: "Email", value: userInfo.user.email },
-  //   { rowName: "Phone Number", value: userInfo.user.phone_number },
-  //   { rowName: "Member Type", value: userInfo.user.member_type },
-  //   { rowName: "Last Login", value: userInfo.user.last_login },
-  //   { rowName: "Date Joined", value: userInfo.user.date_joined },
-  //   { rowName: "Balance", value: userInfo.user.balance },
-  // ];
-
   // TODO(lu): Make phone number editable for the user.
   return (
     <>
@@ -71,14 +60,6 @@ const AccountDetail = ({ userInfo }: Props) => {
               <th>Balance</th>
               <td>{userState.value.balance}</td>
             </tr>
-            {/* {table_row_names.map((key_value) => {
-              return (
-                <tr id={key_value.rowName}>
-                  <th>{key_value.rowName}</th>
-                  <td>{key_value.value}</td>
-                </tr>
-              );
-            })} */}
           </tbody>
         </table>
       )}
