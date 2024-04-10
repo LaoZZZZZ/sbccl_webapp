@@ -117,7 +117,7 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
       </nav>
       {state?.page === Page.AccountDetail && (
         <div className="pt-3 w-75 mx-auto">
-          <AccountDetail userInfo={userInfo.user} />
+          <AccountDetail userInfo={userInfo} />
         </div>
       )}
       {state?.page === Page.Students && (
