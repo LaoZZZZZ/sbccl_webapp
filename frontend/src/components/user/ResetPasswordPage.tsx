@@ -76,20 +76,22 @@ const ResetPasswordPage = ({ onBackToLogin }: Props) => {
         />
       </form>
       {resetStatus["status"] !== Status.UNSPECIFIED && (
-        <Alert
-          success={resetStatus["status"] === Status.SUCCESS}
-          message={resetStatus["msg"]}
-          parentCallback={() => {
-            if (resetStatus["status"] == Status.SUCCESS) {
-              onBackToLogin();
-            } else {
-              setResetStatus({
-                status: Status.UNSPECIFIED,
-                msg: "",
-              });
-            }
-          }}
-        />
+        <div>
+          <Alert
+            success={resetStatus["status"] === Status.SUCCESS}
+            message={resetStatus["msg"]}
+            parentCallback={() => {
+              if (resetStatus["status"] == Status.SUCCESS) {
+                onBackToLogin();
+              } else {
+                setResetStatus({
+                  status: Status.UNSPECIFIED,
+                  msg: "",
+                });
+              }
+            }}
+          />
+        </div>
       )}
     </div>
   );

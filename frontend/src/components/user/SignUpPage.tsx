@@ -169,22 +169,26 @@ const SignUpPage = ({ onBackToLogin }: Props) => {
         </div>
       </form>
       {signUpStatus["status"] === SignUpStatus.FAILED && (
-        <Alert
-          success={false}
-          message={signUpStatus["msg"]}
-          parentCallback={() => {
-            setSignupStatus({});
-          }}
-        />
+        <div>
+          <Alert
+            success={false}
+            message={signUpStatus["msg"]}
+            parentCallback={() => {
+              setSignupStatus({});
+            }}
+          />
+        </div>
       )}
       {signUpStatus["status"] === SignUpStatus.SUCCESS && (
-        <Alert
-          success={true}
-          message={signUpStatus["msg"]}
-          parentCallback={() => {
-            onBackToLogin();
-          }}
-        />
+        <div>
+          <Alert
+            success={true}
+            message={signUpStatus["msg"]}
+            parentCallback={() => {
+              onBackToLogin();
+            }}
+          />
+        </div>
       )}
     </div>
   );
