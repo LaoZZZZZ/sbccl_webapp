@@ -8,6 +8,7 @@ export interface ClassInformation {
   teacher: string;
   cost: string;
   type: string;
+  classroom: string;
 }
 
 interface Props {
@@ -46,15 +47,16 @@ const CourseSelection = ({
     "2024-06-24 10:00am",
     "2024-07-24 10:00am",
   ];
-  const selectedCourse = findSelectedCourse(courses, defaultCourseSelection);
 
+  const selectedCourse = findSelectedCourse(courses, defaultCourseSelection);
   const [classInfo, setClassInfo] = useState<ClassInformation>({
     selected: selectedCourse !== null,
     enrollment: selectedCourse !== null ? selectedCourse.enrollment : 0,
     capacity: selectedCourse !== null ? selectedCourse.size_limit : 0,
-    teacher: "",
-    cost: selectedCourse !== null ? "$" + selectedCourse.cost : "",
+    teacher: "NA",
+    cost: selectedCourse !== null ? "$" + selectedCourse.cost : "NA",
     type: selectedCourse !== null ? selectedCourse.course_type : "",
+    classroom: selectedCourse !== null ? selectedCourse.classroom : "NA",
   });
   return (
     <>
@@ -67,7 +69,9 @@ const CourseSelection = ({
           id="selectCourse"
           onChange={(e) => {
             const selected_course = findSelectedCourse(courses, e.target.value);
+
             if (selected_course !== null) {
+              console.log(selected_course);
               setCourseSelection(selected_course);
               setClassInfo({
                 selected: true,
@@ -75,15 +79,18 @@ const CourseSelection = ({
                 capacity: selected_course.size_limit,
                 cost: "$" + selected_course.cost,
                 type: selected_course.course_type,
-                teacher: "***",
+                classroom: selected_course.classroom,
+                teacher: "NA",
               });
             } else {
               setClassInfo({
                 selected: false,
                 enrollment: 0,
                 capacity: 0,
-                cost: 0,
-                teacher: "",
+                type: "",
+                cost: "$0",
+                classroom: "NA",
+                teacher: "NA",
               });
             }
           }}
@@ -119,6 +126,10 @@ const CourseSelection = ({
           <span className="input-group-text bg-white">{classInfo.cost}</span>
           <span className="input-group-text">Teacher</span>
           <span className="input-group-text bg-white">{classInfo.teacher}</span>
+          <span className="input-group-text">Classroom</span>
+          <span className="input-group-text bg-white">
+            {classInfo.classroom}
+          </span>
         </div>
       )}
       {/* TODO(lu): Bring it back once the PoD workflow is figured out. 
