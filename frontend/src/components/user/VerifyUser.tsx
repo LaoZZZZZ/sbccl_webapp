@@ -78,22 +78,26 @@ const VerifyUser = () => {
           </div>
         </form>
         {verificationStatus["status"] === VerificatiionStatus.FAILED && (
-          <Alert
-            success={false}
-            message={verificationStatus["msg"]}
-            parentCallback={() => {
-              setVerificationStatus({});
-            }}
-          />
+          <div>
+            <Alert
+              success={false}
+              message={verificationStatus["msg"]}
+              parentCallback={() => {
+                setVerificationStatus({});
+              }}
+            />
+          </div>
         )}
         {verificationStatus["status"] === VerificatiionStatus.SUCCESS && (
-          <Alert
-            success={true}
-            message={verificationStatus["msg"]}
-            parentCallback={() => {
-              navigator("/login");
-            }}
-          />
+          <div>
+            <Alert
+              success={true}
+              message={verificationStatus["msg"]}
+              parentCallback={() => {
+                navigator("/login");
+              }}
+            />
+          </div>
         )}
       </div>
     </>
