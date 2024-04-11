@@ -32,6 +32,7 @@ const LoginPage = ({ onLoginSuccess, onSignUp, onResetPassword }: Props) => {
             value="Login"
             onClick={async () => {
               if (emailAddress === "" || password === "") {
+                setLoginErrorMsg("Please provide valid email or password!");
                 setLoginFailed(true);
                 return;
               }
