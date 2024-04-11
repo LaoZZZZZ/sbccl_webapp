@@ -222,13 +222,15 @@ const EditableRegistration = ({
         </form>
       )}
       {updateStatus["status"] === UpdateStatus.FAILED && (
-        <Alert
-          success={false}
-          message={updateStatus["msg"]}
-          parentCallback={() => {
-            setUpdateStatus({});
-          }}
-        />
+        <div>
+          <Alert
+            success={false}
+            message={updateStatus["msg"]}
+            parentCallback={() => {
+              setUpdateStatus({});
+            }}
+          />
+        </div>
       )}
       {removeRegistration && (
         <RemoveRegistration

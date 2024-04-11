@@ -95,13 +95,15 @@ const ResetPasswordByCode = () => {
           />
         )}
         {verificationStatus["status"] === PasswordResetStatus.SUCCESS && (
-          <Alert
-            success={true}
-            message={verificationStatus["msg"]}
-            parentCallback={() => {
-              navigate("/login");
-            }}
-          />
+          <div>
+            <Alert
+              success={true}
+              message={verificationStatus["msg"]}
+              parentCallback={() => {
+                navigate("/login");
+              }}
+            />
+          </div>
         )}
       </div>
     </>

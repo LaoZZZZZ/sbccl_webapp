@@ -83,11 +83,13 @@ const RemoveRegistration = ({
         />
       )}
       {removeStatus.status !== RemoveStatus.UNSPECIFIED && (
-        <Alert
-          success={removeStatus.status === RemoveStatus.SUCCESS}
-          message={removeStatus.msg}
-          parentCallback={callBackUponSuccessRemoval}
-        />
+        <div>
+          <Alert
+            success={removeStatus.status === RemoveStatus.SUCCESS}
+            message={removeStatus.msg}
+            parentCallback={callBackUponSuccessRemoval}
+          />
+        </div>
       )}
     </>
   );

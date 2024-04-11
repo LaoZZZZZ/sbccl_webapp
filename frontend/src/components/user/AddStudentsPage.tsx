@@ -173,13 +173,15 @@ const AddStudents = ({ userAuth, updateStudentList }: Props) => {
         </div>
       </form>
       {addStatus["status"] === AddStatus.FAILED && (
-        <Alert
-          success={false}
-          message={addStatus["msg"]}
-          parentCallback={() => {
-            setAddStatus({});
-          }}
-        />
+        <div>
+          <Alert
+            success={false}
+            message={addStatus["msg"]}
+            parentCallback={() => {
+              setAddStatus({});
+            }}
+          />
+        </div>
       )}
     </div>
   );
