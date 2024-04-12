@@ -74,6 +74,7 @@ const StudentsPage = ({ userInfo }: Props) => {
                 className="form-control"
                 id="first_name"
                 placeholder="First Name"
+                disabled
               />
             </div>
             <div className="col-auto">
@@ -82,20 +83,22 @@ const StudentsPage = ({ userInfo }: Props) => {
                 className="form-control"
                 id="last_name"
                 placeholder="Last Name"
+                disabled
               />
             </div>
             <div className="col-auto btn-group">
-              <button type="submit" className="btn btn-outline-primary">
+              <button
+                type="submit"
+                className="btn btn-outline-primary"
+                disabled
+              >
                 Search
               </button>
               <button
                 type="submit"
-                className="btn btn-outline-secondary"
+                className="btn btn-outline-primary"
                 onClick={() => {
-                  setStudentsState({
-                    ...studentsState,
-                    pageState: Page.AddStudent,
-                  });
+                  setPageState(Page.AddStudent);
                 }}
               >
                 Add Student
@@ -107,23 +110,39 @@ const StudentsPage = ({ userInfo }: Props) => {
               <caption>List of students</caption>
               <thead>
                 <tr id="column_name">
-                  <th></th>
                   {table_columns_names.map((colmunName) => {
                     return <th scope="col">{colmunName}</th>;
                   })}
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
                 {studentsState.value.map((student_info) => (
                   <tr>
-                    <td>
+                    {/* <td>
                       <div className="centered">
                         <input type="radio" aria-label="Check for selection" />
                       </div>
-                    </td>
+                    </td> */}
                     {keys.map((column) => {
                       return <td> {student_info[column]}</td>;
                     })}
+                    <td>
+                      <button
+                        className="btn btn-outline-secondary"
+                        data-toggle="modal"
+                        type="button"
+                        onClick={(e) => {
+                          setRemoveStudent({
+                            needRemoval: true,
+                            student: student_info,
+                          });
+                          setPageState(Page.RemoveStudent);
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -131,7 +150,6 @@ const StudentsPage = ({ userInfo }: Props) => {
           </div>
         </div>
       )}
-      <hr className="hr pt-2" />
       {pageState === Page.AddStudent && (
         <AddStudents
           userAuth={userInfo.auth}
@@ -141,19 +159,22 @@ const StudentsPage = ({ userInfo }: Props) => {
         />
       )}
       {pageState === Page.RemoveStudent && (
-        <RemoveStudents
-          studentInfo={removeStudent.student}
-          userAuth={userAuth}
-          callBackUponSuccessRemoval={() => {
-            updateStudentList();
-          }}
-          callBackUponExit={() => {
-            setRemoveStudent({
-              needRemoval: false,
-              student: {},
-            });
-          }}
-        />
+        <div>
+          <RemoveStudents
+            studentInfo={removeStudent.student}
+            userAuth={userInfo.auth}
+            callBackUponSuccessRemoval={() => {
+              fetchStudentLists();
+            }}
+            callBackUponExit={() => {
+              setRemoveStudent({
+                needRemoval: false,
+                student: {},
+              });
+              setPageState(Page.ListStudent);
+            }}
+          />
+        </div>
       )}
     </>
   );
