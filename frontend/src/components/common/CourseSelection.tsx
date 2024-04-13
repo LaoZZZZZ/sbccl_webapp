@@ -71,7 +71,6 @@ const CourseSelection = ({
             const selected_course = findSelectedCourse(courses, e.target.value);
 
             if (selected_course !== null) {
-              console.log(selected_course);
               setCourseSelection(selected_course);
               setClassInfo({
                 selected: true,
