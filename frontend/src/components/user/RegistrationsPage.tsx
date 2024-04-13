@@ -3,7 +3,7 @@ import AddRegistration from "./AddRegistration.tsx";
 import fetchStudents from "./FetchStudents.tsx";
 import fetchCourses from "./FetchCourses.tsx";
 import UserInfo from "./UserInfo.tsx";
-import fetchRegistrations from "./FetchRegistrations.tsx";
+import fetchRegistrations from "../common/FetchRegistrations.tsx";
 import EditableRegistration from "./EditableRegistration.tsx";
 
 interface Props {
@@ -29,9 +29,7 @@ const renderRegistration = (registration) => {
   return (
     registration["student"]["last_name"] +
     " " +
-    registration["student"]["first_name"] +
-    " - " +
-    registration["course"]["name"]
+    registration["student"]["first_name"]
   );
 };
 
@@ -76,6 +74,8 @@ const Registrations = ({ userInfo }: Props) => {
     }
   }, [userInfo, studentState, courseState, registrationState, pageState]);
 
+  const table_columns_names = ["Name", "Course", "School Year", "Status"];
+
   return (
     <>
       {pageState.pageState === PageStateEnum.ListRegistrations && (
@@ -94,31 +94,57 @@ const Registrations = ({ userInfo }: Props) => {
           </button>
         </div>
       )}
+      <hr className="pb-2" />
+
       {pageState.pageState === PageStateEnum.ListRegistrations &&
         registrationState.fetched && (
-          <div>
-            <hr className="pb-2" />
-            <ul className="list-group pb-2">
-              <caption>List of active registrations</caption>
-              {registrationState.value.map((r) => {
-                return (
-                  <li className="pb-2">
-                    <button
-                      className="btn btn-secondary bg-info"
-                      onClick={(e) => {
-                        setSelectedRegistration(r);
-                        setPageState({
-                          ...pageState,
-                          pageState: PageStateEnum.EditRegistration,
-                        });
-                      }}
-                    >
-                      {renderRegistration(r)}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
+          <div className="table-responsive">
+            <table className="table table-bordered table-hover table-striped">
+              <caption>List of registrations</caption>
+              <thead>
+                <tr id="column_name">
+                  {table_columns_names.map((colmunName) => {
+                    return <th scope="col">{colmunName}</th>;
+                  })}
+                </tr>
+              </thead>
+              <tbody>
+                {registrationState.value.map((r) => (
+                  <tr>
+                    <td>
+                      <button
+                        className={"btn btn-outline-secondary"}
+                        data-toggle="modal"
+                        onClick={(e) => {
+                          setSelectedRegistration(r);
+                          setPageState({
+                            ...pageState,
+                            pageState: PageStateEnum.EditRegistration,
+                          });
+                        }}
+                      >
+                        {renderRegistration(r)}
+                      </button>
+                    </td>
+                    <td>{r["course"]["name"]}</td>
+                    <td>
+                      {new Date(
+                        r["registration"]["school_year_start"]
+                      ).getFullYear() +
+                        " - " +
+                        new Date(
+                          r["registration"]["school_year_end"]
+                        ).getFullYear()}
+                    </td>
+                    <td>
+                      {r["registration"]["on_waiting_list"]
+                        ? "On Waiting List"
+                        : "Enrolled"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
             <hr className="pb-2" />
           </div>
         )}

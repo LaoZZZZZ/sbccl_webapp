@@ -17,7 +17,7 @@ class PaymentAdmin(admin.ModelAdmin):
 
 class RegistrationAdmin(admin.ModelAdmin):
     list_display = ('student', 'course', 'school_year_start', 'school_year_end', 'registration_code',
-                    'registration_date', 'expiration_date')
+                    'registration_date', 'expiration_date', 'on_waiting_list')
 
 class DropoutAdmin(admin.ModelAdmin):
     list_display = ('student', 'course', 'school_year_start', 'school_year_end',
