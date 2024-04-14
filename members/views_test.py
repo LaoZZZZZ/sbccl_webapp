@@ -719,6 +719,110 @@ class MemberViewSetTest(APITestCase):
         self.assertTrue(registration.on_waiting_list)
 
 
+    def test_promoted_from_waiting_list(self):
+        # Add class first
+        exist_user = self.create_user('test_name', 'david@gmail.com')
+        self.create_member(exist_user, sign_up_status='V',
+                           verification_code="12345-1231", member_type='B')
+        
+        # make the capacity to 1
+        course_json = {
+            'name': "B1A",
+            'course_description': 'Morning session for grade 1 class.',
+            'course_type': "L",
+            'course_status': 'A',
+            'size_limit': 1,
+            'cost': 500
+        }
+
+        self.client.force_authenticate(user=exist_user)
+        response = self.client.put('/rest_api/members/upsert-course/',
+                                   data=course_json, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        second_course = {
+            'name': "B2A",
+            'course_description': 'Morning session for grade 2nd class.',
+            'course_type': "L",
+            'course_status': 'A',
+            'size_limit': 20,
+            'cost': 500,
+            'classroom': 'N110'
+        }
+        response = self.client.put('/rest_api/members/upsert-course/',
+                                   data=second_course, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        # Add student
+        parent_account = self.create_user('parent', 'parent@gmail.com')
+        self.create_member(parent_account, sign_up_status='V',
+                           verification_code="12345-1231", member_type='P')
+        # Add two students
+        first_student_json = {
+            'first_name': 'david',
+            'last_name': 'chatty',
+            'date_of_birth': '2015-10-01',
+            'gender': 'M'
+        }
+        self.client.force_authenticate(user=parent_account)
+        response = self.client.put('/rest_api/members/add-student/',
+                                   data=first_student_json, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        second_student_json = {
+            'first_name': 'luke',
+            'last_name': 'chatty',
+            'date_of_birth': '2015-10-01',
+            'gender': 'M'
+        }
+        self.client.force_authenticate(user=parent_account)
+        response = self.client.put('/rest_api/members/add-student/',
+                                   data=second_student_json, format='json')
+        first_student = Student.objects.get(first_name="david")
+        persisted_course = Course.objects.get(name="B1A")
+
+        # Add registration
+        second_registration_payload = {
+            'course_id': persisted_course.id,
+            'student': {
+                'first_name': first_student.first_name,
+                'last_name': first_student.last_name,
+                'date_of_birth': first_student.date_of_birth,
+                'gender': 'M'
+            }
+        }
+        response = self.client.put('/rest_api/members/register-course/',
+                                   data=second_registration_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        registration = Registration.objects.get(student=first_student)
+        self.assertFalse(registration.on_waiting_list)
+
+        # Second registration will be added to waiting list as the class can only hold one student.
+        second_student = Student.objects.get(first_name="luke")
+
+        payload = {
+            'course_id': persisted_course.id,
+            'student': {
+                'first_name': second_student.first_name,
+                'last_name': second_student.last_name,
+                'date_of_birth': second_student.date_of_birth,
+                'gender': 'M'
+            }
+        }
+        response = self.client.put('/rest_api/members/register-course/',
+                                   data=payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        waiting_list = Registration.objects.get(student=second_student)
+        self.assertTrue(waiting_list.on_waiting_list)
+
+        # Unregister the first student, the second should be automatically enrolled.
+        unregister_url = '/rest_api/members/{registration_id}/unregister-course/'.format(
+            registration_id = registration.id
+        )
+        response = self.client.put(unregister_url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+        updated_course = Course.objects.get(name='B1A')
+        self.assertEqual(updated_course.students.count(), 1)
+        registration = Registration.objects.get(student=second_student)
+        self.assertFalse(registration.on_waiting_list)
+
     def test_unregistration_succeed(self):
          # Add class first
         exist_user = self.create_user('test_name', 'david@gmail.com')
