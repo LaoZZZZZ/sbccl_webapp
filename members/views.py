@@ -74,6 +74,20 @@ class MemberViewSet(ModelViewSet):
         else:
             return None
 
+    # Retrieve all registration and dropouts for a member
+    def __get_per_parent_registration__(self, matched_members):
+        if matched_members.member_type != 'P':
+            return ([], [])
+        students = models.Student.objects.filter(parent_id=matched_members)
+        registrations = []
+        dropouts = []
+        for s in students:
+            matched_registrations = Registration.objects.filter(student=s)
+            registrations = registrations + [self.__generate_registration_info__(r) for r in matched_registrations]
+            matched_dropouts = Dropout.objects.filter(student=s)
+            dropouts = dropouts + [JSONRenderer().render(d) for d in matched_dropouts]
+        return (registrations, dropouts)
+
     def __send_account_creation_email__(self, new_user, new_member, verification_url):
         user_email_body = "Thanks for registering account in SBCCL school."
         if new_member.member_type != 'P':
@@ -442,14 +456,7 @@ class MemberViewSet(ModelViewSet):
         try:
             user = User.objects.get(username=request.user)
             matched_members = models.Member.objects.get(user_id=user)
-            students = models.Student.objects.filter(parent_id=matched_members)
-            registrations = []
-            dropouts = []
-            for s in students:
-                matched_registrations = Registration.objects.filter(student=s)
-                registrations = registrations + [self.__generate_registration_info__(r) for r in matched_registrations]
-                matched_dropouts = Dropout.objects.filter(student=s)
-                dropouts = dropouts + [JSONRenderer().render(d) for d in matched_dropouts]
+            registrations, dropouts = self.__get_per_parent_registration__(matched_members)
             content = {
                 'registrations': registrations,
                 'dropouts': dropouts
