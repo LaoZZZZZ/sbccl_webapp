@@ -24,7 +24,7 @@ class DropoutAdmin(admin.ModelAdmin):
                     'original_registration_code', 'dropout_date')
 
 class InstructorAssignmentAdmin(admin.ModelAdmin):
-    list_disply = ('school_year_start', 'school_year_end', 'course', 'instructor', 'assigned_date',
+    list_display = ('school_year_start', 'school_year_end', 'course', 'instructor', 'assigned_date',
                    'expiration_date', 'last_update_person', 'last_update_date')
 
 admin.site.register(Member, MemberAdmin)

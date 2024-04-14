@@ -76,6 +76,10 @@ class InstructorAssignment(models.Model):
     # The person who made the update to this assignment.
     last_update_person = models.CharField(max_length=255, null=False)
 
+    def __str__(self):
+        return 'Instructor: {name} Course: {course} School Year: {school_year}'.format(
+            name=self.instructor.user_id, course=self.course.name,
+            school_year=self.school_year_start + '-' + self.school_year_end)
 
 class Course(models.Model):
     name = models.CharField(max_length=255)
@@ -107,6 +111,10 @@ class Course(models.Model):
     # relationship.
     instructor = models.ManyToManyField(Member, through="InstructorAssignment")
 
+    def __str__(self):
+        return 'Course: {name} Course Type: {course_type} Status: {course_status}'.format(
+            name=self.name, course_type=self.course_type, course_status=self.course_status)
+
 # Capture the registration event for each student
 class Registration(models.Model):
     # unique identifier to the registration. This code will be sent to the user too.
@@ -121,6 +129,11 @@ class Registration(models.Model):
     expiration_date = models.DateField(null=True)
     last_update_date = models.DateField(null=True)
     on_waiting_list = models.BooleanField(null=False, default=False)
+    
+    def __str__(self):
+        return 'student: {name} course: {course_name} registration date: {registration_date}'.format(
+            name=self.student.last_name + ' ' + self.student.first_name,
+            course_name=self.course.name, registration_date=self.registration_date)
 
 # Payment history
 class Payment(models.Model):
