@@ -101,10 +101,25 @@ class MemberViewSet(ModelViewSet):
     def __send_unregistration_email__(self, user, dropout):
         pass
 
-    def __update_waiting_list__(self, user, course):
-        pass
+    def __update_waiting_list__(self, course):
+        waiting_list = []
+        enrollment_size = 0
+        registrations = Registration.objects.filter(course=course)
+        for r in registrations:
+            if r.on_waiting_list:
+                waiting_list.append(r)
+            else:
+                enrollment_size += 1
+        sorted(waiting_list, key=lambda registration:registration.registration_date)
+        index = 0
+        while enrollment_size <= course.size_limit and index < len(waiting_list):
+            waiting_list[index].on_waiting_list = False
+            waiting_list[index].save()
+            self.__email_waiting_list_removal__(waiting_list[index])
+            enrollment_size += 1
 
-    def __email_waiting_list_removal__(self, user, registration):
+
+    def __email_waiting_list_removal__(self, registration):
         pass
 
     def get_permissions(self):
@@ -530,7 +545,7 @@ class MemberViewSet(ModelViewSet):
             matched_registration.last_update_date = datetime.datetime.today()
             matched_registration.save()
             user = User.objects.get(username=request.user)
-            self.__update_waiting_list__(user, old_course)
+            self.__update_waiting_list__(old_course)
             return Response(status=status.HTTP_202_ACCEPTED)
         except User.DoesNotExist or Member.DoesNotExist as e:
             return Response(str(e), status=status.HTTP_404_NOT_FOUND)
@@ -569,8 +584,10 @@ class MemberViewSet(ModelViewSet):
                 persisted_payment[0].last_update_person = user.username
                 persisted_payment[0].save()
                 self.__send_unregistration_email__(user, dropout)
+            if not matched_registration.on_waiting_list:
+                self.__update_waiting_list__(matched_registration.course)
+
             matched_registration.delete()
-            self.__update_waiting_list__(user, matched_registration.course)
             return Response(status=status.HTTP_202_ACCEPTED)
         except User.DoesNotExist or Member.DoesNotExist:
             return Response('There is no user registered with - ' + request.user,
@@ -641,7 +658,7 @@ class MemberViewSet(ModelViewSet):
                 matched_course[0].last_update_person = user.username
                 matched_course[0].save()
                 if matched_course[0].size_limit > matched_course[0].students.count():
-                    self.__update_waiting_list__(user, matched_course[0])
+                    self.__update_waiting_list__(matched_course[0])
                 return Response(status=status.HTTP_202_ACCEPTED)
             course = course_serializer.create(course_serializer.validated_data,
                                               username=user.username, member=user.username)
