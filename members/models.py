@@ -60,7 +60,23 @@ class Student(models.Model):
         return 'First name: {first_name}\n Last name: {last_name}'.format(
             first_name=self.first_name, last_name=self.last_name)
 
-# TODO(lu): Add teacher information.
+class InstructorAssignment(models.Model):
+    school_year_start = models.DateField(null=False)
+    school_year_end = models.DateField(null=False)
+    # Course should not be deleted if there is any registration tied to it.
+    course = models.ForeignKey('Course', on_delete=models.PROTECT)
+    # needs to remove the InstructorAssignment before delete the teacher (member).
+    instructor = models.ForeignKey('Member', on_delete=models.PROTECT)
+    # The date that this instructor is assigned to the course
+    assigned_date = models.DateField(null=False)
+    # The date that this assignment expires. Usually this should be the last date of the school year.
+    expiration_date = models.DateField(null=True)
+    # The assignment could be updated if the teacher left or changed to different class.
+    last_update_date = models.DateField(null=True)
+    # The person who made the update to this assignment.
+    last_update_person = models.CharField(max_length=255, null=False)
+
+
 class Course(models.Model):
     name = models.CharField(max_length=255)
     students = models.ManyToManyField(Student, through="Registration")
@@ -86,6 +102,10 @@ class Course(models.Model):
     last_update_person = models.CharField(max_length=255, null=False)
     # classroom assignment to this course.
     classroom = models.CharField(max_length=255, null=True, default="Unassigned")
+    # One course could be taught by more than one teacher (enrichment). A teach could teach more than
+    # one course (Morning and afternoong sessions for the same grade). So this should be a manytomany
+    # relationship.
+    instructor = models.ManyToManyField(Member, through="InstructorAssignment")
 
 # Capture the registration event for each student
 class Registration(models.Model):
