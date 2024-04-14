@@ -74,7 +74,7 @@ class MemberViewSet(ModelViewSet):
         else:
             return None
 
-    # Retrieve all registration and dropouts for a member
+    # Retrieve all registrations and dropouts for a member
     def __get_per_parent_registration__(self, matched_members):
         if matched_members.member_type != 'P':
             return ([], [])
@@ -620,8 +620,15 @@ class MemberViewSet(ModelViewSet):
             for c in courses:
                 if c.course_status == 'U' and not show_inactive_class:
                     continue
+                
                 course_data = CourseSerializer(c).data
                 course_data['enrollment'] = len(c.students.all())
+                instructors = c.instructor
+                if instructors:
+                    teachers = []
+                    for teacher in instructors.all():
+                        teachers.append(teacher.user_id.last_name + ' ' + teacher.user_id.first_name)
+                    course_data['teacher'] = ','.join(teachers)
                 courses_json.append(JSONRenderer().render(course_data))
             content = {
                 'courses': courses_json
