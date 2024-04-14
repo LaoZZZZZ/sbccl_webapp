@@ -77,9 +77,9 @@ class InstructorAssignment(models.Model):
     last_update_person = models.CharField(max_length=255, null=False)
 
     def __str__(self):
-        return 'Instructor: {name} Course: {course} School Year: {school_year}'.format(
+        return 'Instructor: {name} Course: {course} School Year: {school_year_start} - {school_year_end}'.format(
             name=self.instructor.user_id, course=self.course.name,
-            school_year=self.school_year_start + '-' + self.school_year_end)
+            school_year_start=self.school_year_start.year, school_year_end=self.school_year_end.year)
 
 class Course(models.Model):
     name = models.CharField(max_length=255)
