@@ -53,7 +53,7 @@ const CourseSelection = ({
     selected: selectedCourse !== null,
     enrollment: selectedCourse !== null ? selectedCourse.enrollment : 0,
     capacity: selectedCourse !== null ? selectedCourse.size_limit : 0,
-    teacher: "NA",
+    teacher: selectedCourse != null ? selectedCourse.teacher : "NA",
     cost: selectedCourse !== null ? "$" + selectedCourse.cost : "NA",
     type: selectedCourse !== null ? selectedCourse.course_type : "",
     classroom: selectedCourse !== null ? selectedCourse.classroom : "NA",
@@ -79,7 +79,7 @@ const CourseSelection = ({
                 cost: "$" + selected_course.cost,
                 type: selected_course.course_type,
                 classroom: selected_course.classroom,
-                teacher: "NA",
+                teacher: selected_course.teacher,
               });
             } else {
               setClassInfo({
