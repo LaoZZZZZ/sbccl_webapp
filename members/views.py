@@ -47,7 +47,8 @@ class MemberViewSet(ModelViewSet):
         return json.dumps({
             'student': StudentSerializer(registration.student).data,
             'registration': RegistrationSerializer(registration).data,
-            'course': CourseSerializer(registration.course).data})
+            'course': CourseSerializer(registration.course).data,
+            'teacher': [UserSerializer(user.user_id).data for user in registration.course.instructor.all()]})
 
     def __calculate_balance__(self, member):
         students = Student.objects.filter(parent_id=member)
