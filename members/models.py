@@ -172,3 +172,7 @@ class Dropout(models.Model):
     original_registration_code = models.CharField(max_length=225)
     dropout_date = models.DateField(null=False)
     user = models.ForeignKey('members.Member', on_delete=models.CASCADE, verbose_name='Dropout requester')
+
+
+class Calendar(models.Model):
+    pass
