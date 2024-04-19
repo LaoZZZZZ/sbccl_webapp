@@ -43,11 +43,17 @@ class MemberViewSet(ModelViewSet):
                                                     amount=self.__calculate_balance__(member))
         }
 
+    def __get_teacher_infomation__(self, teacher_account):
+        info = UserSerializer(teacher_account.user_id).data
+        del info['password']
+        return info
+
     def __generate_registration_info__(self, registration):
         return json.dumps({
             'student': StudentSerializer(registration.student).data,
             'registration': RegistrationSerializer(registration).data,
-            'course': CourseSerializer(registration.course).data})
+            'course': CourseSerializer(registration.course).data,
+            'teacher': [self.__get_teacher_infomation__(teacher) for teacher in registration.course.instructor.all()]})
 
     def __calculate_balance__(self, member):
         students = Student.objects.filter(parent_id=member)
