@@ -5,6 +5,7 @@ import fetchCourses from "./FetchCourses.tsx";
 import UserInfo from "./UserInfo.tsx";
 import fetchRegistrations from "../common/FetchRegistrations.tsx";
 import EditableRegistration from "./EditableRegistration.tsx";
+import TeacherDetailPage from "./TeacherDetailPage.tsx";
 
 interface Props {
   userInfo: UserInfo;
@@ -55,7 +56,10 @@ const Registrations = ({ userInfo }: Props) => {
   });
 
   const [selectedRegistration, setSelectedRegistration] = useState({});
-  const [selectedTeacher, setSelectedTeacher] = useState({});
+  const [selectedTeacher, setSelectedTeacher] = useState({
+    class_name: "",
+    teachers_info: [],
+  });
 
   useEffect(() => {
     if (!studentState.fetched) {
@@ -77,7 +81,7 @@ const Registrations = ({ userInfo }: Props) => {
   }, [userInfo, studentState, courseState, registrationState, pageState]);
 
   const table_columns_names = [
-    "Name",
+    "Student",
     "Course",
     "School Year",
     "Status",
@@ -154,16 +158,17 @@ const Registrations = ({ userInfo }: Props) => {
                         className={"btn btn-outline-secondary"}
                         data-toggle="modal"
                         onClick={(e) => {
-                          console.log(r["teacher"]);
-
-                          setSelectedTeacher(r["teacher"]);
+                          setSelectedTeacher({
+                            class_name: r["course"]["name"],
+                            teachers_info: r["teacher"],
+                          });
                           setPageState({
                             ...pageState,
                             pageState: PageStateEnum.TeacherDetails,
                           });
                         }}
                       >
-                        {r["teacher"].last_name}
+                        Teacher information
                       </button>
                     </td>
                   </tr>
@@ -225,7 +230,20 @@ const Registrations = ({ userInfo }: Props) => {
       )}
       {pageState.pageState === PageStateEnum.TeacherDetails && (
         <div>
-          <span>{selectedTeacher["last_name"]}</span>
+          <TeacherDetailPage
+            class_name={selectedTeacher.class_name}
+            teachers_info={selectedTeacher.teachers_info}
+            exitCallBack={() => {
+              setRegistrationState({
+                fetched: true,
+                value: registrationState.value,
+              });
+              return setPageState({
+                ...pageState,
+                pageState: PageStateEnum.ListRegistrations,
+              });
+            }}
+          />
         </div>
       )}
     </>
