@@ -215,7 +215,8 @@ class MemberViewSet(ModelViewSet):
         try:
             matched_member = models.Member.objects.get(user_id=request.user)
             if matched_member.sign_up_status == 'S':
-                return Response(status=status.HTTP_401_UNAUTHORIZED)
+                return Response('{username} needs to be verified before login!'.format(username=matched_member.user_id.username),
+                                 status=status.HTTP_401_UNAUTHORIZED)
             login(request, request.user)
             user = User.objects.get(username=request.user)
             content = {

@@ -63,8 +63,7 @@ const LoginPage = ({ onLoginSuccess, onSignUp, onResetPassword }: Props) => {
                 })
                 .catch(function (error) {
                   if (error.response.data) {
-                    console.log(error.response.data);
-                    setLoginErrorMsg(error.response.data.detail);
+                    setLoginErrorMsg(error.response.data);
                   }
                   setLoginFailed(true);
                 });
