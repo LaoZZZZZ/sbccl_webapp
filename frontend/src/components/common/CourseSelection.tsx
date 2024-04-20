@@ -9,6 +9,8 @@ export interface ClassInformation {
   cost: string;
   type: string;
   classroom: string;
+  course_start: string;
+  course_end: string;
 }
 
 interface Props {
@@ -57,6 +59,9 @@ const CourseSelection = ({
     cost: selectedCourse !== null ? "$" + selectedCourse.cost : "NA",
     type: selectedCourse !== null ? selectedCourse.course_type : "",
     classroom: selectedCourse !== null ? selectedCourse.classroom : "NA",
+    course_start:
+      selectedCourse !== null ? selectedCourse.course_start_time : "NA",
+    course_end: selectedCourse !== null ? selectedCourse.course_end_time : "NA",
   });
   return (
     <>
@@ -80,6 +85,8 @@ const CourseSelection = ({
                 type: selected_course.course_type,
                 classroom: selected_course.classroom,
                 teacher: selected_course.teacher,
+                course_start: selected_course.course_start_time,
+                course_end: selected_course.course_end_time,
               });
             } else {
               setClassInfo({
@@ -90,6 +97,8 @@ const CourseSelection = ({
                 cost: "$0",
                 classroom: "NA",
                 teacher: "NA",
+                course_start: "NA",
+                course_end: "NA",
               });
             }
           }}
@@ -128,6 +137,10 @@ const CourseSelection = ({
           <span className="input-group-text">Classroom</span>
           <span className="input-group-text bg-white">
             {classInfo.classroom}
+          </span>
+          <span className="input-group-text">Time</span>
+          <span className="input-group-text bg-white">
+            {classInfo.course_start + " - " + classInfo.course_end}
           </span>
         </div>
       )}
