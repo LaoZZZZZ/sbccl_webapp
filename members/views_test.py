@@ -337,7 +337,9 @@ class MemberViewSetTest(APITestCase):
             'course_status': 'A',
             'size_limit': 20,
             'cost': 500,
-            'classroom': 'N402'
+            'classroom': 'N402',
+            'course_start_time': '10:00:00',
+            'course_end_time': '11:50:00'
         }
 
         self.client.force_authenticate(user=exist_user)
@@ -356,6 +358,8 @@ class MemberViewSetTest(APITestCase):
         self.assertIsNotNone(persited_course.creation_date)
         self.assertIsNotNone(persited_course.last_update_time)
         self.assertEqual(persited_course.last_update_person, exist_user.username)
+        self.assertEqual(persited_course.course_start_time, datetime.time(10, 0))
+        self.assertEqual(persited_course.course_end_time, datetime.time(11, 50))
 
         updated_course = {
             'name': "B1A",
@@ -394,7 +398,9 @@ class MemberViewSetTest(APITestCase):
             'course_status': 'A',
             'size_limit': 20,
             'cost': 500,
-            'classroom': 'N402'
+            'classroom': 'N402',
+            'course_start_time': '10:00:00',
+            'course_end_time': '11:50:00'
         }
 
         self.client.force_authenticate(user=exist_user)
@@ -409,6 +415,8 @@ class MemberViewSetTest(APITestCase):
         obtained_course = json.loads(response.data['courses'][0])
         self.assertEqual(obtained_course['name'], 'B1A')
         self.assertTrue('id' in obtained_course)
+        self.assertEqual(obtained_course['course_start_time'], '10:00:00')
+        self.assertEqual(obtained_course['course_end_time'], '11:50:00')
 
     def test_add_registration_course_succeed(self):
         # Add class first
@@ -423,7 +431,9 @@ class MemberViewSetTest(APITestCase):
             'course_status': 'A',
             'size_limit': 20,
             'cost': 500,
-            'classroom': 'N101'
+            'classroom': 'N101',
+            'course_start_time': '10:00:00',
+            'course_end_time': '11:50:00'
         }
 
         self.client.force_authenticate(user=exist_user)
@@ -561,13 +571,16 @@ class MemberViewSetTest(APITestCase):
             'course_status': 'A',
             'size_limit': 20,
             'cost': 500,
-            'classroom': 'N442'
+            'classroom': 'N442',
+            'course_start_time': '10:00:00',
+            'course_end_time': '11:50:00'
         }
 
         self.client.force_authenticate(user=exist_user)
         response = self.client.put('/rest_api/members/upsert-course/',
                                    data=course_json, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        # Second course has overlapped time window.
         second_course = {
             'name': "B2A",
             'course_description': 'Morning session for grade 2nd class.',
@@ -575,7 +588,9 @@ class MemberViewSetTest(APITestCase):
             'course_status': 'A',
             'size_limit': 20,
             'cost': 500,
-            'classroom': 'N118'
+            'classroom': 'N118',
+            'course_start_time': '11:00:00',
+            'course_end_time': '13:50:00'
         }
         response = self.client.put('/rest_api/members/upsert-course/',
                                    data=second_course, format='json')
@@ -638,7 +653,9 @@ class MemberViewSetTest(APITestCase):
             'course_type': "L",
             'course_status': 'A',
             'size_limit': 1,
-            'cost': 500
+            'cost': 500,
+            'course_start_time': '10:00:00',
+            'course_end_time': '11:50:00'
         }
 
         self.client.force_authenticate(user=exist_user)
@@ -732,7 +749,9 @@ class MemberViewSetTest(APITestCase):
             'course_type': "L",
             'course_status': 'A',
             'size_limit': 1,
-            'cost': 500
+            'cost': 500,
+            'course_start_time': '10:00:00',
+            'course_end_time': '11:50:00'
         }
 
         self.client.force_authenticate(user=exist_user)
@@ -746,7 +765,9 @@ class MemberViewSetTest(APITestCase):
             'course_status': 'A',
             'size_limit': 20,
             'cost': 500,
-            'classroom': 'N110'
+            'classroom': 'N110',
+            'course_start_time': '10:00:00',
+            'course_end_time': '11:50:00'
         }
         response = self.client.put('/rest_api/members/upsert-course/',
                                    data=second_course, format='json')

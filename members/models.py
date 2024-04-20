@@ -110,6 +110,9 @@ class Course(models.Model):
     # one course (Morning and afternoong sessions for the same grade). So this should be a manytomany
     # relationship.
     instructor = models.ManyToManyField(Member, through="InstructorAssignment")
+    # When the course starts and ends
+    course_start_time = models.TimeField(null=True)
+    course_end_time = models.TimeField(null=True)
 
     def __str__(self):
         return 'Course: {name} Course Type: {course_type} Status: {course_status}'.format(

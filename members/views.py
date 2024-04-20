@@ -114,6 +114,10 @@ class MemberViewSet(ModelViewSet):
             subject="Registration confirmation",
             message=user_email_body)
 
+    # These two course time window has overlap
+    def __has_conflict__(self, course_a, course_b):
+        return ((course_a.course_start_time >= course_b.course_start_time and course_a.course_start_time <= course_b.course_end_time)
+            or (course_a.course_end_time >= course_b.course_start_time and course_a.course_end_time <= course_b.course_end_time))
 
     def __send_registration_email__(self, user, registration):
         pass
@@ -497,7 +501,7 @@ class MemberViewSet(ModelViewSet):
                                                     parent_id=matched_members)
             matched_registration = Registration.objects.filter(student=persisted_student)
             for m in matched_registration:
-                if m.course.course_type == persisted_course.course_type and m.course.course_status == 'A':
+                if self.__has_conflict__(m.course, persisted_course) and m.course.course_status == 'A':
                     return Response("The student already registered a same type of course!",
                                     status=status.HTTP_409_CONFLICT)
             registration = Registration()
