@@ -115,11 +115,11 @@ const CourseSelection = ({
       </div>
       {classInfo.selected && (
         <div className="input-group pb-2">
-          <span className="input-group-text">Capacity:</span>
+          <span className="input-group-text bg-info">Capacity:</span>
           <span className="input-group-text bg-white">
             {classInfo.capacity}
           </span>
-          <span className="input-group-text">Enrollment:</span>
+          <span className="input-group-text bg-info">Enrollment:</span>
           <span
             className={
               "input-group-text " +
@@ -130,15 +130,15 @@ const CourseSelection = ({
           >
             {classInfo.enrollment}
           </span>
-          <span className="input-group-text">Cost</span>
+          <span className="input-group-text bg-info">Cost</span>
           <span className="input-group-text bg-white">{classInfo.cost}</span>
-          <span className="input-group-text">Teacher</span>
+          <span className="input-group-text bg-info">Teacher</span>
           <span className="input-group-text bg-white">{classInfo.teacher}</span>
-          <span className="input-group-text">Classroom</span>
+          <span className="input-group-text bg-info">Classroom</span>
           <span className="input-group-text bg-white">
             {classInfo.classroom}
           </span>
-          <span className="input-group-text">Time</span>
+          <span className="input-group-text bg-info">Time</span>
           <span className="input-group-text bg-white">
             {classInfo.course_start + " - " + classInfo.course_end}
           </span>
