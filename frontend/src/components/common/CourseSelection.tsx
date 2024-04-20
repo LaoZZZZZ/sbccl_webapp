@@ -138,7 +138,7 @@ const CourseSelection = ({
           <span className="input-group-text bg-white">
             {classInfo.classroom}
           </span>
-          <span className="input-group-text">Time</span>
+          <span className="input-group-text bg-info">Time</span>
           <span className="input-group-text bg-white">
             {classInfo.course_start + " - " + classInfo.course_end}
           </span>
