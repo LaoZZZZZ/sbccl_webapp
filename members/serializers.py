@@ -74,7 +74,8 @@ class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = ('id', 'name', 'course_description', 'course_type',
-                  'course_status', 'size_limit', 'cost', 'classroom')
+                  'course_status', 'size_limit', 'cost', 'classroom',
+                  'course_start_time', 'course_end_time')
     
     def validate_course_type(self, course_type):
         if course_type not in ['L', 'E']:
