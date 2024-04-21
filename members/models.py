@@ -173,6 +173,25 @@ class Dropout(models.Model):
     dropout_date = models.DateField(null=False)
     user = models.ForeignKey('members.Member', on_delete=models.CASCADE, verbose_name='Dropout requester')
 
+# Coupon will be applied to registration fee. For each purchase, ONLY one coupon can be applied.
+class Coupon(models.Model):
+    REASON = [
+        ('EB', 'EARLY_BIRD'),
+        ('BM', 'BOARD_MEMBER')
+    ]
+    reason = models.CharField(max_length=2, choices=REASON)
 
-class Calendar(models.Model):
-    pass
+    TYPE = [
+        ('P', 'PERCENTAGE'),
+        ('A', 'AMOUNT')
+    ]
+    type = models.CharField(max_length=1, choices=TYPE)
+    # Only valid if the type=A
+    dolloar_amount = models.FloatField(null=True)
+
+    # Only valid if the type=P
+    percentage = models.FloatField(null=True)
+    expiration_date = models.DateField(null=False)
+    creation_date = models.DateField(null=False)
+    creator = models.CharField(null=False)
+
