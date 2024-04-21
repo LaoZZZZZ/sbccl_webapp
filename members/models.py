@@ -195,3 +195,15 @@ class Coupon(models.Model):
     creation_date = models.DateField(null=False)
     creator = models.CharField(null=False)
 
+    def __str__(self):
+        reason = 'Early Bird' if self.reason == 'EB' else 'Board member'
+        if self.type == 'P':
+            return 'Reason: {reason}, Percentage: {percentage}%, Expiration Date: {expiration_date}'.format(
+            reason=reason, percentage=self.percentage, expiration_date=self.expiration_date)
+        elif self.type == "A":
+            return 'Reason: {reason}, Amount: ${amount}, Expiration Date: {expiration_date}'.format(
+            reason=reason, amount=self.dolloar_amount, expiration_date=self.expiration_date)
+        return 'Reason: {reason} Expiration Date: {expiration_date}'.format(
+            reason=reason, expiration_date=self.expiration_date)
+
+
