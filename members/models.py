@@ -196,7 +196,7 @@ class Coupon(models.Model):
     creator = models.CharField(null=False)
 
     # unique code that identify this coupon.
-    code = models.CharField(max_length=255)
+    code = models.CharField(max_length=255, default='CCL_EARLY_BIRD')
 
     def __str__(self):
         reason = 'Early Bird' if self.reason == 'EB' else 'Board member'

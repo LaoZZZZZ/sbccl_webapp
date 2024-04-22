@@ -1,0 +1,2 @@
+class CouponProcessor(object):
+    pass
