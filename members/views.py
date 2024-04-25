@@ -161,6 +161,28 @@ class MemberViewSet(ModelViewSet):
             message=user_email_body)
 
 
+
+    def __send_account_creation_email__(self, new_user, new_member, verification_url):
+        user_email_body = "Thanks for registering account in SBCCL school."
+        if new_member.member_type != 'P':
+            admin_msg = "{email} register a {type} account. Please review this registration!".format(email=new_user.email, type=new_member.getMemberType())
+            admin_email_body = admin_msg + "Please click {link} to verify this account.".format(link=verification_url)
+            # Email to admin to verify this account.
+            send_mail(
+                subject="Account registration request",
+                message=admin_email_body,
+                from_email="no-reply@sbcclny.com",
+                # TODO(lu): Remove luzhao@sbcclny.com once the functionality is stable.
+                recipient_list=['ccl_admin@sbcclny.com', 'luzhao@sbcclny.com'])
+            # Email to user for confirmation.
+            user_email_body = user_email_body + """ CCL account admin will review your registration soon. If you have not received any update within a week, please inquery the state by sending email to ccl_board@sbcclny.com."""
+        else:
+            user_email_body = user_email_body + "Please click {link} to verify this account.".format(link=verification_url)
+        new_user.email_user(
+            subject="Registration confirmation",
+            message=user_email_body)
+
+
     # These two course time window has overlap
     def __has_conflict__(self, course_a, course_b):
         return ((course_a.course_start_time >= course_b.course_start_time and course_a.course_start_time <= course_b.course_end_time)
@@ -263,7 +285,7 @@ class MemberViewSet(ModelViewSet):
             if 'phone_number' in request.data:
                 new_member.phone_number = request.data['phone_number']
             verification_url = os.path.join(os.environ["FRONTEND_URL"], "verify-user", registration_code)
-            self.__send_account_creation_html_email__(new_user, new_member, verification_url)
+            self.__send_account_creation_email__(new_user, new_member, verification_url)
             new_member.save()
 
             content = {
