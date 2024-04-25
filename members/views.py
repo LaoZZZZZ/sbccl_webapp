@@ -5,6 +5,9 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
+from django.template import Context
+from django.template.loader import get_template
+
 import pytz
 from rest_framework.viewsets import ModelViewSet
 from .serializers import StudentSerializer, UserSerializer, MemberSerializer, CourseSerializer, RegistrationSerializer
@@ -94,6 +97,15 @@ class MemberViewSet(ModelViewSet):
             dropouts = dropouts + [JSONRenderer().render(d) for d in matched_dropouts]
         return (registrations, dropouts)
 
+    def __send_account_creation_html_email__(self, new_user, new_member, verification_url):
+        """
+        Send account creation confirmation email.
+        """
+        if new_member.member_type == 'P':
+            message = get_template("templates/account_registration_email.html").render(
+                Context({'verification_link': verification_url}))
+            new_user.email_user(subject="Registration confirmation", message=message)
+
     def __send_account_creation_email__(self, new_user, new_member, verification_url):
         user_email_body = "Thanks for registering account in SBCCL school."
         if new_member.member_type != 'P':
@@ -120,7 +132,33 @@ class MemberViewSet(ModelViewSet):
             or (course_a.course_end_time >= course_b.course_start_time and course_a.course_end_time <= course_b.course_end_time))
 
     def __send_registration_email__(self, user, registration):
-        pass
+        user_email_body = """
+          This email confirms your class registration in SBCCL school.
+           
+            Student name: {name}
+            Class: {class_name}
+            Registration code: {code}
+
+          You can find the registration details at {link}.
+        """.format(name=registration.student.last_name + ' ' + registration.student.first_name,
+                   class_name=registration.course.name,
+                   code=registration.registration_code,
+                   link=os.environ["FRONTEND_URL"])
+        
+        if registration.on_waiting_list:
+            user_email_body += """
+        Note: The class is already full. You are put on the waiting list. If there is a spot available, you
+        will be automatically enrolled and an email notification will be sent to you.
+            """
+        else:
+            user_email_body += """
+          To officially enroll to this class, please send payment to xxxx@gmail.com. You can find the balance in your account. Remember to include the registration code to the memo of the payment. 
+            """
+        user.email_user(
+            subject="Class registration confirmation",
+            message=user_email_body)
+
+
 
     def __send_unregistration_email__(self, user, dropout):
         pass
@@ -191,6 +229,7 @@ class MemberViewSet(ModelViewSet):
                 new_member.phone_number = request.data['phone_number']
             verification_url = os.path.join(os.environ["FRONTEND_URL"], "verify-user", registration_code)
             self.__send_account_creation_email__(new_user, new_member, verification_url)
+            self.__send_account_creation_html_email__(new_user, new_member, verification_url)
             new_member.save()
 
             content = {
