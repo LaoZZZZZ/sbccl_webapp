@@ -171,6 +171,16 @@ class MemberViewSet(ModelViewSet):
             all_students.append({'students': students, 'course': course})
         return all_students
 
+    
+    def __send_account_creation_html_email__(self, new_user, new_member, verification_url):
+        """
+        Send account creation confirmation email.
+        """
+        if new_member.member_type == 'P':
+            message = get_template("templates/account_registration_email.html").render(
+                Context({'verification_link': verification_url}))
+            new_user.email_user(subject="Registration confirmation", message=message)
+
     def __send_account_creation_email__(self, new_user, new_member, verification_url):
         user_email_body = "Thanks for registering account in SBCCL school."
         if new_member.member_type != 'P':
@@ -293,7 +303,7 @@ class MemberViewSet(ModelViewSet):
             if 'phone_number' in request.data:
                 new_member.phone_number = request.data['phone_number']
             verification_url = os.path.join(os.environ["FRONTEND_URL"], "verify-user", registration_code)
-            self.__send_account_creation_html_email__(new_user, new_member, verification_url)
+            self.__send_account_creation_email__(new_user, new_member, verification_url)
             new_member.save()
 
             content = {
