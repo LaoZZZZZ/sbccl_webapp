@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404
 import pytz
 from rest_framework.viewsets import ModelViewSet
 from .serializers import StudentSerializer, UserSerializer, MemberSerializer, CourseSerializer, RegistrationSerializer
-from .models import Course, Member, Student, Registration, Dropout, Payment
+from .models import Course, Member, Student, Registration, Dropout, Payment, InstructorAssignment
 from rest_framework.decorators import action
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.renderers import JSONRenderer
@@ -93,6 +93,37 @@ class MemberViewSet(ModelViewSet):
             matched_dropouts = Dropout.objects.filter(student=s)
             dropouts = dropouts + [JSONRenderer().render(d) for d in matched_dropouts]
         return (registrations, dropouts)
+
+    def __get_students_per_teacher__(self, matched_member):
+        """
+          Find all students that are taught by this teacher in current school year.
+        """
+        if matched_member.member_type != 'T':
+            return []
+        
+        assignments = InstructorAssignment.objects.filter(instructor=matched_member)
+        all_students = []
+        for assignment in assignments:
+            if assignment.expiration_date < datetime.datetime.today:
+                continue
+            # Skip inactive course
+            if assignment.course.course_status != 'A':
+                continue
+            students = []
+            course = JSONRenderer.render(assignment.course)
+            for registration in Registration.objects.filter(course=assignment.course):
+                if registration.expiration_date < datetime.datetime.today:
+                    student = JSONRenderer.render(registration.student)
+                    parent = registration.student.parent_id.user_id
+                    student['contact'] = JSONRenderer.render({
+                        'parent': parent.user_id.last_name + ' ' + parent.user_id.first_name,
+                        'email': parent.user_id.email,
+                        'phone': parent.phone_number
+                    })
+                    students.append(student)
+            all_students.append({'students': students, 'course': course})
+        return all_students
+    
 
     def __send_account_creation_email__(self, new_user, new_member, verification_url):
         user_email_body = "Thanks for registering account in SBCCL school."
@@ -447,8 +478,13 @@ class MemberViewSet(ModelViewSet):
     def fetch_students(self, request, pk=None):
         try:
             user = User.objects.get(username=request.user)
-            matched_members = models.Member.objects.get(user_id=user)
-            students = models.Student.objects.filter(parent_id=matched_members)
+            matched_member = models.Member.objects.get(user_id=user)
+            students = []
+            # Fetch relevant students for different type of member
+            if matched_member.member_type == 'P':
+                students = models.Student.objects.filter(parent_id=matched_member)
+            elif matched_member.member_type == 'T':
+                students = self.__get_students_per_teacher__(matched_member)
             content = {
                 'students': [JSONRenderer().render(StudentSerializer(s).data) for s in students]
             }

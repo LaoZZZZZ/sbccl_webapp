@@ -44,7 +44,7 @@ class MemberViewSetTest(APITestCase):
     def test_create_teacher_succeed(self):
         user_json = {'username': 'test_name', 'email': 'test4@gmail.com',
                       'first_name': 'Sandy', 'last_name': 'Zhao', 'password': 'Helloworld1',
-                      'member_type': 'teacheR'}
+                      'member_type': 'teacher'}
         response = self.client.post('/rest_api/members/', data=user_json, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Member.objects.count(), 1)
@@ -53,6 +53,13 @@ class MemberViewSetTest(APITestCase):
         created_member = Member.objects.get(user_id=user)
         self.assertEqual(created_member.sign_up_status, 'S')
         self.assertEqual(created_member.member_type, 'T')
+
+        # Fetch the students
+        self.client.force_authenticate(user=user)
+
+        response = self.client.get('/rest_api/members/fetch-students/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
 
     def test_create_parent_succeed(self):
         user_json = {'username': 'test_name', 'email': 'test4@gmail.com',
@@ -250,6 +257,10 @@ class MemberViewSetTest(APITestCase):
         response = self.client.put('/rest_api/members/add-student/',
                                    data=student_json, format='json')
         self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+
+        # Fetch the students
+        response = self.client.get('/rest_api/members/fetch-students/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
     def test_add_invalid_student_fail(self):
@@ -1024,3 +1035,7 @@ class MemberViewSetTest(APITestCase):
         updated_course = Course.objects.get(name='B1A')
         students = updated_course.students.filter(first_name=student.first_name)
         self.assertEqual(len(students), 0)
+
+
+    def test_fetch_students_for_teacher(self):
+        pass
