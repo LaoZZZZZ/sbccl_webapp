@@ -7,11 +7,6 @@ from django.core.mail import send_mail
 from django.template import Context
 from django.template import loader
 from django.utils.html import strip_tags
-<<<<<<< HEAD
-
-=======
->>>>>>> dc6e972 (Rework the account registration confirmation email.)
-
 import pytz
 from rest_framework.viewsets import ModelViewSet
 from .serializers import StudentSerializer, UserSerializer, MemberSerializer, CourseSerializer, RegistrationSerializer
@@ -198,7 +193,6 @@ class MemberViewSet(ModelViewSet):
         user.email_user(
             subject="Class registration confirmation",
             message=user_email_body)
-
 
 
     def __send_unregistration_email__(self, user, dropout):
@@ -527,6 +521,7 @@ class MemberViewSet(ModelViewSet):
         try:
             user = User.objects.get(username=request.user)
             matched_member = models.Member.objects.get(user_id=user)
+            students = []
             students = []
             # Fetch relevant students for different type of member
             if matched_member.member_type == 'P':
