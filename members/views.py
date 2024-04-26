@@ -97,6 +97,7 @@ class MemberViewSet(ModelViewSet):
             dropouts = dropouts + [JSONRenderer().render(d) for d in matched_dropouts]
         return (registrations, dropouts)
 
+<<<<<<< HEAD
     def __send_account_creation_html_email__(self, new_user, new_member, verification_url):
         """
         Send account creation confirmation email.
@@ -140,6 +141,8 @@ class MemberViewSet(ModelViewSet):
         return all_students
 
 
+=======
+>>>>>>> 854ff2b (Return all students taught by a teacher.)
     def __get_students_per_teacher__(self, matched_member):
         """
           Find all students that are taught by this teacher in current school year.
@@ -555,6 +558,7 @@ class MemberViewSet(ModelViewSet):
             # Fetch relevant students for different type of member
             if matched_member.member_type == 'P':
                 students = models.Student.objects.filter(parent_id=matched_member)
+<<<<<<< HEAD
                 content = {
                     'students': [JSONRenderer().render(StudentSerializer(s).data) for s in students]
                 }
@@ -563,6 +567,13 @@ class MemberViewSet(ModelViewSet):
                 content = {
                     'data': students
                 }
+=======
+            elif matched_member.member_type == 'T':
+                students = self.__get_students_per_teacher__(matched_member)
+            content = {
+                'students': [JSONRenderer().render(StudentSerializer(s).data) for s in students]
+            }
+>>>>>>> 854ff2b (Return all students taught by a teacher.)
             return Response(data=content, status=status.HTTP_200_OK)
         except User.DoesNotExist or Member.DoesNotExist:
             return Response('There is no user registered with - ' + request.user,
