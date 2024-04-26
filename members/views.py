@@ -141,6 +141,37 @@ class MemberViewSet(ModelViewSet):
         return all_students
 
 
+    def __get_students_per_teacher__(self, matched_member):
+        """
+          Find all students that are taught by this teacher in current school year.
+        """
+        if matched_member.member_type != 'T':
+            return []
+        
+        assignments = InstructorAssignment.objects.filter(instructor=matched_member)
+        all_students = []
+        for assignment in assignments:
+            if assignment.expiration_date < datetime.datetime.today:
+                continue
+            # Skip inactive course
+            if assignment.course.course_status != 'A':
+                continue
+            students = []
+            course = JSONRenderer.render(assignment.course)
+            for registration in Registration.objects.filter(course=assignment.course):
+                if registration.expiration_date < datetime.datetime.today:
+                    student = JSONRenderer.render(registration.student)
+                    parent = registration.student.parent_id.user_id
+                    student['contact'] = JSONRenderer.render({
+                        'parent': parent.user_id.last_name + ' ' + parent.user_id.first_name,
+                        'email': parent.user_id.email,
+                        'phone': parent.phone_number
+                    })
+                    students.append(student)
+            all_students.append({'students': students, 'course': course})
+        return all_students
+    
+
     def __send_account_creation_email__(self, new_user, new_member, verification_url):
         user_email_body = "Thanks for registering account in SBCCL school."
         if new_member.member_type != 'P':

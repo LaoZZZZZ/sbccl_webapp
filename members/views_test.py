@@ -1132,4 +1132,3 @@ class MemberViewSetTest(APITestCase):
         self.assertEqual(len(response.data['data']), 1)
         self.assertTrue('students' in response.data['data'][0])
         self.assertTrue('course' in response.data['data'][0])
-
