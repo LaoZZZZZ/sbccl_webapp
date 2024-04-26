@@ -1134,3 +1134,6 @@ class MemberViewSetTest(APITestCase):
         self.assertTrue('course' in response.data['data'][0])
 
         
+
+    def test_fetch_students_for_teacher(self):
+        pass
