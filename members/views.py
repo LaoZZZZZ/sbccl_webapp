@@ -104,23 +104,23 @@ class MemberViewSet(ModelViewSet):
         assignments = InstructorAssignment.objects.filter(instructor=matched_member)
         all_students = []
         for assignment in assignments:
-            if assignment.expiration_date < datetime.datetime.today:
+            if assignment.expiration_date < datetime.date.today():
                 continue
             # Skip inactive course
             if assignment.course.course_status != 'A':
                 continue
             students = []
-            course = JSONRenderer.render(assignment.course)
+            course = JSONRenderer().render(CourseSerializer(assignment.course).data)
             for registration in Registration.objects.filter(course=assignment.course):
-                if registration.expiration_date < datetime.datetime.today:
-                    student = JSONRenderer.render(registration.student)
+                if not registration.expiration_date or registration.expiration_date < datetime.date.today():
+                    student = StudentSerializer(registration.student).data
                     parent = registration.student.parent_id.user_id
-                    student['contact'] = JSONRenderer.render({
-                        'parent': parent.user_id.last_name + ' ' + parent.user_id.first_name,
-                        'email': parent.user_id.email,
-                        'phone': parent.phone_number
+                    student['contact'] = JSONRenderer().render({
+                        'parent': parent.last_name + ' ' + parent.first_name,
+                        'email': parent.email,
+                        'phone': registration.student.parent_id.phone_number
                     })
-                    students.append(student)
+                    students.append(JSONRenderer().render(student))
             all_students.append({'students': students, 'course': course})
         return all_students
     
@@ -483,11 +483,14 @@ class MemberViewSet(ModelViewSet):
             # Fetch relevant students for different type of member
             if matched_member.member_type == 'P':
                 students = models.Student.objects.filter(parent_id=matched_member)
+                content = {
+                    'students': [JSONRenderer().render(StudentSerializer(s).data) for s in students]
+                }
             elif matched_member.member_type == 'T':
                 students = self.__get_students_per_teacher__(matched_member)
-            content = {
-                'students': [JSONRenderer().render(StudentSerializer(s).data) for s in students]
-            }
+                content = {
+                    'data': students
+                }
             return Response(data=content, status=status.HTTP_200_OK)
         except User.DoesNotExist or Member.DoesNotExist:
             return Response('There is no user registered with - ' + request.user,
