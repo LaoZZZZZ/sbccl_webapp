@@ -596,6 +596,7 @@ class MemberViewSet(ModelViewSet):
             registration.school_year_end = registration.school_year_start.replace(year=datetime.datetime.today().year + 1,
                                                                                   month=7)
             registration.registration_date = datetime.datetime.today()
+            registration.expiration_date = registration.school_year_end
             registration.last_update_date = registration.registration_date
             registration.save()
             self.__send_registration_email__(user, registration)
