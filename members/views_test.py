@@ -493,6 +493,7 @@ class MemberViewSetTest(APITestCase):
         self.assertIsNotNone(registration.school_year_start)
         self.assertIsNotNone(registration.school_year_end)
         self.assertEqual(registration.registration_date.day, datetime.datetime.today().day)
+        self.assertEqual(registration.expiration_date, registration.school_year_end)
 
         # make sure the student can also be searched 
         updated_course = Course.objects.get(name='B1A')
