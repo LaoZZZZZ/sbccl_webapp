@@ -53,7 +53,7 @@ class MemberViewSet(ModelViewSet):
             'student': StudentSerializer(registration.student).data,
             'registration': RegistrationSerializer(registration).data,
             'course': CourseSerializer(registration.course).data,
-            'teacher': [self.__get_teacher_infomation__(teacher) for teacher in registration.course.instructor.all()]})
+            'teacher': [self.__get_teacher_infomation__(teacher) for teacher in registration.course.instructor.all() if teacher.member_type == 'T']})
 
     def __calculate_balance__(self, member):
         students = Student.objects.filter(parent_id=member)
