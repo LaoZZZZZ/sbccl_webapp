@@ -1,10 +1,11 @@
 
 from rest_framework.test import APITestCase, APIRequestFactory, APIClient
 from rest_framework import status
-from .models import Member, Student, Course, Registration
+from .models import Member, Student, Course, Registration, InstructorAssignment
 from django.contrib.auth.models import User
 from rest_framework.test import force_authenticate
 import datetime
+import json
 
 class MemberViewSetTest(APITestCase):
     def create_user(self, user_name, email):
@@ -44,7 +45,7 @@ class MemberViewSetTest(APITestCase):
     def test_create_teacher_succeed(self):
         user_json = {'username': 'test_name', 'email': 'test4@gmail.com',
                       'first_name': 'Sandy', 'last_name': 'Zhao', 'password': 'Helloworld1',
-                      'member_type': 'teacheR'}
+                      'member_type': 'teacher'}
         response = self.client.post('/rest_api/members/', data=user_json, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Member.objects.count(), 1)
@@ -53,6 +54,13 @@ class MemberViewSetTest(APITestCase):
         created_member = Member.objects.get(user_id=user)
         self.assertEqual(created_member.sign_up_status, 'S')
         self.assertEqual(created_member.member_type, 'T')
+
+        # Fetch the students
+        self.client.force_authenticate(user=user)
+
+        response = self.client.get('/rest_api/members/fetch-students/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
 
     def test_create_parent_succeed(self):
         user_json = {'username': 'test_name', 'email': 'test4@gmail.com',
@@ -250,6 +258,10 @@ class MemberViewSetTest(APITestCase):
         response = self.client.put('/rest_api/members/add-student/',
                                    data=student_json, format='json')
         self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+
+        # Fetch the students
+        response = self.client.get('/rest_api/members/fetch-students/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
     def test_add_invalid_student_fail(self):
@@ -1024,3 +1036,100 @@ class MemberViewSetTest(APITestCase):
         updated_course = Course.objects.get(name='B1A')
         students = updated_course.students.filter(first_name=student.first_name)
         self.assertEqual(len(students), 0)
+
+
+    def test_fetch_students_for_teacher(self):
+        # Add class first
+        exist_user = self.create_user('test_name', 'david@gmail.com')
+        self.create_member(exist_user, sign_up_status='V',
+                           verification_code="12345-1231", member_type='B')
+        
+        course_json = {
+            'name': "B1A",
+            'course_description': 'Morning session for grade 1 class.',
+            'course_type': "L",
+            'course_status': 'A',
+            'size_limit': 20,
+            'cost': 500,
+            'classroom': 'N101',
+            'course_start_time': '10:00:00',
+            'course_end_time': '11:50:00'
+        }
+
+        self.client.force_authenticate(user=exist_user)
+        response = self.client.put('/rest_api/members/upsert-course/',
+                                   data=course_json, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        persisted_course = Course.objects.get(name="B1A")
+        # Add student
+        parent_account = self.create_user('parent', 'parent@gmail.com')
+        self.create_member(parent_account, sign_up_status='V',
+                           verification_code="12345-1231", member_type='P')
+        student_json = {
+            'first_name': 'david',
+            'last_name': 'chatty',
+            'date_of_birth': '2015-10-01',
+            'gender': 'M'
+        }
+        self.client.force_authenticate(user=parent_account)
+        response = self.client.put('/rest_api/members/add-student/',
+                                   data=student_json, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        member = Member.objects.get(user_id=parent_account)
+        student = Student.objects.get(parent_id=member)
+        self.assertEqual(student.last_name, 'chatty')
+        self.assertEqual(student.first_name, 'david')
+        self.assertIsNotNone(student.joined_date)
+        # Add registration
+        payload = {
+            'course_id': persisted_course.id,
+            'student': {
+                'first_name': student.first_name,
+                'last_name': student.last_name,
+                'date_of_birth': student.date_of_birth,
+                'gender': 'M'
+            }
+        }
+        response = self.client.put('/rest_api/members/register-course/',
+                                   data=payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        registration = Registration.objects.get(student=student)
+        self.assertEqual(registration.course.name, "B1A")
+        self.assertEqual(registration.student.last_name, student.last_name)
+        self.assertEqual(registration.student.first_name, student.first_name)
+        self.assertIsNotNone(registration.school_year_start)
+        self.assertIsNotNone(registration.school_year_end)
+        self.assertEqual(registration.registration_date.day, datetime.datetime.today().day)
+        
+        # Add teacher
+        teacher_account = self.create_user('teacher', 'teacher@gmail.com')
+        self.create_member(teacher_account, sign_up_status='V',
+                           verification_code="12345-1231", member_type='T')
+        user = User.objects.get(username='teacher')
+        teacher_member = Member.objects.get(user_id=user)
+        self.assertEqual(teacher_member.sign_up_status, 'V')
+        self.assertEqual(teacher_member.member_type, 'T')
+
+        
+        assignment = InstructorAssignment()
+        assignment.course = persisted_course
+        assignment.instructor = teacher_member
+        assignment.school_year_start = datetime.date(year=2023, month=9, day=1)
+        assignment.school_year_end = datetime.date(year=2024, month=6, day=23)
+        assignment.assigned_date = datetime.date.today()
+        assignment.last_update_date=datetime.date.today()
+        assignment.expiration_date = datetime.datetime.today() + datetime.timedelta(days=2)
+        assignment.last_update_person="Test"
+        assignment.save()
+
+        # fetch students under the teacher
+        self.client.force_authenticate(user=teacher_account)
+        response = self.client.get('/rest_api/members/fetch-students/', format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue('data' in response.data)
+        self.assertEqual(len(response.data['data']), 1)
+        self.assertTrue('students' in response.data['data'][0])
+        self.assertTrue('course' in response.data['data'][0])
+
+        
