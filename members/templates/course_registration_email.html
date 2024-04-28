@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <h1> {{ student }} </h1>
+        <p>Welcome to SBCCL {{year_start}}-{{year_end}} ! </p>
+        <p>欢迎报名石溪中文学校  {{year_start}}-{{year_start}}   学年！</p>
+
+
+        <ul>
+            <li>Name:	{{student}} </li>
+            <li>Class:	{{class_name}} </li>
+            <li>Registration Date:  {{ registration_date }} </li>
+            <li>Registration Code: {{ code }}</li>
+            <li>Status: {{ status }}</li>
+        </ul>
+        
+        <p>You should be able to see the registration state in your <a href="{{ account_url} }">account/a></p>
+
+        <p>If you have further questions, please contact ccl_board@sbcclny.com.</p>
+        <p>如果有其它疑问，请联系 ccl_board@sbcclny.com.</p>
+
+        
+        <p>Thank you</p>
+        <p><a href="https://www.sbcclny.com."> Center of Chinese Learning at Stony Brook </a></p>
+    </body>
+</html>
