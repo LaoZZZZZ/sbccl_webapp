@@ -1133,4 +1133,3 @@ class MemberViewSetTest(APITestCase):
         self.assertTrue('students' in response.data['data'][0])
         self.assertTrue('course' in response.data['data'][0])
 
-        

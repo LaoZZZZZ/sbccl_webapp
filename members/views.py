@@ -2,9 +2,11 @@
 import datetime
 import os
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import login, logout
 from django.core.mail import send_mail
-from django.shortcuts import get_object_or_404
+from django.template import Context
+from django.template import loader
+from django.utils.html import strip_tags
 import pytz
 from rest_framework.viewsets import ModelViewSet
 from .serializers import StudentSerializer, UserSerializer, MemberSerializer, CourseSerializer, RegistrationSerializer
@@ -94,6 +96,19 @@ class MemberViewSet(ModelViewSet):
             dropouts = dropouts + [JSONRenderer().render(d) for d in matched_dropouts]
         return (registrations, dropouts)
 
+      
+    def __send_account_creation_html_email__(self, new_user, new_member, verification_url):
+        """
+        Send account creation confirmation email.
+        """
+        if new_member.member_type == 'P':
+            html_message = loader.render_to_string("account_registration_email.html",
+                                                  {'verification_link': verification_url})
+            subject = 'Registration confirmation'
+            plain_message = strip_tags(html_message)
+            send_mail(subject, plain_message, from_email=None, recipient_list=[new_user.email],
+                      html_message=html_message)
+
     def __get_students_per_teacher__(self, matched_member):
         """
           Find all students that are taught by this teacher in current school year.
@@ -145,13 +160,41 @@ class MemberViewSet(ModelViewSet):
             subject="Registration confirmation",
             message=user_email_body)
 
+
+
     # These two course time window has overlap
     def __has_conflict__(self, course_a, course_b):
         return ((course_a.course_start_time >= course_b.course_start_time and course_a.course_start_time <= course_b.course_end_time)
             or (course_a.course_end_time >= course_b.course_start_time and course_a.course_end_time <= course_b.course_end_time))
 
+
     def __send_registration_email__(self, user, registration):
-        pass
+        user_email_body = """
+          This email confirms your class registration in SBCCL school.
+           
+            Student name: {name}
+            Class: {class_name}
+            Registration code: {code}
+
+          You can find the registration details at {link}.
+        """.format(name=registration.student.last_name + ' ' + registration.student.first_name,
+                   class_name=registration.course.name,
+                   code=registration.registration_code,
+                   link=os.environ["FRONTEND_URL"])
+        
+        if registration.on_waiting_list:
+            user_email_body += """
+        Note: The class is already full. You are put on the waiting list. If there is a spot available, you
+        will be automatically enrolled and an email notification will be sent to you.
+            """
+        else:
+            user_email_body += """
+          To officially enroll to this class, please send payment to xxxx@gmail.com. You can find the balance in your account. Remember to include the registration code to the memo of the payment. 
+            """
+        user.email_user(
+            subject="Class registration confirmation",
+            message=user_email_body)
+
 
     def __send_unregistration_email__(self, user, dropout):
         pass
