@@ -96,7 +96,10 @@ class MemberViewSet(ModelViewSet):
             dropouts = dropouts + [JSONRenderer().render(d) for d in matched_dropouts]
         return (registrations, dropouts)
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> fd64d8a (Rework the account registration confirmation email.)
     def __send_account_creation_html_email__(self, new_user, new_member, verification_url):
         """
         Send account creation confirmation email.
