@@ -7,7 +7,10 @@ from django.core.mail import send_mail
 from django.template import Context
 from django.template import loader
 from django.utils.html import strip_tags
+<<<<<<< HEAD
 
+=======
+>>>>>>> dc6e972 (Rework the account registration confirmation email.)
 
 import pytz
 from rest_framework.viewsets import ModelViewSet
@@ -97,7 +100,8 @@ class MemberViewSet(ModelViewSet):
             matched_dropouts = Dropout.objects.filter(student=s)
             dropouts = dropouts + [JSONRenderer().render(d) for d in matched_dropouts]
         return (registrations, dropouts)
-    
+
+
     def __send_account_creation_html_email__(self, new_user, new_member, verification_url):
         """
         Send account creation confirmation email.
@@ -137,37 +141,6 @@ class MemberViewSet(ModelViewSet):
                         'phone': registration.student.parent_id.phone_number
                     })
                     students.append(JSONRenderer().render(student))
-            all_students.append({'students': students, 'course': course})
-        return all_students
-
-
-    def __get_students_per_teacher__(self, matched_member):
-        """
-          Find all students that are taught by this teacher in current school year.
-        """
-        if matched_member.member_type != 'T':
-            return []
-        
-        assignments = InstructorAssignment.objects.filter(instructor=matched_member)
-        all_students = []
-        for assignment in assignments:
-            if assignment.expiration_date < datetime.datetime.today:
-                continue
-            # Skip inactive course
-            if assignment.course.course_status != 'A':
-                continue
-            students = []
-            course = JSONRenderer.render(assignment.course)
-            for registration in Registration.objects.filter(course=assignment.course):
-                if registration.expiration_date < datetime.datetime.today:
-                    student = JSONRenderer.render(registration.student)
-                    parent = registration.student.parent_id.user_id
-                    student['contact'] = JSONRenderer.render({
-                        'parent': parent.user_id.last_name + ' ' + parent.user_id.first_name,
-                        'email': parent.user_id.email,
-                        'phone': parent.phone_number
-                    })
-                    students.append(student)
             all_students.append({'students': students, 'course': course})
         return all_students
     
@@ -296,7 +269,6 @@ class MemberViewSet(ModelViewSet):
             if 'phone_number' in request.data:
                 new_member.phone_number = request.data['phone_number']
             verification_url = os.path.join(os.environ["FRONTEND_URL"], "verify-user", registration_code)
-            self.__send_account_creation_email__(new_user, new_member, verification_url)
             self.__send_account_creation_html_email__(new_user, new_member, verification_url)
             new_member.save()
 
