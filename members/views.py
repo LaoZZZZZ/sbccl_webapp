@@ -6,7 +6,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from django.template import Context
-from django.template.loader import get_template
+from django.template import loader
+from django.utils.html import strip_tags
 
 import pytz
 from rest_framework.viewsets import ModelViewSet
@@ -102,9 +103,12 @@ class MemberViewSet(ModelViewSet):
         Send account creation confirmation email.
         """
         if new_member.member_type == 'P':
-            message = get_template("templates/account_registration_email.html").render(
-                Context({'verification_link': verification_url}))
-            new_user.email_user(subject="Registration confirmation", message=message)
+            html_message = loader.render_to_string("account_registration_email.html",
+                                                  {'verification_link': verification_url})
+            subject = 'Registration confirmation'
+            plain_message = strip_tags(html_message)
+            send_mail(subject, plain_message, from_email=None, recipient_list=[new_user.email],
+                      html_message=html_message)
 
     def __get_students_per_teacher__(self, matched_member):
         """
@@ -135,16 +139,6 @@ class MemberViewSet(ModelViewSet):
                     students.append(JSONRenderer().render(student))
             all_students.append({'students': students, 'course': course})
         return all_students
-    
-
-    def __send_account_creation_html_email__(self, new_user, new_member, verification_url):
-        """
-        Send account creation confirmation email.
-        """
-        if new_member.member_type == 'P':
-            message = get_template("templates/account_registration_email.html").render(
-                Context({'verification_link': verification_url}))
-            new_user.email_user(subject="Registration confirmation", message=message)
 
     def __send_account_creation_email__(self, new_user, new_member, verification_url):
         user_email_body = "Thanks for registering account in SBCCL school."
@@ -268,7 +262,6 @@ class MemberViewSet(ModelViewSet):
             if 'phone_number' in request.data:
                 new_member.phone_number = request.data['phone_number']
             verification_url = os.path.join(os.environ["FRONTEND_URL"], "verify-user", registration_code)
-            self.__send_account_creation_email__(new_user, new_member, verification_url)
             self.__send_account_creation_html_email__(new_user, new_member, verification_url)
             new_member.save()
 
