@@ -2,9 +2,8 @@
 import datetime
 import os
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import login, logout
 from django.core.mail import send_mail
-from django.shortcuts import get_object_or_404
 from django.template import Context
 from django.template import loader
 from django.utils.html import strip_tags
@@ -140,15 +139,6 @@ class MemberViewSet(ModelViewSet):
             all_students.append({'students': students, 'course': course})
         return all_students
 
-    
-    def __send_account_creation_html_email__(self, new_user, new_member, verification_url):
-        """
-        Send account creation confirmation email.
-        """
-        if new_member.member_type == 'P':
-            message = get_template("templates/account_registration_email.html").render(
-                Context({'verification_link': verification_url}))
-            new_user.email_user(subject="Registration confirmation", message=message)
 
     def __get_students_per_teacher__(self, matched_member):
         """
