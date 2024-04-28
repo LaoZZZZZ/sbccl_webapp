@@ -96,10 +96,7 @@ class MemberViewSet(ModelViewSet):
             dropouts = dropouts + [JSONRenderer().render(d) for d in matched_dropouts]
         return (registrations, dropouts)
 
-<<<<<<< HEAD
-
-=======
->>>>>>> fd64d8a (Rework the account registration confirmation email.)
+      
     def __send_account_creation_html_email__(self, new_user, new_member, verification_url):
         """
         Send account creation confirmation email.
@@ -163,58 +160,6 @@ class MemberViewSet(ModelViewSet):
             subject="Registration confirmation",
             message=user_email_body)
 
-
-
-    def __get_students_per_teacher__(self, matched_member):
-        """
-          Find all students that are taught by this teacher in current school year.
-        """
-        if matched_member.member_type != 'T':
-            return []
-        
-        assignments = InstructorAssignment.objects.filter(instructor=matched_member)
-        all_students = []
-        for assignment in assignments:
-            if assignment.expiration_date < datetime.datetime.today:
-                continue
-            # Skip inactive course
-            if assignment.course.course_status != 'A':
-                continue
-            students = []
-            course = JSONRenderer.render(assignment.course)
-            for registration in Registration.objects.filter(course=assignment.course):
-                if registration.expiration_date < datetime.datetime.today:
-                    student = JSONRenderer.render(registration.student)
-                    parent = registration.student.parent_id.user_id
-                    student['contact'] = JSONRenderer.render({
-                        'parent': parent.user_id.last_name + ' ' + parent.user_id.first_name,
-                        'email': parent.user_id.email,
-                        'phone': parent.phone_number
-                    })
-                    students.append(student)
-            all_students.append({'students': students, 'course': course})
-        return all_students
-    
-
-    def __send_account_creation_email__(self, new_user, new_member, verification_url):
-        user_email_body = "Thanks for registering account in SBCCL school."
-        if new_member.member_type != 'P':
-            admin_msg = "{email} register a {type} account. Please review this registration!".format(email=new_user.email, type=new_member.getMemberType())
-            admin_email_body = admin_msg + "Please click {link} to verify this account.".format(link=verification_url)
-            # Email to admin to verify this account.
-            send_mail(
-                subject="Account registration request",
-                message=admin_email_body,
-                from_email="no-reply@sbcclny.com",
-                # TODO(lu): Remove luzhao@sbcclny.com once the functionality is stable.
-                recipient_list=['ccl_admin@sbcclny.com', 'luzhao@sbcclny.com'])
-            # Email to user for confirmation.
-            user_email_body = user_email_body + """ CCL account admin will review your registration soon. If you have not received any update within a week, please inquery the state by sending email to ccl_board@sbcclny.com."""
-        else:
-            user_email_body = user_email_body + "Please click {link} to verify this account.".format(link=verification_url)
-        new_user.email_user(
-            subject="Registration confirmation",
-            message=user_email_body)
 
 
     # These two course time window has overlap
