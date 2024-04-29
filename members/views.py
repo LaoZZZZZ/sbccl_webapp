@@ -96,7 +96,6 @@ class MemberViewSet(ModelViewSet):
             dropouts = dropouts + [JSONRenderer().render(d) for d in matched_dropouts]
         return (registrations, dropouts)
 
-      
     def __send_account_creation_html_email__(self, new_user, new_member, verification_url):
         """
         Send account creation confirmation email.
@@ -162,6 +161,58 @@ class MemberViewSet(ModelViewSet):
 
 
 
+    def __get_students_per_teacher__(self, matched_member):
+        """
+          Find all students that are taught by this teacher in current school year.
+        """
+        if matched_member.member_type != 'T':
+            return []
+        
+        assignments = InstructorAssignment.objects.filter(instructor=matched_member)
+        all_students = []
+        for assignment in assignments:
+            if assignment.expiration_date < datetime.date.today():
+                continue
+            # Skip inactive course
+            if assignment.course.course_status != 'A':
+                continue
+            students = []
+            course = JSONRenderer().render(CourseSerializer(assignment.course).data)
+            for registration in Registration.objects.filter(course=assignment.course):
+                if registration.expiration_date < datetime.date.today():
+                    student = JSONRenderer().render(registration.student)
+                    parent = registration.student.parent_id.user_id
+                    student['contact'] = JSONRenderer().render({
+                        'parent': parent.user_id.last_name + ' ' + parent.user_id.first_name,
+                        'email': parent.user_id.email,
+                        'phone': parent.phone_number
+                    })
+                    students.append(student)
+            all_students.append({'students': students, 'course': course})
+        return all_students
+    
+
+    def __send_account_creation_email__(self, new_user, new_member, verification_url):
+        user_email_body = "Thanks for registering account in SBCCL school."
+        if new_member.member_type != 'P':
+            admin_msg = "{email} register a {type} account. Please review this registration!".format(email=new_user.email, type=new_member.getMemberType())
+            admin_email_body = admin_msg + "Please click {link} to verify this account.".format(link=verification_url)
+            # Email to admin to verify this account.
+            send_mail(
+                subject="Account registration request",
+                message=admin_email_body,
+                from_email="no-reply@sbcclny.com",
+                # TODO(lu): Remove luzhao@sbcclny.com once the functionality is stable.
+                recipient_list=['ccl_admin@sbcclny.com', 'luzhao@sbcclny.com'])
+            # Email to user for confirmation.
+            user_email_body = user_email_body + """ CCL account admin will review your registration soon. If you have not received any update within a week, please inquery the state by sending email to ccl_board@sbcclny.com."""
+        else:
+            user_email_body = user_email_body + "Please click {link} to verify this account.".format(link=verification_url)
+        new_user.email_user(
+            subject="Registration confirmation",
+            message=user_email_body)
+
+
     # These two course time window has overlap
     def __has_conflict__(self, course_a, course_b):
         return ((course_a.course_start_time >= course_b.course_start_time and course_a.course_start_time <= course_b.course_end_time)
@@ -169,31 +220,20 @@ class MemberViewSet(ModelViewSet):
 
 
     def __send_registration_email__(self, user, registration):
-        user_email_body = """
-          This email confirms your class registration in SBCCL school.
-           
-            Student name: {name}
-            Class: {class_name}
-            Registration code: {code}
-
-          You can find the registration details at {link}.
-        """.format(name=registration.student.last_name + ' ' + registration.student.first_name,
-                   class_name=registration.course.name,
-                   code=registration.registration_code,
-                   link=os.environ["FRONTEND_URL"])
-        
-        if registration.on_waiting_list:
-            user_email_body += """
-        Note: The class is already full. You are put on the waiting list. If there is a spot available, you
-        will be automatically enrolled and an email notification will be sent to you.
-            """
-        else:
-            user_email_body += """
-          To officially enroll to this class, please send payment to xxxx@gmail.com. You can find the balance in your account. Remember to include the registration code to the memo of the payment. 
-            """
-        user.email_user(
-            subject="Class registration confirmation",
-            message=user_email_body)
+        html_message = loader.render_to_string("course_registration_email.html",
+                                               {'registration': RegistrationSerializer(registration).data,
+                                                'account_url': os.environ["FRONTEND_URL"],
+                                                'student': ' '.join([registration.student.last_name,
+                                                                    registration.student.first_name]),
+                                                'class_name': registration.course.name,
+                                                'school_start': registration.school_year_start.year,
+                                                'school_end': registration.school_year_end.year,
+                                                'status': "On Waiting List" if registration.on_waiting_list else "Enrolled"})
+        subject = 'Class Registration confirmation'
+        plain_message = strip_tags(html_message)
+        send_mail(subject, plain_message, from_email=None, recipient_list=[user.email],
+                    html_message=html_message)
+       
 
 
     def __send_unregistration_email__(self, user, dropout):
@@ -594,12 +634,13 @@ class MemberViewSet(ModelViewSet):
             
             registration.course = persisted_course
             registration.student = persisted_student
-            school_year_start = '{year}-{month}-{day}'.format(year=persisted_course.creation_date.year,
-                                                              month='09', day='01')
-            registration.school_year_start = datetime.datetime.strptime(school_year_start, "%Y-%m-%d")
+            # TODO(luke): The calculation of school start and end should be based on the calendar instead
+            # of course creation year.
+            registration.school_year_start = datetime.date(year=persisted_course.creation_date.year,
+                                                           month=9, day = 1)
             registration.school_year_end = registration.school_year_start.replace(year=datetime.datetime.today().year + 1,
                                                                                   month=7)
-            registration.registration_date = datetime.datetime.today()
+            registration.registration_date = datetime.date.today()
             registration.expiration_date = registration.school_year_end
             registration.last_update_date = registration.registration_date
             registration.save()
