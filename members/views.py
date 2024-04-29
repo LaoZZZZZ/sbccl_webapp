@@ -236,12 +236,12 @@ class MemberViewSet(ModelViewSet):
        
 
 
-    def __send_unregistration_email__(self, user, registration):
+    def __send_unregistration_email__(self, user, registration, old_course=None):
         html_message = loader.render_to_string("course_unregistration_email.html",
                                                {'account_url': os.environ["FRONTEND_URL"],
                                                 'student': ' '.join([registration.student.last_name,
                                                                     registration.student.first_name]),
-                                                'class_name': registration.course.name,
+                                                'class_name': old_course.name if old_course else registration.course.name,
                                                 'school_start': registration.school_year_start.year,
                                                 'school_end': registration.school_year_end.year})
         subject = 'Class withdraw confirmation'
@@ -696,7 +696,10 @@ class MemberViewSet(ModelViewSet):
             matched_registration.course = new_course
             matched_registration.last_update_date = datetime.datetime.today()
             matched_registration.save()
+  
             user = User.objects.get(username=request.user)
+            self.__send_unregistration_email__(user, matched_registration, old_course)
+            self.__send_registration_email__(user, matched_registration)
             self.__update_waiting_list__(old_course)
             return Response(status=status.HTTP_202_ACCEPTED)
         except User.DoesNotExist or Member.DoesNotExist as e:
