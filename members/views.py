@@ -236,8 +236,18 @@ class MemberViewSet(ModelViewSet):
        
 
 
-    def __send_unregistration_email__(self, user, dropout):
-        pass
+    def __send_unregistration_email__(self, user, registration):
+        html_message = loader.render_to_string("course_unregistration_email.html",
+                                               {'account_url': os.environ["FRONTEND_URL"],
+                                                'student': ' '.join([registration.student.last_name,
+                                                                    registration.student.first_name]),
+                                                'class_name': registration.course.name,
+                                                'school_start': registration.school_year_start.year,
+                                                'school_end': registration.school_year_end.year})
+        subject = 'Class withdraw confirmation'
+        plain_message = strip_tags(html_message)
+        send_mail(subject, plain_message, from_email=None, recipient_list=[user.email],
+                    html_message=html_message)
 
     def __update_waiting_list__(self, course):
         waiting_list = []
@@ -725,7 +735,7 @@ class MemberViewSet(ModelViewSet):
                 persisted_payment[0].last_udpate_date = dropout.dropout_date
                 persisted_payment[0].last_update_person = user.username
                 persisted_payment[0].save()
-                self.__send_unregistration_email__(user, dropout)
+            self.__send_unregistration_email__(user, matched_registration)
             if not matched_registration.on_waiting_list:
                 self.__update_waiting_list__(matched_registration.course)
 
