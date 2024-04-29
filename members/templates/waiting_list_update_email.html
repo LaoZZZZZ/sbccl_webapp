@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <h2> Hello {{ student }}, </h2>
+        <p>Congratulations. You're just enrolled to {{class_name}} from the waiting list! Below is your course registration details: </p>
+        <ul>
+            <li><strong>Name</strong>: {{student}} </li>
+            <li><strong>Class</strong>:	{{class_name}} </li>
+            <li><strong>School year</strong>: {{ school_start }}-{{school_end}} </li>
+            <li><strong>Registration Date</strong>:  {{ registration.registration_date }} </li>
+            <li><strong>Registration Code</strong>: {{ registration.registration_code }}</li>
+        </ul>
+        
+        <p>You should be able to see the registration state in your <a href="{{ account_url }}">account</a>.</p>
+        <p>To secure your spot, please make payment for the registration as soon as possible. You can find payment instructions at our <a href="https://www.sbcclny.com.">website</a>.</p>
+        <p>If you have further questions, please contact ccl_board@sbcclny.com.</p>
+        
+        <p>Thank you!</p>
+        <p><a href="https://www.sbcclny.com."> Center of Chinese Learning at Stony Brook </a></p>
+
+    </body>
+</html>

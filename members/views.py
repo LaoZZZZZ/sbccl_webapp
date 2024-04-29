@@ -263,12 +263,27 @@ class MemberViewSet(ModelViewSet):
         while enrollment_size <= course.size_limit and index < len(waiting_list):
             waiting_list[index].on_waiting_list = False
             waiting_list[index].save()
-            self.__email_waiting_list_removal__(waiting_list[index])
+            parent = waiting_list[index].student.parent_id.user_id
+            self.__email_waiting_list_removal__(parent, waiting_list[index])
             enrollment_size += 1
 
 
-    def __email_waiting_list_removal__(self, registration):
-        pass
+    def __email_waiting_list_removal__(self, user, registration):
+        html_message = loader.render_to_string(
+            "waiting_list_update_email.html",
+            {
+                'registration': RegistrationSerializer(registration).data,
+                'account_url': os.environ["FRONTEND_URL"],
+                'student': ' '.join([registration.student.last_name,
+                                    registration.student.first_name]),
+                'class_name': registration.course.name,
+                'school_start': registration.school_year_start.year,
+                'school_end': registration.school_year_end.year,
+            })
+        subject = 'Class Registration confirmation'
+        plain_message = strip_tags(html_message)
+        send_mail(subject, plain_message, from_email=None, recipient_list=[user.email],
+                  html_message=html_message)
 
     def get_permissions(self):
         if self.action == "list":
