@@ -46,3 +46,4 @@ jobs:
           export FRONTEND_URL=http://localhost:3000
           python manage.py test members.serializers_test
           python manage.py test members.views_test
+          python manage.py test members.coupon_utils_test
