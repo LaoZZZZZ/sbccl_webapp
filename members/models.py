@@ -33,7 +33,7 @@ class Coupon(models.Model):
             reason=reason, percentage=self.percentage, expiration_date=self.expiration_date)
         elif self.type == "A":
             return 'Reason: {reason}, Amount: ${amount}, Expiration Date: {expiration_date}'.format(
-            reason=reason, amount=self.dolloar_amount, expiration_date=self.expiration_date)
+            reason=reason, amount=self.dollar_amount, expiration_date=self.expiration_date)
         return 'Reason: {reason} Expiration Date: {expiration_date}'.format(
             reason=reason, expiration_date=self.expiration_date)
 
