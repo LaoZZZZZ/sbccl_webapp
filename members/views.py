@@ -130,34 +130,13 @@ class MemberViewSet(ModelViewSet):
                     student = StudentSerializer(registration.student).data
                     parent = registration.student.parent_id.user_id
                     student['contact'] = JSONRenderer().render({
-                        'parent': parent.last_name + ' ' + parent.first_name,
+                        'parent': ' '.join([parent.first_name, parent.last_name]),
                         'email': parent.email,
                         'phone': registration.student.parent_id.phone_number
                     })
                     students.append(JSONRenderer().render(student))
             all_students.append({'students': students, 'course': course})
         return all_students
-    
-
-    def __send_account_creation_email__(self, new_user, new_member, verification_url):
-        user_email_body = "Thanks for registering account in SBCCL school."
-        if new_member.member_type != 'P':
-            admin_msg = "{email} register a {type} account. Please review this registration!".format(email=new_user.email, type=new_member.getMemberType())
-            admin_email_body = admin_msg + "Please click {link} to verify this account.".format(link=verification_url)
-            # Email to admin to verify this account.
-            send_mail(
-                subject="Account registration request",
-                message=admin_email_body,
-                from_email="no-reply@sbcclny.com",
-                # TODO(lu): Remove luzhao@sbcclny.com once the functionality is stable.
-                recipient_list=['ccl_admin@sbcclny.com', 'luzhao@sbcclny.com'])
-            # Email to user for confirmation.
-            user_email_body = user_email_body + """ CCL account admin will review your registration soon. If you have not received any update within a week, please inquery the state by sending email to ccl_board@sbcclny.com."""
-        else:
-            user_email_body = user_email_body + "Please click {link} to verify this account.".format(link=verification_url)
-        new_user.email_user(
-            subject="Registration confirmation",
-            message=user_email_body)
 
 
     def __get_students_per_teacher__(self, matched_member):
@@ -201,8 +180,7 @@ class MemberViewSet(ModelViewSet):
         html_message = loader.render_to_string("course_registration_email.html",
                                                {'registration': RegistrationSerializer(registration).data,
                                                 'account_url': os.environ["FRONTEND_URL"],
-                                                'student': ' '.join([registration.student.last_name,
-                                                                    registration.student.first_name]),
+                                                'student': ' '.join([registration.student.first_name, registration.student.last_name]),
                                                 'class_name': registration.course.name,
                                                 'school_start': registration.school_year_start.year,
                                                 'school_end': registration.school_year_end.year,
@@ -217,8 +195,7 @@ class MemberViewSet(ModelViewSet):
     def __send_unregistration_email__(self, user, registration, old_course=None):
         html_message = loader.render_to_string("course_unregistration_email.html",
                                                {'account_url': os.environ["FRONTEND_URL"],
-                                                'student': ' '.join([registration.student.last_name,
-                                                                    registration.student.first_name]),
+                                                'student': ' '.join([registration.student.first_name, registration.student.last_name]),
                                                 'class_name': old_course.name if old_course else registration.course.name,
                                                 'school_start': registration.school_year_start.year,
                                                 'school_end': registration.school_year_end.year})
@@ -252,8 +229,7 @@ class MemberViewSet(ModelViewSet):
             {
                 'registration': RegistrationSerializer(registration).data,
                 'account_url': os.environ["FRONTEND_URL"],
-                'student': ' '.join([registration.student.last_name,
-                                    registration.student.first_name]),
+                'student': ' '.join([registration.student.first_name, registration.student.last_name]),
                 'class_name': registration.course.name,
                 'school_start': registration.school_year_start.year,
                 'school_end': registration.school_year_end.year,
