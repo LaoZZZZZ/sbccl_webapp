@@ -24,6 +24,7 @@ class Coupon(models.Model):
     dollar_amount = models.FloatField(null=True)
 
     # Only valid if the type=P. Valid value is between 0 - 100
+    # NOTE: percentage type coupon is not supported yet. Don't USE it.
     percentage = models.FloatField(null=True)
     expiration_date = models.DateField(null=False)
     creation_date = models.DateField(null=False)
