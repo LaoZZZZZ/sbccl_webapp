@@ -61,6 +61,8 @@ const AddStudents = ({ userAuth, updateStudentList }: Props) => {
     chinese_name: "",
   });
 
+  const [waitForResponse, setWaitForResponse] = useState(false);
+
   return (
     <div className="col w-75 mx-auto align-middle">
       <form className="form-label form-control">
@@ -154,13 +156,16 @@ const AddStudents = ({ userAuth, updateStudentList }: Props) => {
                   msg: "Invalid student information provided. The student can not be added now!",
                 });
               }
+              setWaitForResponse(true);
               AddStudentRequest(student, userAuth, (result) => {
                 setAddStatus(result);
                 if (result.status == AddStatus.SUCCESS) {
                   updateStudentList();
                 }
+                setWaitForResponse(false);
               });
             }}
+            disabled={waitForResponse}
           />
           <input
             className="btn btn-secondary mr-2"
@@ -169,6 +174,7 @@ const AddStudents = ({ userAuth, updateStudentList }: Props) => {
             onClick={() => {
               updateStudentList();
             }}
+            disabled={waitForResponse}
           />
         </div>
       </form>

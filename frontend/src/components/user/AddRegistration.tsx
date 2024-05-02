@@ -76,6 +76,7 @@ const AddRegistration = ({
 }: Props) => {
   const [addStatus, setAddStatus] = useState({});
   const [buttonMsg, setButtonMsg] = useState("Register");
+  const [waitForResponse, setWaitForResponse] = useState(false);
 
   const [registration] = useState<Registration>({
     course_id: "",
@@ -134,13 +135,16 @@ const AddRegistration = ({
             type="button"
             value={buttonMsg}
             onClick={() => {
+              setWaitForResponse(true);
               AddRegistrationRequest(registration, userAuth, (result) => {
                 setAddStatus(result);
                 if (result.status === AddStatus.SUCCESS) {
                   updateRegistrationList();
                 }
+                setWaitForResponse(false);
               });
             }}
+            disabled={waitForResponse}
           />
           <input
             className="btn btn-secondary mr-2"
@@ -149,6 +153,7 @@ const AddRegistration = ({
             onClick={() => {
               cancelCallback();
             }}
+            disabled={waitForResponse}
           />
         </div>
       </form>

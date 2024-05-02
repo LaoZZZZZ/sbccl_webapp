@@ -105,6 +105,7 @@ const EditableRegistration = ({
   const [buttonMsg, setButtonMsg] = useState("Update");
   const [needsUpdate, setNeedsUpdate] = useState<boolean>(false);
   const [removeRegistration, setRemoveRegistration] = useState(false);
+  const [waitForResponse, setWaitForResponse] = useState(false);
 
   return (
     <div className="col w-75 mx-auto align-middle">
@@ -191,14 +192,16 @@ const EditableRegistration = ({
             <input
               className="btn btn-primary active mr-3"
               type="button"
-              disabled={!needsUpdate}
+              disabled={!needsUpdate || waitForResponse}
               value={buttonMsg}
               onClick={() => {
+                setWaitForResponse(true);
                 UpdateRegistrationRequest(registration, userAuth, (result) => {
                   setUpdateStatus(result);
                   if (result.status === UpdateStatus.SUCCESS) {
                     updateRegistrationList();
                   }
+                  setWaitForResponse(false);
                 });
               }}
             />
@@ -209,6 +212,7 @@ const EditableRegistration = ({
               onClick={() => {
                 cancelCallback();
               }}
+              disabled={waitForResponse}
             />
             <input
               className="btn btn-warning mr-3"
@@ -217,6 +221,7 @@ const EditableRegistration = ({
               onClick={() => {
                 setRemoveRegistration(true);
               }}
+              disabled={waitForResponse}
             />
           </div>
         </form>
