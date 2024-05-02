@@ -154,7 +154,9 @@ class Course(models.Model):
         return 'Course: {name} Course Type: {course_type} Status: {course_status}'.format(
             name=self.name, course_type=self.course_type, course_status=self.course_status)
 
-""""""
+"""
+Record the usage of coupons by each member/user.
+"""
 class CouponUsageRecord(models.Model):
     user = models.ForeignKey(Member, on_delete=models.CASCADE)
     registration = models.ForeignKey('Registration', on_delete=models.CASCADE)
@@ -190,7 +192,7 @@ class Payment(models.Model):
     registration_code = models.ForeignKey(
         'Registration', on_delete=models.SET_NULL, verbose_name='Related registration', null=True)
     dropout_info = models.ForeignKey('Dropout', on_delete=models.SET_NULL, verbose_name='Related dropout', null=True)
-    user = models.ForeignKey('members.Member', on_delete=models.CASCADE, verbose_name='Payment sender')
+    user = models.ForeignKey(Member, on_delete=models.CASCADE, verbose_name='Payment sender')
     pay_date = models.DateField(null=False)
     original_amount = models.FloatField(null=False)
     amount_in_dollar = models.FloatField(null=False)
