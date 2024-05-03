@@ -9,6 +9,12 @@ class Coupon(models.Model):
     ]
     reason = models.CharField(max_length=2, choices=REASON)
 
+    APPLICATION_RULE = [
+        ('PR', 'PER_REGISTRATION'),
+        ('PA', 'PER_ACCOUNT')
+    ]
+    application_rule = models.CharField(max_length=2, choices=APPLICATION_RULE)
+
     TYPE = [
         ('P', 'PERCENTAGE'),
         ('A', 'AMOUNT')
@@ -29,13 +35,15 @@ class Coupon(models.Model):
     def __str__(self):
         reason = 'Early Bird' if self.reason == 'EB' else 'Board member'
         if self.type == 'P':
-            return 'Reason: {reason}, Percentage: {percentage}%, Expiration Date: {expiration_date}'.format(
-            reason=reason, percentage=self.percentage, expiration_date=self.expiration_date)
+            return 'Reason: {reason}, Percentage: {percentage}%, Expiration Date: {expiration_date}, Rule: {rule}'.format(
+            reason=reason, percentage=self.percentage, expiration_date=self.expiration_date,
+            rule=self.application_rule)
         elif self.type == "A":
-            return 'Reason: {reason}, Amount: ${amount}, Expiration Date: {expiration_date}'.format(
-            reason=reason, amount=self.dollar_amount, expiration_date=self.expiration_date)
-        return 'Reason: {reason} Expiration Date: {expiration_date}'.format(
-            reason=reason, expiration_date=self.expiration_date)
+            return 'Reason: {reason}, Amount: ${amount}, Expiration Date: {expiration_date}, Rule: {rule}'.format(
+            reason=reason, amount=self.dollar_amount, expiration_date=self.expiration_date,
+            rule=self.application_rule)
+        return 'Reason: {reason} Expiration Date: {expiration_date}, Rule: {rule}'.format(
+            reason=reason, expiration_date=self.expiration_date, rule=self.application_rule)
 
 """
 Represent the account type of the registered user.
