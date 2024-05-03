@@ -93,7 +93,9 @@ const AddRegistration = ({
     <div className="col w-75 mx-auto align-middle">
       <form className="form-label form-control">
         <div className="form-group pb-2">
-          <label>Select student</label>
+          <label>
+            <strong>Select student</strong>
+          </label>
           <select
             className="form-control"
             id="studentSelect"

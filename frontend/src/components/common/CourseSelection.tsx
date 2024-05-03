@@ -1,5 +1,6 @@
 import React from "react";
 import { useState } from "react";
+import TotalCost from "./TotalCost.tsx";
 
 export interface ClassInformation {
   selected: boolean;
@@ -28,6 +29,24 @@ const findSelectedCourse = (courses, value) => {
     return selected_course[0];
   }
   return null;
+};
+
+const extractCourseTime = (course: ClassInformation) => {
+  var start = new Date("2024-10-01T" + course.course_start);
+  var end = new Date("2024-10-01T" + course.course_end);
+  return (
+    start.toLocaleString("en-US", {
+      hour: "numeric",
+      hour12: true,
+      minute: "numeric",
+    }) +
+    " - " +
+    end.toLocaleString("en-US", {
+      hour: "numeric",
+      hour12: true,
+      minute: "numeric",
+    })
+  );
 };
 
 const CourseSelection = ({
@@ -65,7 +84,7 @@ const CourseSelection = ({
   });
   return (
     <>
-      <div className="form-group">
+      <div className="form-group pb-2">
         <label>
           <strong>Select class</strong>
         </label>
@@ -114,34 +133,42 @@ const CourseSelection = ({
         </select>
       </div>
       {classInfo.selected && (
-        <div className="input-group pb-2">
-          <span className="input-group-text bg-info">Capacity:</span>
-          <span className="input-group-text bg-white">
-            {classInfo.capacity}
-          </span>
-          <span className="input-group-text bg-info">Enrollment:</span>
-          <span
-            className={
-              "input-group-text " +
-              (classInfo.enrollment >= classInfo.capacity
-                ? "bg-danger"
-                : "bg-white")
-            }
-          >
-            {classInfo.enrollment}
-          </span>
-          <span className="input-group-text bg-info">Cost</span>
-          <span className="input-group-text bg-white">{classInfo.cost}</span>
-          <span className="input-group-text bg-info">Teacher</span>
-          <span className="input-group-text bg-white">{classInfo.teacher}</span>
-          <span className="input-group-text bg-info">Classroom</span>
-          <span className="input-group-text bg-white">
-            {classInfo.classroom}
-          </span>
-          <span className="input-group-text bg-info">Time</span>
-          <span className="input-group-text bg-white">
-            {classInfo.course_start + " - " + classInfo.course_end}
-          </span>
+        <div className="form-control">
+          <label>
+            <strong>Class Information</strong>
+          </label>
+          <div className="input-group pb-2">
+            <div className="input-group pb-2">
+              <span className="input-group-text bg-info">Time</span>
+              <span className="input-group-text bg-white">
+                {extractCourseTime(classInfo)}
+              </span>
+              <span className="input-group-text bg-info">Classroom</span>
+              <span className="input-group-text bg-white">
+                {classInfo.classroom}
+              </span>
+              <span className="input-group-text bg-info">Teacher</span>
+              <span className="input-group-text bg-white">
+                {classInfo.teacher}
+              </span>
+            </div>
+            <span className="input-group-text bg-info">Capacity:</span>
+            <span className="input-group-text bg-white">
+              {classInfo.capacity}
+            </span>
+            <span className="input-group-text bg-info">Enrollment:</span>
+            <span
+              className={
+                "input-group-text " +
+                (classInfo.enrollment >= classInfo.capacity
+                  ? "bg-danger"
+                  : "bg-white")
+              }
+            >
+              {classInfo.enrollment}
+            </span>
+          </div>
+          <TotalCost amount={classInfo.cost} />
         </div>
       )}
       {/* TODO(lu): Bring it back once the PoD workflow is figured out. 
