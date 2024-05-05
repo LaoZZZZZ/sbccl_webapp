@@ -1,7 +1,7 @@
 
 from rest_framework.test import APITestCase, APIRequestFactory, APIClient
 from rest_framework import status
-from .models import Member, Student, Course, Registration, InstructorAssignment
+from .models import Coupon, Member, Student, Course, Registration, InstructorAssignment, CouponUsageRecord
 from django.contrib.auth.models import User
 from rest_framework.test import force_authenticate
 import datetime
@@ -28,6 +28,14 @@ class MemberViewSetTest(APITestCase):
         )
         member.save()
         return member
+
+    def createCoupon(self, coupon_code, application_rule, expiration_date):
+        coupon = Coupon(type='A', dollar_amount=50, code=coupon_code,
+                        application_rule=application_rule, creator='test',
+                        expiration_date = expiration_date,
+                        creation_date=datetime.date.today())
+        coupon.save()
+        return coupon
 
     def test_create_member_succeed(self):
         user_json = {'username': 'test_name', 'email': 'test4@gmail.com',
@@ -498,6 +506,82 @@ class MemberViewSetTest(APITestCase):
         # make sure the student can also be searched 
         updated_course = Course.objects.get(name='B1A')
         updated_course.students.get(first_name=student.first_name)
+
+    def test_add_registration_course_with_coupon_succeed(self):
+        coupon_code = 'EARLY_BIRD_2024'
+        coupon = self.createCoupon(coupon_code, 'PA', expiration_date=datetime.date.today())
+        # Add class first
+        exist_user = self.create_user('test_name', 'david@gmail.com')
+        self.create_member(exist_user, sign_up_status='V',
+                           verification_code="12345-1231", member_type='B')
+        
+        course_json = {
+            'name': "B1A",
+            'course_description': 'Morning session for grade 1 class.',
+            'course_type': "L",
+            'course_status': 'A',
+            'size_limit': 20,
+            'cost': 500,
+            'classroom': 'N101',
+            'course_start_time': '10:00:00',
+            'course_end_time': '11:50:00'
+        }
+
+        self.client.force_authenticate(user=exist_user)
+        response = self.client.put('/rest_api/members/upsert-course/',
+                                   data=course_json, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        persisted_course = Course.objects.get(name="B1A")
+        # Add student
+        parent_account = self.create_user('parent', 'parent@gmail.com')
+        self.create_member(parent_account, sign_up_status='V',
+                           verification_code="12345-1231", member_type='P')
+        student_json = {
+            'first_name': 'david',
+            'last_name': 'chatty',
+            'date_of_birth': '2015-10-01',
+            'gender': 'M'
+        }
+        self.client.force_authenticate(user=parent_account)
+        response = self.client.put('/rest_api/members/add-student/',
+                                   data=student_json, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        member = Member.objects.get(user_id=parent_account)
+        student = Student.objects.get(parent_id=member)
+        self.assertEqual(student.last_name, 'chatty')
+        self.assertEqual(student.first_name, 'david')
+        self.assertIsNotNone(student.joined_date)
+        # Add registration
+        payload = {
+            'course_id': persisted_course.id,
+            'student': {
+                'first_name': student.first_name,
+                'last_name': student.last_name,
+                'date_of_birth': student.date_of_birth,
+                'gender': 'M'
+            },
+            'coupon_code': coupon_code
+        }
+        response = self.client.put('/rest_api/members/register-course/',
+                                   data=payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        registration = Registration.objects.get(student=student)
+        self.assertEqual(registration.course.name, "B1A")
+        self.assertEqual(registration.student.last_name, student.last_name)
+        self.assertEqual(registration.student.first_name, student.first_name)
+        self.assertIsNotNone(registration.school_year_start)
+        self.assertIsNotNone(registration.school_year_end)
+        self.assertEqual(registration.registration_date.day, datetime.datetime.today().day)
+        self.assertEqual(registration.expiration_date, registration.school_year_end)
+
+        # make sure the student can also be searched 
+        updated_course = Course.objects.get(name='B1A')
+        updated_course.students.get(first_name=student.first_name)
+
+        response = self.client.get('/rest_api/members/account-details/',format='json')
+        self.assertEqual(response.data['account_details']['balance'],
+                         ''.join(['$', str(updated_course.cost - coupon.dollar_amount)]))
 
     def test_add_registration_nonexisting_course_fail(self):
         parent_account = self.create_user('parent', 'parent@gmail.com')
@@ -1133,3 +1217,50 @@ class MemberViewSetTest(APITestCase):
         self.assertTrue('students' in response.data['data'][0])
         self.assertTrue('course' in response.data['data'][0])
 
+
+    def test__get_coupon_details_succeed(self):
+        code = 'early_bird'
+        self.createCoupon(code, 'PA', expiration_date=datetime.date.today())
+        exist_user = self.create_user('test_name', 'david@gmail.com')
+        self.create_member(exist_user, sign_up_status='V',
+                           verification_code="12345-1231", member_type='P')
+
+        self.client.force_authenticate(user=exist_user)
+        response = self.client.get('/rest_api/members/{code}/coupon-details/'.format(code=code),
+                                   format='json')
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        retrieved_coupon = json.loads(response.data)
+        self.assertEqual(retrieved_coupon['code'], code)
+        self.assertEqual(retrieved_coupon['dollar_amount'], 50)
+
+    def test__get_coupon_details_failed(self):
+        coupon_code = 'expired_code'
+        self.createCoupon(coupon_code, application_rule='PA',
+                          expiration_date=datetime.date.today() - datetime.timedelta(days=1))
+        exist_user = self.create_user('test_name', 'david@gmail.com')
+        self.create_member(exist_user, sign_up_status='V',
+                           verification_code="12345-1231", member_type='P')
+        self.client.force_authenticate(user=exist_user)
+        response = self.client.get('/rest_api/members/{code}/coupon-details/'.format(code=coupon_code),
+                                   format='json')
+        
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    # def test_get_coupon_details_unavailable(self):
+    #     coupon_code = 'expired_code'
+    #     saved_coupon = self.createCoupon(coupon_code, application_rule='PA',
+    #                       expiration_date=datetime.date.today() - datetime.timedelta(days=1))
+    #     exist_user = self.create_user('test_name', 'david@gmail.com')
+    #     self.create_member(exist_user, sign_up_status='V',
+    #                        verification_code="12345-1231", member_type='P')
+    #     member = Member.objects.get(user_id=exist_user)
+        
+    #     usage = CouponUsageRecord(user=member, coupon=saved_coupon, registration=registration,
+    #                               used_date=datetime.date.today())
+    #     usage.save()
+    #     self.client.force_authenticate(user=exist_user)
+    #     response = self.client.get('/rest_api/members/{code}/coupon-details/'.format(code=coupon_code),
+    #                                format='json')
+        
+    #     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
