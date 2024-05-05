@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Member, Student, Course, Registration
+from .models import Member, Student, Course, Registration, Coupon
 from django.contrib.auth.models import User
 import re
 import pytz
@@ -129,4 +129,16 @@ class RegistrationSerializer(serializers.ModelSerializer):
         registration.student = student
         registration.course = course
         return registration
+    
+class CouponSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Coupon
+        fields = ('reason', 'type', 'dollar_amount', 'percentage', 'code', 'application_rule',
+                  'expiration_date')
+
+    def create(self, validated_data, user : User):
+        coupon = Coupon(**validated_data)
+        coupon.creation_date = datetime.date.today()
+        coupon.creator = user.username
+        return coupon
     

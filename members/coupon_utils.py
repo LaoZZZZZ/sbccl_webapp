@@ -1,5 +1,5 @@
 
-from members.models import Coupon
+from members.models import Coupon, CouponUsageRecord
 import datetime
 
 class CouponUtils(object):
@@ -20,3 +20,21 @@ class CouponUtils(object):
             else:
                 print('Percentage type of coupon is not supported yet')
         return amount
+    
+    def canBeUsed(coupon : Coupon, usage_history: list[CouponUsageRecord]):
+        """
+         Checks if this coupon can be used for this user.
+        """
+        for usage in usage_history:
+            if usage.coupon.code == coupon.code:
+                # Per registration
+                if coupon.application_rule == 'PR':
+                    return True
+                # Per account
+                elif coupon.application_rule == 'PA':
+                    return False
+                else:
+                    print("Invalid application rule found: ", coupon.application_rule)
+                    return False
+
+        return True
