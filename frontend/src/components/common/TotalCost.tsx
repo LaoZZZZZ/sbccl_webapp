@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import validateCoupon from "./GetCoupon.tsx";
 
 interface TotalCostProps {
@@ -6,13 +6,38 @@ interface TotalCostProps {
   amount: any;
 }
 
+interface Coupon {
+  code: string;
+  expiration_date: Date;
+  reason: string;
+  type: string;
+  dollar_amount: string;
+  percentage: string;
+  application_rule: string;
+}
+
+// Json format for the data model of backend API call.
+interface CouponDetails {
+  errMsg: string;
+  coupon: Coupon;
+}
+
 /**
  * Component that shows the total cost and coupon application if possible.
  */
-const TotalCost = ({ user_info, amount }: TotalCostProps): JSX.Element => {
+const TotalCost = ({ user_info, amount }: TotalCostProps) => {
   const [couponCode, setCouponCode] = useState("");
-  const [couponInfo, setCouponInfo] = useState({
-    'error_msg': "", 'data': {}
+  const [couponDetails, setCouponDetails] = useState<CouponDetails>({
+    errMsg: "",
+    coupon: {
+      code: "",
+      expiration_date: new Date(),
+      reason: "",
+      type: "",
+      dollar_amount: "",
+      percentage: "",
+      application_rule: "",
+    },
   });
 
   return (
@@ -34,7 +59,7 @@ const TotalCost = ({ user_info, amount }: TotalCostProps): JSX.Element => {
               placeholder="Coupon Code"
               aria-label="Coupon"
               onChange={(e) => {
-                setCouponCode(e.target.value)
+                setCouponCode(e.target.value);
               }}
             />
           </div>
@@ -45,12 +70,7 @@ const TotalCost = ({ user_info, amount }: TotalCostProps): JSX.Element => {
               value="Apply"
               id="coupon-button"
               onClick={() => {
-                validateCoupon(user_info, {'coupon_code': couponCode}, (response)=>{
-                  if (response['data'] === null) {
-                    setErrMsg(response['error_msg'])
-                  }
-                  setCouponInfo(response['data'])
-                })
+                validateCoupon(user_info, couponCode, setCouponDetails);
               }}
             />
           </div>
@@ -62,7 +82,3 @@ const TotalCost = ({ user_info, amount }: TotalCostProps): JSX.Element => {
 // #endregion
 
 export default TotalCost;
-function useState(arg0: string): [any, any] {
-  throw new Error("Function not implemented.");
-}
-
