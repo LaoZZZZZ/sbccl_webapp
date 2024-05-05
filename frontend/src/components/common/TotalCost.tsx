@@ -1,26 +1,20 @@
-import React from "react";
-import TextInput from "./TextInput.tsx";
-// #region constants
+import React, {useState} from "react";
+import validateCoupon from "./GetCoupon.tsx";
 
-// #endregion
-
-// #region styled-components
-
-// #endregion
-
-// #region functions
-
-// #endregion
-
-// #region component
 interface TotalCostProps {
+  user_info: {};
   amount: any;
 }
 
 /**
- *
+ * Component that shows the total cost and coupon application if possible.
  */
-const TotalCost = ({ amount }: TotalCostProps): JSX.Element => {
+const TotalCost = ({ user_info, amount }: TotalCostProps): JSX.Element => {
+  const [couponCode, setCouponCode] = useState("");
+  const [couponInfo, setCouponInfo] = useState({
+    'error_msg': "", 'data': {}
+  });
+
   return (
     <div className="form-group">
       <div className="form-group mb-2">
@@ -39,6 +33,9 @@ const TotalCost = ({ amount }: TotalCostProps): JSX.Element => {
               className="form-control col-auto"
               placeholder="Coupon Code"
               aria-label="Coupon"
+              onChange={(e) => {
+                setCouponCode(e.target.value)
+              }}
             />
           </div>
           <div className="col-auto">
@@ -47,6 +44,14 @@ const TotalCost = ({ amount }: TotalCostProps): JSX.Element => {
               className="btn btn-outline-primary col-auto"
               value="Apply"
               id="coupon-button"
+              onClick={() => {
+                validateCoupon(user_info, {'coupon_code': couponCode}, (response)=>{
+                  if (response['data'] === null) {
+                    setErrMsg(response['error_msg'])
+                  }
+                  setCouponInfo(response['data'])
+                })
+              }}
             />
           </div>
         </div>
@@ -57,3 +62,7 @@ const TotalCost = ({ amount }: TotalCostProps): JSX.Element => {
 // #endregion
 
 export default TotalCost;
+function useState(arg0: string): [any, any] {
+  throw new Error("Function not implemented.");
+}
+
