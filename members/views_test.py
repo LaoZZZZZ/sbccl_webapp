@@ -942,6 +942,8 @@ class MemberViewSetTest(APITestCase):
         self.assertFalse(registration.on_waiting_list)
 
     def test_unregistration_succeed(self):
+        coupon_code = 'EARLY_BIRD_2024'
+        coupon = self.createCoupon(coupon_code, 'PA', expiration_date=datetime.date.today())
          # Add class first
         exist_user = self.create_user('test_name', 'david@gmail.com')
         self.create_member(exist_user, sign_up_status='V',
@@ -990,7 +992,8 @@ class MemberViewSetTest(APITestCase):
                 'last_name': student.last_name,
                 'date_of_birth': student.date_of_birth,
                 'gender': 'M'
-            }
+            },
+            'coupon_code': coupon_code
         }
         response = self.client.put('/rest_api/members/register-course/',
                                    data=payload, format='json')
@@ -1015,7 +1018,13 @@ class MemberViewSetTest(APITestCase):
         updated_course = Course.objects.get(name='B1A')
         self.assertEqual(len(updated_course.students.filter(first_name=student.first_name)), 0)
 
+        # make sure the coupon usage is also removed once the registration is removed.
+        coupon_usage = CouponUsageRecord.objects.filter(user=member)
+        self.assertTrue(len(coupon_usage) == 0)
+
     def test_update_registration_course_succeed(self):
+        coupon_code = 'EARLY_BIRD_2025'
+        coupon = self.createCoupon(coupon_code, 'PA', expiration_date=datetime.date.today())
         # Add class first
         exist_user = self.create_user('test_name', 'david@gmail.com')
         self.create_member(exist_user, sign_up_status='V',
@@ -1105,12 +1114,20 @@ class MemberViewSetTest(APITestCase):
             'school_year_start': registration.school_year_start,
             'school_year_end': registration.school_year_end,
             'registration_code': registration.registration_code,
-            'registration_date': registration.registration_date
+            'registration_date': registration.registration_date,
+            'coupons': [coupon_code]
         }
         response = self.client.put('/rest_api/members/update-registration/',
                                    data=updated_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
-        # No op on the second request
+
+        # can not apply the same coupon to the same registration repeatedly.
+        response = self.client.put('/rest_api/members/update-registration/',
+                                   data=updated_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # No op if there is no update.
+        del updated_payload['coupons']
         response = self.client.put('/rest_api/members/update-registration/',
                                    data=updated_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
