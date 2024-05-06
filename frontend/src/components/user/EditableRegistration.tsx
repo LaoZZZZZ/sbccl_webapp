@@ -141,26 +141,28 @@ const EditableRegistration = ({
               disabled
             />
           </div>
-          <CourseSelection
-            courses={courses.filter((course) => {
-              return course.course_type === originalCourse.course_type;
-            })}
-            defaultCourseSelection={originalCourse.name}
-            defaultPoDSelection={"Not Selected"}
-            setCourseSelection={(course) => {
-              const updated = originalCourse.id !== course.id;
-              setNeedsUpdate(updated);
-              setButtonMsg(
-                course.enrollment >= course.size_limit && updated
-                  ? "Add to waiting list"
-                  : "Update"
-              );
-              return (registration.course = course.id);
-            }}
-            setPoDSelection={(pod) => {
-              return (registration.pod = pod);
-            }}
-          />
+          <div>
+            <CourseSelection
+              user_auth={userAuth}
+              courses={courses.filter((course) => {
+                return course.course_type === originalCourse.course_type;
+              })}
+              defaultCourseSelection={originalCourse.name}
+              setCourseSelection={(course) => {
+                const updated = originalCourse.id !== course.id;
+                setNeedsUpdate(updated);
+                setButtonMsg(
+                  course.enrollment >= course.size_limit && updated
+                    ? "Add to waiting list"
+                    : "Update"
+                );
+                return (registration.course = course.id);
+              }}
+              populateCouponCode={(code: string) => {
+                registration.coupons = [code];
+              }}
+            />
+          </div>
           <div className="form-group pb-2 mb-2">
             <label className="sr-only" htmlFor="registration-code">
               <strong>Registration Code</strong>

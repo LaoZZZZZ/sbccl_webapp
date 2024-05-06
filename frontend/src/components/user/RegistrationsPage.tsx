@@ -69,7 +69,6 @@ const Registrations = ({ userInfo }: Props) => {
     }
     if (!courseState.fetched) {
       fetchCourses(userInfo, (courses) => {
-        console.log(courses);
         setCourseState(courses);
       });
     }
