@@ -22,7 +22,7 @@ interface Student {
 interface Registration {
   course_id: string;
   student: Student;
-  pod: string;
+  coupon_code: string;
 }
 
 const AddStatus = {
@@ -86,7 +86,7 @@ const AddRegistration = ({
       gender: "",
       date_of_birth: new Date("1997-01-01"),
     },
-    pod: "",
+    coupon_code: "",
   });
 
   return (
@@ -116,9 +116,9 @@ const AddRegistration = ({
           </select>
         </div>
         <CourseSelection
+          user_auth={userAuth}
           courses={courses}
           defaultCourseSelection={"Not Selected"}
-          defaultPoDSelection={"Not Selected"}
           setCourseSelection={(course) => {
             setButtonMsg(
               course.enrollment < course.size_limit
@@ -127,8 +127,8 @@ const AddRegistration = ({
             );
             registration.course_id = course.id;
           }}
-          setPoDSelection={(pod) => {
-            return (registration.pod = pod);
+          populateCouponCode={(code: string) => {
+            registration.coupon_code = code;
           }}
         />
         <div className="btn-group pt-2">

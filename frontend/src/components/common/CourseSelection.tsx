@@ -1,13 +1,13 @@
 import React from "react";
 import { useState } from "react";
 import TotalCost from "./TotalCost.tsx";
+import GetCoupon from "./GetCoupon.tsx";
 
 export interface ClassInformation {
-  selected: boolean;
   enrollment: number;
   capacity: number;
   teacher: string;
-  cost: string;
+  cost: number;
   type: string;
   classroom: string;
   course_start: string;
@@ -15,11 +15,12 @@ export interface ClassInformation {
 }
 
 interface Props {
+  user_auth: {};
   courses: ClassInformation[];
   defaultCourseSelection: "";
   defaultPoDSelection: "";
   setCourseSelection: () => {};
-  setPoDSelection: () => {};
+  populateCouponCode: (code: string) => {};
 }
 
 //
@@ -50,38 +51,31 @@ const extractCourseTime = (course: ClassInformation) => {
 };
 
 const CourseSelection = ({
+  user_auth,
   courses,
   defaultCourseSelection,
-  defaultPoDSelection,
   setCourseSelection,
-  setPoDSelection,
+  populateCouponCode,
 }: Props) => {
-  // TODO(lu): Read the available dates from the backend.
-  const podDates = [
-    "2024-01-24 10:00am",
-    "2024-01-24 01:00pm",
-    "2024-02-24 10:00am",
-    "2024-02-24 01:00pm",
-    "2024-03-24 10:00am",
-    "2024-04-24 10:00am",
-    "2024-05-24 10:00am",
-    "2024-06-24 10:00am",
-    "2024-07-24 10:00am",
-  ];
-
   const selectedCourse = findSelectedCourse(courses, defaultCourseSelection);
+  const [selected, setSelected] = useState(selectedCourse !== null);
+
   const [classInfo, setClassInfo] = useState<ClassInformation>({
-    selected: selectedCourse !== null,
     enrollment: selectedCourse !== null ? selectedCourse.enrollment : 0,
     capacity: selectedCourse !== null ? selectedCourse.size_limit : 0,
     teacher: selectedCourse != null ? selectedCourse.teacher : "NA",
-    cost: selectedCourse !== null ? "$" + selectedCourse.cost : "NA",
+    cost: selectedCourse !== null ? selectedCourse.cost : 0,
     type: selectedCourse !== null ? selectedCourse.course_type : "",
     classroom: selectedCourse !== null ? selectedCourse.classroom : "NA",
     course_start:
       selectedCourse !== null ? selectedCourse.course_start_time : "NA",
     course_end: selectedCourse !== null ? selectedCourse.course_end_time : "NA",
   });
+  const [waitForResponse, setWaitForResponse] = useState(false);
+  const [cost, setCost] = useState(selectedCourse.cost);
+
+  const [couponCode, setCouponCode] = useState("");
+  const [couponApplied, setCouponApplied] = useState(false);
   return (
     <>
       <div className="form-group pb-2">
@@ -92,33 +86,33 @@ const CourseSelection = ({
           className="form-control"
           id="selectCourse"
           onChange={(e) => {
+            setSelected(false);
+            setClassInfo({
+              enrollment: 0,
+              capacity: 0,
+              type: "",
+              cost: 0,
+              classroom: "NA",
+              teacher: "NA",
+              course_start: "NA",
+              course_end: "NA",
+            });
             const selected_course = findSelectedCourse(courses, e.target.value);
-
             if (selected_course !== null) {
               setCourseSelection(selected_course);
+
               setClassInfo({
-                selected: true,
                 enrollment: selected_course.enrollment,
                 capacity: selected_course.size_limit,
-                cost: "$" + selected_course.cost,
+                cost: selected_course.cost,
                 type: selected_course.course_type,
                 classroom: selected_course.classroom,
                 teacher: selected_course.teacher,
                 course_start: selected_course.course_start_time,
                 course_end: selected_course.course_end_time,
               });
-            } else {
-              setClassInfo({
-                selected: false,
-                enrollment: 0,
-                capacity: 0,
-                type: "",
-                cost: "$0",
-                classroom: "NA",
-                teacher: "NA",
-                course_start: "NA",
-                course_end: "NA",
-              });
+              setCost(selected_course.cost);
+              setSelected(true);
             }
           }}
         >
@@ -132,7 +126,7 @@ const CourseSelection = ({
             })}
         </select>
       </div>
-      {classInfo.selected && (
+      {selected && (
         <div className="form-control">
           <label>
             <strong>Class Information</strong>
@@ -152,43 +146,71 @@ const CourseSelection = ({
                 {classInfo.teacher}
               </span>
             </div>
-            <span className="input-group-text bg-info">Capacity:</span>
-            <span className="input-group-text bg-white">
-              {classInfo.capacity}
-            </span>
-            <span className="input-group-text bg-info">Enrollment:</span>
-            <span
-              className={
-                "input-group-text " +
-                (classInfo.enrollment >= classInfo.capacity
-                  ? "bg-danger"
-                  : "bg-white")
-              }
-            >
-              {classInfo.enrollment}
-            </span>
+            <div className="input-group pb-2">
+              <span className="input-group-text bg-info">Capacity:</span>
+              <span className="input-group-text bg-white">
+                {classInfo.capacity}
+              </span>
+              <span className="input-group-text bg-info">Enrollment:</span>
+              <span
+                className={
+                  "input-group-text " +
+                  (classInfo.enrollment >= classInfo.capacity
+                    ? "bg-danger"
+                    : "bg-white")
+                }
+              >
+                {classInfo.enrollment}
+              </span>
+            </div>
+            <div className="row g-3 input-group pb-2">
+              <div className="col-auto">
+                <TotalCost amount={cost} />
+              </div>
+              <div className="col-auto">
+                <input
+                  type="text"
+                  className="form-control col-auto"
+                  placeholder="Coupon code"
+                  aria-label="Coupon"
+                  onChange={(e) => {
+                    setCouponCode(e.target.value);
+                  }}
+                />
+              </div>
+              <div className="col-auto">
+                <input
+                  type="button"
+                  className="btn btn-outline-primary"
+                  value={couponApplied ? "Remove" : "Apply"}
+                  id="coupon-button"
+                  disabled={waitForResponse}
+                  onClick={() => {
+                    setWaitForResponse(true);
+                    if (!couponApplied && couponCode.length > 0) {
+                      GetCoupon(
+                        user_auth,
+                        couponCode,
+                        classInfo.cost,
+                        (updatedCost) => {
+                          setCost(updatedCost);
+                          setCouponApplied(true);
+                          populateCouponCode(couponCode);
+                        }
+                      );
+                    } else {
+                      setCost(classInfo.cost);
+                      setCouponApplied(false);
+                      populateCouponCode("");
+                    }
+                    setWaitForResponse(false);
+                  }}
+                />
+              </div>
+            </div>
           </div>
-          <TotalCost amount={classInfo.cost} />
         </div>
       )}
-      {/* TODO(lu): Bring it back once the PoD workflow is figured out. 
-        {classInfo.selected && classInfo.type === "L" && (
-        <div className="form-group pb-2">
-          <label>Select Parent On Duty date</label>
-          <select
-            className="form-control"
-            id="podSelect"
-            onChange={(e) => {
-              setPoDSelection(e.target.value);
-            }}
-          >
-            <option>{defaultPoDSelection}</option>
-            {podDates.map((date) => {
-              return <option>{date}</option>;
-            })}
-          </select>
-        </div>
-      )} */}
     </>
   );
 };

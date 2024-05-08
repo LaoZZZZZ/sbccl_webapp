@@ -64,6 +64,8 @@ const LoginPage = ({ onLoginSuccess, onSignUp, onResetPassword }: Props) => {
                 .catch(function (error) {
                   if (error.response.data) {
                     setLoginErrorMsg(error.response.data);
+                  } else {
+                    setLoginErrorMsg("Unexpected error!");
                   }
                   setLoginFailed(true);
                 });

@@ -106,6 +106,7 @@ const EditableRegistration = ({
   const [needsUpdate, setNeedsUpdate] = useState<boolean>(false);
   const [removeRegistration, setRemoveRegistration] = useState(false);
   const [waitForResponse, setWaitForResponse] = useState(false);
+  console.log(registration);
 
   return (
     <div className="col w-75 mx-auto align-middle">
@@ -141,26 +142,38 @@ const EditableRegistration = ({
               disabled
             />
           </div>
-          <CourseSelection
-            courses={courses.filter((course) => {
-              return course.course_type === originalCourse.course_type;
-            })}
-            defaultCourseSelection={originalCourse.name}
-            defaultPoDSelection={"Not Selected"}
-            setCourseSelection={(course) => {
-              const updated = originalCourse.id !== course.id;
-              setNeedsUpdate(updated);
-              setButtonMsg(
-                course.enrollment >= course.size_limit && updated
-                  ? "Add to waiting list"
-                  : "Update"
-              );
-              return (registration.course = course.id);
-            }}
-            setPoDSelection={(pod) => {
-              return (registration.pod = pod);
-            }}
-          />
+          <div>
+            <CourseSelection
+              user_auth={userAuth}
+              courses={courses.filter((course) => {
+                return course.course_type === originalCourse.course_type;
+              })}
+              defaultCourseSelection={originalCourse.name}
+              setCourseSelection={(course) => {
+                const updated = originalCourse.id !== course.id;
+                setNeedsUpdate(updated);
+                setButtonMsg(
+                  course.enrollment >= course.size_limit && updated
+                    ? "Add to waiting list"
+                    : "Update"
+                );
+                return (registration.course = course.id);
+              }}
+              populateCouponCode={(code: string) => {
+                if (code.length > 0) {
+                  console.log(registration);
+                  setNeedsUpdate(
+                    registration.coupons === null ||
+                      registration.coupons.length == 0
+                  );
+                  registration.coupons = [code];
+                } else {
+                  registration.coupons = [];
+                  setNeedsUpdate(false);
+                }
+              }}
+            />
+          </div>
           <div className="form-group pb-2 mb-2">
             <label className="sr-only" htmlFor="registration-code">
               <strong>Registration Code</strong>

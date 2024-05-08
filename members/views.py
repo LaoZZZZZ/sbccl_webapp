@@ -176,13 +176,13 @@ class MemberViewSet(ModelViewSet):
         matched_coupon = Coupon.objects.get(code=coupon_code)
         # expired coupon can not be used.
         if not CouponUtils.IsValid(matched_coupon):
-            raise ValueError("The coupon code - {code} has expired!".format(code=matched_coupon.code))
+            raise ValueError("The coupon code ({code}) has expired!".format(code=matched_coupon.code))
         
         # Check if coupon can be applied to this account or the registration.
         matched_member = Member.objects.get(user_id=user)
         coupon_usages = CouponUsageRecord.objects.filter(user=matched_member)
         if not CouponUtils.canBeUsed(matched_coupon, coupon_usages, registration):
-            raise ValueError("The coupon code - {code} has been used in your account!".format(code=matched_coupon.code))
+            raise ValueError("The coupon code ({code}) has been used!".format(code=matched_coupon.code))
         return matched_coupon
 
     def __record_coupon_usage__(self, coupon, registration, matched_member):
@@ -610,7 +610,7 @@ class MemberViewSet(ModelViewSet):
     def register_course(self, request):
         try:
             coupon = None
-            if 'coupon_code' in request.data:
+            if 'coupon_code' in request.data and len(request.data['coupon_code']) > 0:
                 coupon = self.__fetch_coupon__(request.user, request.data['coupon_code'])
                 
             course_id = request.data['course_id']
@@ -682,10 +682,11 @@ class MemberViewSet(ModelViewSet):
             if not new_course_id:
                 return Response("No course is provided", status=status.HTTP_400_BAD_REQUEST)
             
-            if 'coupons' in request.data:
+            if 'coupons' in request.data and len(request.data['coupons']) > 0:
                 if len(request.data['coupons']) > 1:
                     return Response("Only one coupon can be accepted at a time!",
                                     status=status.HTTP_400_BAD_REQUEST)
+                print(request.data['coupons'][0])
                 coupon = self.__fetch_coupon__(request.user, request.data['coupons'][0], matched_registration)
                 member = Member.objects.get(user_id=request.user)
                 self.__record_coupon_usage__(coupon, matched_registration, member)
@@ -722,6 +723,8 @@ class MemberViewSet(ModelViewSet):
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
         except Course.DoesNotExist as e:
             return Response(str(3), status=status.HTTP_400_BAD_REQUEST)
+        except Coupon.DoesNotExist as e:
+            return Response('The coupon code does not exist!', status=status.HTTP_400_BAD_REQUEST)
 
 
     @action(methods=['PUT'], detail=True, url_path='unregister-course', name='Unregister a student to a course',
