@@ -163,45 +163,51 @@ const CourseSelection = ({
                 {classInfo.enrollment}
               </span>
             </div>
-            <div className="input-group pb-2">
-              <input
-                type="text"
-                className="form-control col-auto"
-                placeholder="Coupon code"
-                aria-label="Coupon"
-                onChange={(e) => {
-                  setCouponCode(e.target.value);
-                }}
-              />
-              <input
-                type="button"
-                className="btn btn-outline-primary"
-                value={couponApplied ? "Remove" : "Apply"}
-                id="coupon-button"
-                disabled={waitForResponse}
-                onClick={() => {
-                  setWaitForResponse(true);
-                  if (!couponApplied && couponCode.length > 0) {
-                    GetCoupon(
-                      user_auth,
-                      couponCode,
-                      classInfo.cost,
-                      (updatedCost) => {
-                        setCost(updatedCost);
-                        setCouponApplied(true);
-                        populateCouponCode(couponCode);
-                      }
-                    );
-                  } else {
-                    setCost(classInfo.cost);
-                    setCouponApplied(false);
-                    populateCouponCode("");
-                  }
-                  setWaitForResponse(false);
-                }}
-              />
+            <div className="row g-3 input-group pb-2">
+              <div className="col-auto">
+                <TotalCost amount={cost} />
+              </div>
+              <div className="col-auto">
+                <input
+                  type="text"
+                  className="form-control col-auto"
+                  placeholder="Coupon code"
+                  aria-label="Coupon"
+                  onChange={(e) => {
+                    setCouponCode(e.target.value);
+                  }}
+                />
+              </div>
+              <div className="col-auto">
+                <input
+                  type="button"
+                  className="btn btn-outline-primary"
+                  value={couponApplied ? "Remove" : "Apply"}
+                  id="coupon-button"
+                  disabled={waitForResponse}
+                  onClick={() => {
+                    setWaitForResponse(true);
+                    if (!couponApplied && couponCode.length > 0) {
+                      GetCoupon(
+                        user_auth,
+                        couponCode,
+                        classInfo.cost,
+                        (updatedCost) => {
+                          setCost(updatedCost);
+                          setCouponApplied(true);
+                          populateCouponCode(couponCode);
+                        }
+                      );
+                    } else {
+                      setCost(classInfo.cost);
+                      setCouponApplied(false);
+                      populateCouponCode("");
+                    }
+                    setWaitForResponse(false);
+                  }}
+                />
+              </div>
             </div>
-            <TotalCost amount={cost} />
           </div>
         </div>
       )}

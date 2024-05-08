@@ -169,6 +169,7 @@ const EditableRegistration = ({
                   registration.coupons = [code];
                 } else {
                   registration.coupons = [];
+                  setNeedsUpdate(false);
                 }
               }}
             />
