@@ -72,7 +72,7 @@ const CourseSelection = ({
     course_end: selectedCourse !== null ? selectedCourse.course_end_time : "NA",
   });
   const [waitForResponse, setWaitForResponse] = useState(false);
-  const [cost, setCost] = useState(selectedCourse.cost);
+  const [cost, setCost] = useState(classInfo.cost);
 
   const [couponCode, setCouponCode] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
