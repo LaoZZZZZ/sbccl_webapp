@@ -9,16 +9,14 @@ interface TotalCostProps {
  */
 const TotalCost = ({ amount }: TotalCostProps) => {
   return (
-    <div className="form-group">
-      <div className="form-group mb-2">
-        <label className="sr-only" htmlFor="student">
-          <strong>Total cost</strong>
+    <div className="row g-3 align-items-left">
+      <div className="col-auto">
+        <label className="col-form-label">
+          <strong>Total cost</strong>:
         </label>
-        <div className="col-auto">
-          <label className="form-control-plaintext" id="staticEmail2">
-            ${amount}
-          </label>
-        </div>
+      </div>
+      <div className="col-auto">
+        <label className="col-form-label">${amount}</label>
       </div>
     </div>
   );

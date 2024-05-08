@@ -72,9 +72,10 @@ const CourseSelection = ({
     course_end: selectedCourse !== null ? selectedCourse.course_end_time : "NA",
   });
   const [waitForResponse, setWaitForResponse] = useState(false);
-  const [cost, setCost] = useState(0);
+  const [cost, setCost] = useState(selectedCourse.cost);
 
   const [couponCode, setCouponCode] = useState("");
+  const [couponApplied, setCouponApplied] = useState(false);
   return (
     <>
       <div className="form-group pb-2">
@@ -175,22 +176,27 @@ const CourseSelection = ({
               <input
                 type="button"
                 className="btn btn-outline-primary"
-                value="Apply"
+                value={couponApplied ? "Remove" : "Apply"}
                 id="coupon-button"
                 disabled={waitForResponse}
                 onClick={() => {
                   setWaitForResponse(true);
-                  GetCoupon(
-                    user_auth,
-                    couponCode,
-                    classInfo.cost,
-                    (updatedCost) => {
-                      if (updatedCost != cost) {
+                  if (!couponApplied && couponCode.length > 0) {
+                    GetCoupon(
+                      user_auth,
+                      couponCode,
+                      classInfo.cost,
+                      (updatedCost) => {
+                        setCost(updatedCost);
+                        setCouponApplied(true);
                         populateCouponCode(couponCode);
                       }
-                      setCost(updatedCost);
-                    }
-                  );
+                    );
+                  } else {
+                    setCost(classInfo.cost);
+                    setCouponApplied(false);
+                    populateCouponCode("");
+                  }
                   setWaitForResponse(false);
                 }}
               />

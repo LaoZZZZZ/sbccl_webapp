@@ -610,7 +610,7 @@ class MemberViewSet(ModelViewSet):
     def register_course(self, request):
         try:
             coupon = None
-            if 'coupon_code' in request.data:
+            if 'coupon_code' in request.data and len(request.data['coupon_code']) > 0:
                 coupon = self.__fetch_coupon__(request.user, request.data['coupon_code'])
                 
             course_id = request.data['course_id']
@@ -682,7 +682,7 @@ class MemberViewSet(ModelViewSet):
             if not new_course_id:
                 return Response("No course is provided", status=status.HTTP_400_BAD_REQUEST)
             
-            if 'coupons' in request.data:
+            if 'coupons' in request.data and len(request.data['coupons']) > 0:
                 if len(request.data['coupons']) > 1:
                     return Response("Only one coupon can be accepted at a time!",
                                     status=status.HTTP_400_BAD_REQUEST)

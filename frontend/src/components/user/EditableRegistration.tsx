@@ -106,6 +106,7 @@ const EditableRegistration = ({
   const [needsUpdate, setNeedsUpdate] = useState<boolean>(false);
   const [removeRegistration, setRemoveRegistration] = useState(false);
   const [waitForResponse, setWaitForResponse] = useState(false);
+  console.log(registration);
 
   return (
     <div className="col w-75 mx-auto align-middle">
@@ -159,7 +160,16 @@ const EditableRegistration = ({
                 return (registration.course = course.id);
               }}
               populateCouponCode={(code: string) => {
-                registration.coupons = [code];
+                if (code.length > 0) {
+                  console.log(registration);
+                  setNeedsUpdate(
+                    registration.coupons === null ||
+                      registration.coupons.length == 0
+                  );
+                  registration.coupons = [code];
+                } else {
+                  registration.coupons = [];
+                }
               }}
             />
           </div>
