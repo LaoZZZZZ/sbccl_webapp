@@ -106,7 +106,6 @@ const EditableRegistration = ({
   const [needsUpdate, setNeedsUpdate] = useState<boolean>(false);
   const [removeRegistration, setRemoveRegistration] = useState(false);
   const [waitForResponse, setWaitForResponse] = useState(false);
-  console.log(registration);
 
   return (
     <div className="col w-75 mx-auto align-middle">
@@ -161,7 +160,6 @@ const EditableRegistration = ({
               }}
               populateCouponCode={(code: string) => {
                 if (code.length > 0) {
-                  console.log(registration);
                   setNeedsUpdate(
                     registration.coupons === null ||
                       registration.coupons.length == 0
@@ -171,6 +169,10 @@ const EditableRegistration = ({
                   registration.coupons = [];
                   setNeedsUpdate(false);
                 }
+              }}
+              setOrderBook={(orderBook: boolean) => {
+                setNeedsUpdate(registration.order_book != orderBook);
+                registration.order_book = orderBook;
               }}
             />
           </div>

@@ -21,6 +21,7 @@ interface Props {
   defaultPoDSelection: "";
   setCourseSelection: () => {};
   populateCouponCode: (code: string) => {};
+  setOrderBook: (orderBook: boolean) => {};
 }
 
 //
@@ -56,7 +57,18 @@ const CourseSelection = ({
   defaultCourseSelection,
   setCourseSelection,
   populateCouponCode,
+  setOrderBook,
 }: Props) => {
+  const calculateTotalAmount = (registrationCost, bookCost, discount) => {
+    return registrationCost + bookCost - discount;
+  };
+
+  const calculateOriginalAmount = (registrationCost, bookCost) => {
+    return registrationCost + bookCost;
+  };
+
+  const bookCost = 50;
+  const [wantTextBook, setWantTextBook] = useState(false);
   const selectedCourse = findSelectedCourse(courses, defaultCourseSelection);
   const [selected, setSelected] = useState(selectedCourse !== null);
 
@@ -163,10 +175,34 @@ const CourseSelection = ({
                 {classInfo.enrollment}
               </span>
             </div>
+            <div className="form-check pb-2">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                value=""
+                id="orderBook"
+                onClick={(e) => {
+                  if (e.target.checked) {
+                    setCost(cost + bookCost);
+                    setOrderBook(true);
+                    setWantTextBook(true);
+                  } else {
+                    setCost(Math.max(0, cost - bookCost));
+                    setWantTextBook(false);
+                    setOrderBook(false);
+                  }
+                }}
+                disabled={classInfo.type === "E"}
+              />
+              <label className="form-check-label">Order textbook</label>
+            </div>
             <div className="row g-3 input-group pb-2">
               <div className="col-auto">
                 <TotalCost
-                  original_amount={classInfo.cost}
+                  original_amount={calculateOriginalAmount(
+                    classInfo.cost,
+                    wantTextBook ? bookCost : 0
+                  )}
                   updated_amount={cost}
                 />
               </div>
@@ -187,14 +223,17 @@ const CourseSelection = ({
                   className="btn btn-outline-primary"
                   value={couponApplied ? "Remove" : "Apply"}
                   id="coupon-button"
-                  disabled={waitForResponse}
+                  disabled={waitForResponse || classInfo.type === "E"}
                   onClick={() => {
                     setWaitForResponse(true);
                     if (!couponApplied && couponCode.length > 0) {
                       GetCoupon(
                         user_auth,
                         couponCode,
-                        classInfo.cost,
+                        calculateOriginalAmount(
+                          classInfo.cost,
+                          wantTextBook ? bookCost : 0
+                        ),
                         (updatedCost) => {
                           setCost(updatedCost);
                           setCouponApplied(true);
@@ -202,7 +241,12 @@ const CourseSelection = ({
                         }
                       );
                     } else {
-                      setCost(classInfo.cost);
+                      setCost(
+                        calculateOriginalAmount(
+                          classInfo.cost,
+                          wantTextBook ? bookCost : 0
+                        )
+                      );
                       setCouponApplied(false);
                       populateCouponCode("");
                     }
