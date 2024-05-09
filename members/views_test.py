@@ -561,7 +561,8 @@ class MemberViewSetTest(APITestCase):
                 'date_of_birth': student.date_of_birth,
                 'gender': 'M'
             },
-            'coupon_code': coupon_code
+            'coupon_code': coupon_code,
+            'textbook_ordered': False
         }
         response = self.client.put('/rest_api/members/register-course/',
                                    data=payload, format='json')
@@ -574,6 +575,7 @@ class MemberViewSetTest(APITestCase):
         self.assertIsNotNone(registration.school_year_end)
         self.assertEqual(registration.registration_date.day, datetime.datetime.today().day)
         self.assertEqual(registration.expiration_date, registration.school_year_end)
+        self.assertFalse(registration.textbook_ordered)
 
         # make sure the student can also be searched 
         updated_course = Course.objects.get(name='B1A')
