@@ -165,7 +165,10 @@ const CourseSelection = ({
             </div>
             <div className="row g-3 input-group pb-2">
               <div className="col-auto">
-                <TotalCost amount={cost} />
+                <TotalCost
+                  original_amount={classInfo.cost}
+                  updated_amount={cost}
+                />
               </div>
               <div className="col-auto">
                 <input

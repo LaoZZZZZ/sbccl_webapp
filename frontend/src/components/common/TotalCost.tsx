@@ -1,13 +1,15 @@
 import React from "react";
 
 interface TotalCostProps {
-  amount: number;
+  original_amount: number;
+  updated_amount: number;
 }
 
 /**
  * Component that shows the total cost and coupon application if possible.
  */
-const TotalCost = ({ amount }: TotalCostProps) => {
+const TotalCost = ({ original_amount, updated_amount }: TotalCostProps) => {
+  const hasDiscount = original_amount > updated_amount;
   return (
     <div className="row g-3 align-items-left">
       <div className="col-auto">
@@ -16,7 +18,14 @@ const TotalCost = ({ amount }: TotalCostProps) => {
         </label>
       </div>
       <div className="col-auto">
-        <label className="col-form-label">${amount}</label>
+        <label className="col-form-label">
+          <p className={hasDiscount ? "text-success" : "text-primary"}>
+            ${updated_amount}
+            {hasDiscount && (
+              <del className="text-secondary"> (${original_amount})</del>
+            )}
+          </p>
+        </label>
       </div>
     </div>
   );
