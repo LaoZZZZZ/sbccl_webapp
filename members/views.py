@@ -675,7 +675,8 @@ class MemberViewSet(ModelViewSet):
             registration.registration_date = datetime.date.today()
             registration.expiration_date = registration.school_year_end
             registration.last_update_date = registration.registration_date
-            registration.textbook_ordered = request.data['textbook_ordered']
+            if 'textbook_ordered' in request.data:
+                registration.textbook_ordered = request.data['textbook_ordered']
             registration.save()
             if coupon:
                 self.__record_coupon_usage__(coupon, registration, matched_member)
@@ -713,7 +714,7 @@ class MemberViewSet(ModelViewSet):
             
             if 'textbook_ordered' in registration_serializer.validated_data:
                 matched_registration.textbook_ordered = registration_serializer.validated_data['textbook_ordered']
-            # No-op
+            # No change to the class, but still need to save updates in other fields.
             if matched_registration.course.id == new_course_id:
                 matched_registration.save()
                 return Response(status=status.HTTP_202_ACCEPTED)
