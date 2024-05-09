@@ -23,6 +23,7 @@ interface Registration {
   course_id: string;
   student: Student;
   coupon_code: string;
+  order_book: boolean;
 }
 
 const AddStatus = {
@@ -87,6 +88,7 @@ const AddRegistration = ({
       date_of_birth: new Date("1997-01-01"),
     },
     coupon_code: "",
+    order_book: false,
   });
 
   return (
@@ -129,6 +131,9 @@ const AddRegistration = ({
           }}
           populateCouponCode={(code: string) => {
             registration.coupon_code = code;
+          }}
+          setOrderBook={(orderBook: boolean) => {
+            registration.order_book = orderBook;
           }}
         />
         <div className="btn-group pt-2">

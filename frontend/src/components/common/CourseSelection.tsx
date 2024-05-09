@@ -21,6 +21,7 @@ interface Props {
   defaultPoDSelection: "";
   setCourseSelection: () => {};
   populateCouponCode: (code: string) => {};
+  setOrderBook: (orderBook: boolean) => {};
 }
 
 //
@@ -56,7 +57,9 @@ const CourseSelection = ({
   defaultCourseSelection,
   setCourseSelection,
   populateCouponCode,
+  setOrderBook,
 }: Props) => {
+  const bookCost = 50;
   const selectedCourse = findSelectedCourse(courses, defaultCourseSelection);
   const [selected, setSelected] = useState(selectedCourse !== null);
 
@@ -163,6 +166,26 @@ const CourseSelection = ({
                 {classInfo.enrollment}
               </span>
             </div>
+            <div className="form-check pb-2">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                value=""
+                id="orderBook"
+                onClick={(e) => {
+                  console.log(e);
+                  if (e.target.checked) {
+                    setCost(cost + bookCost);
+                    setOrderBook(true);
+                  } else {
+                    setCost(Math.max(0, cost - bookCost));
+                    setOrderBook(false);
+                  }
+                }}
+                disabled={classInfo.type === "E"}
+              />
+              <label className="form-check-label">Order textbook</label>
+            </div>
             <div className="row g-3 input-group pb-2">
               <div className="col-auto">
                 <TotalCost
@@ -187,7 +210,7 @@ const CourseSelection = ({
                   className="btn btn-outline-primary"
                   value={couponApplied ? "Remove" : "Apply"}
                   id="coupon-button"
-                  disabled={waitForResponse}
+                  disabled={waitForResponse || classInfo.type === "E"}
                   onClick={() => {
                     setWaitForResponse(true);
                     if (!couponApplied && couponCode.length > 0) {
