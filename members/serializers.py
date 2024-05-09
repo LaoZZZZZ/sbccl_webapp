@@ -121,7 +121,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         model = Registration
         fields = ('id', 'registration_code', 'school_year_start', 'school_year_end',
                   'registration_date', 'expiration_date', 'course', 'student',
-                  'on_waiting_list', 'coupons')
+                  'on_waiting_list', 'coupons', 'textbook_ordered')
     
     def create(self, validated_data, student, course):
         registration = Registration(**validated_data)

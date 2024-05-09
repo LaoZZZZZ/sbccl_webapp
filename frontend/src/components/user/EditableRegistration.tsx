@@ -172,7 +172,7 @@ const EditableRegistration = ({
               }}
               setOrderBook={(orderBook: boolean) => {
                 setNeedsUpdate(registration.order_book != orderBook);
-                registration.order_book = orderBook;
+                registration.textbook_ordered = orderBook;
               }}
             />
           </div>

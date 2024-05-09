@@ -23,7 +23,7 @@ interface Registration {
   course_id: string;
   student: Student;
   coupon_code: string;
-  order_book: boolean;
+  textbook_ordered: boolean;
 }
 
 const AddStatus = {
@@ -133,7 +133,7 @@ const AddRegistration = ({
             registration.coupon_code = code;
           }}
           setOrderBook={(orderBook: boolean) => {
-            registration.order_book = orderBook;
+            registration.textbook_ordered = orderBook;
           }}
         />
         <div className="btn-group pt-2">

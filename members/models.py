@@ -188,11 +188,14 @@ class Registration(models.Model):
     last_update_date = models.DateField(null=True)
     on_waiting_list = models.BooleanField(null=False, default=False)
     coupons = models.ManyToManyField(Coupon, through='CouponUsageRecord')
+    # whether the registration also order textbook
+    textbook_ordered = models.BooleanField(null=True, default=False)
 
     def __str__(self):
-        return 'student: {name} course: {course_name} registration date: {registration_date}'.format(
+        return 'student: {name} course: {course_name} registration date: {registration_date} textbook: {order}'.format(
             name=self.student.last_name + ' ' + self.student.first_name,
-            course_name=self.course.name, registration_date=self.registration_date)
+            course_name=self.course.name, registration_date=self.registration_date,
+            order= 'ordered' if self.textbook_ordered else 'not ordered')
 
 # Payment history
 class Payment(models.Model):
