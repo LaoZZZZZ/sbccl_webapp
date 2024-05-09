@@ -59,7 +59,16 @@ const CourseSelection = ({
   populateCouponCode,
   setOrderBook,
 }: Props) => {
+  const calculateTotalAmount = (registrationCost, bookCost, discount) => {
+    return registrationCost + bookCost - discount;
+  };
+
+  const calculateOriginalAmount = (registrationCost, bookCost) => {
+    return registrationCost + bookCost;
+  };
+
   const bookCost = 50;
+  const [wantTextBook, setWantTextBook] = useState(false);
   const selectedCourse = findSelectedCourse(courses, defaultCourseSelection);
   const [selected, setSelected] = useState(selectedCourse !== null);
 
@@ -173,12 +182,13 @@ const CourseSelection = ({
                 value=""
                 id="orderBook"
                 onClick={(e) => {
-                  console.log(e);
                   if (e.target.checked) {
                     setCost(cost + bookCost);
                     setOrderBook(true);
+                    setWantTextBook(true);
                   } else {
                     setCost(Math.max(0, cost - bookCost));
+                    setWantTextBook(false);
                     setOrderBook(false);
                   }
                 }}
@@ -189,7 +199,10 @@ const CourseSelection = ({
             <div className="row g-3 input-group pb-2">
               <div className="col-auto">
                 <TotalCost
-                  original_amount={classInfo.cost}
+                  original_amount={calculateOriginalAmount(
+                    classInfo.cost,
+                    wantTextBook ? bookCost : 0
+                  )}
                   updated_amount={cost}
                 />
               </div>
@@ -217,7 +230,10 @@ const CourseSelection = ({
                       GetCoupon(
                         user_auth,
                         couponCode,
-                        classInfo.cost,
+                        calculateOriginalAmount(
+                          classInfo.cost,
+                          wantTextBook ? bookCost : 0
+                        ),
                         (updatedCost) => {
                           setCost(updatedCost);
                           setCouponApplied(true);
@@ -225,7 +241,12 @@ const CourseSelection = ({
                         }
                       );
                     } else {
-                      setCost(classInfo.cost);
+                      setCost(
+                        calculateOriginalAmount(
+                          classInfo.cost,
+                          wantTextBook ? bookCost : 0
+                        )
+                      );
                       setCouponApplied(false);
                       populateCouponCode("");
                     }
