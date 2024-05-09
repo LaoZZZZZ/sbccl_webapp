@@ -652,6 +652,7 @@ class MemberViewSet(ModelViewSet):
             registration.registration_date = datetime.date.today()
             registration.expiration_date = registration.school_year_end
             registration.last_update_date = registration.registration_date
+            registration.textbook_ordered = request.data['textbook_ordered']
             registration.save()
             if coupon:
                 self.__record_coupon_usage__(coupon, registration, matched_member)
@@ -686,13 +687,15 @@ class MemberViewSet(ModelViewSet):
                 if len(request.data['coupons']) > 1:
                     return Response("Only one coupon can be accepted at a time!",
                                     status=status.HTTP_400_BAD_REQUEST)
-                print(request.data['coupons'][0])
                 coupon = self.__fetch_coupon__(request.user, request.data['coupons'][0], matched_registration)
                 member = Member.objects.get(user_id=request.user)
                 self.__record_coupon_usage__(coupon, matched_registration, member)
             
+            if 'textbook_ordered' in registration_serializer.validated_data:
+                matched_registration.textbook_ordered = registration_serializer.validated_data['textbook_ordered']
             # No-op
             if matched_registration.course.id == new_course_id:
+                matched_registration.save()
                 return Response(status=status.HTTP_202_ACCEPTED)
             
             new_course = Course.objects.get(id=new_course_id)
