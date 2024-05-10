@@ -59,10 +59,6 @@ const CourseSelection = ({
   populateCouponCode,
   setOrderBook,
 }: Props) => {
-  const calculateTotalAmount = (registrationCost, bookCost, discount) => {
-    return registrationCost + bookCost - discount;
-  };
-
   const calculateOriginalAmount = (registrationCost, bookCost) => {
     return registrationCost + bookCost;
   };
