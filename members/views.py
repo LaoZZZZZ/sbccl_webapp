@@ -30,6 +30,9 @@ class MemberViewSet(ModelViewSet):
     serializer_class = MemberSerializer
     authentication_classes = [SessionAuthentication, BasicAuthentication]
 
+    def __generate_unsuccessful_response(self, error_msg, status_code):
+        return Response({'detail': error_msg}, status=status_code)
+
     def __generate_user_info__(self, user, member):
         balance = self.__calculate_balance__(member)
         return {
@@ -324,7 +327,8 @@ class MemberViewSet(ModelViewSet):
             # User can not login for unverified account. Delete the user so that the user can retry.
             if new_user:
                 new_user.delete()
-            return Response("Account creation failed: " + str(e), status=status.HTTP_400_BAD_REQUEST)
+            return self.__generate_unsuccessful_response("Account creation failed: " + str(e),
+                                                         status.HTTP_400_BAD_REQUEST)
 
 
     @action(methods=['PUT'], detail=False, url_path='login', name='login user',
@@ -334,8 +338,9 @@ class MemberViewSet(ModelViewSet):
         try:
             matched_member = models.Member.objects.get(user_id=request.user)
             if matched_member.sign_up_status == 'S':
-                return Response('{username} needs to be verified before login!'.format(username=matched_member.user_id.username),
-                                 status=status.HTTP_401_UNAUTHORIZED)
+                return self.__generate_unsuccessful_response(
+                    '{username} needs to be verified before login!'.format(username=matched_member.user_id.username),
+                    status.HTTP_401_UNAUTHORIZED)
             login(request, request.user)
             user = User.objects.get(username=request.user)
             content = {
@@ -344,11 +349,13 @@ class MemberViewSet(ModelViewSet):
             }
             return Response(content, status=status.HTTP_202_ACCEPTED)
         except User.DoesNotExist: 
-            return Response('{username} does not exist'.format(username=request.user.username),
-                            status=status.HTTP_404_NOT_FOUND)
+            return self.__generate_unsuccessful_response(
+                '{username} does not exist'.format(username=request.user.username),
+                status.HTTP_404_NOT_FOUND)
         except Member.DoesNotExist:
-            return Response('{username} does not exist'.format(username=request.user.username),
-                             status=status.HTTP_404_NOT_FOUND)
+            return self.__generate_unsuccessful_response(
+                '{username} does not exist'.format(username=request.user.username),
+                status.HTTP_404_NOT_FOUND)
 
 
     @action(methods=['PUT'], detail=True, url_path='logout', name='log out user',
@@ -359,7 +366,7 @@ class MemberViewSet(ModelViewSet):
             logout(request)
             return Response(status=status.HTTP_200_OK)
         except User.DoesNotExist or models.Member.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return self.__generate_unsuccessful_response("No user is found", status.HTTP_404_NOT_FOUND)
 
     @action(methods=['GET'], detail=False, url_path='account-details', name='Account details',
             authentication_classes=[SessionAuthentication, BasicAuthentication],
@@ -374,8 +381,8 @@ class MemberViewSet(ModelViewSet):
                 'account_details': self.__generate_user_info__(user, matched_member)
             }
             return Response(content, status=status.HTTP_200_OK)
-        except User.DoesNotExist or models.Member.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        except (User.DoesNotExist, models.Member.DoesNotExist) as e:
+            return self.__generate_unsuccessful_response("No user is found", status.HTTP_404_NOT_FOUND)
 
     """
      Verify the signup for the user.
@@ -387,18 +394,22 @@ class MemberViewSet(ModelViewSet):
         verification_code = request.query_params.get('verification_code')
         email = request.query_params.get('email')
         if verification_code is None or verification_code == '':
-            return Response("No verification code is provided!",status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'detail': "No verification code is provided!"},
+                status=status.HTTP_400_BAD_REQUEST)
         if email is None:
-            return Response("No email was provided!", status=status.HTTP_400_BAD_REQUEST)
+            return self.__generate_unsuccessful_response(
+                "No email was provided!", status=status.HTTP_400_BAD_REQUEST)
         try:
             user = User.objects.get(username=email)
             matched_members = models.Member.objects.get(user_id=user.id)
             # User has already been verified
             if matched_members.sign_up_status == 'V':
-                return Response("The user has already been verified!",
-                                status=status.HTTP_409_CONFLICT)
+                return self.__generate_unsuccessful_response(
+                    "The user has already been verified!", status.HTTP_409_CONFLICT)
             if matched_members.verification_code != verification_code:
-                return Response("Incorrect verification code is provided!",status=status.HTTP_400_BAD_REQUEST)
+                self.__generate_unsuccessful_response(
+                    "Incorrect verification code is provided!",status=status.HTTP_400_BAD_REQUEST)
             # Send verification email
             if matched_members.member_type != 'P':
                 send_mail(
@@ -411,10 +422,10 @@ class MemberViewSet(ModelViewSet):
             matched_members.save()
             return Response(status=status.HTTP_202_ACCEPTED)
         except User.DoesNotExist as e:
-            return Response('There is no user registered with - ' + email,
-                             status=status.HTTP_404_NOT_FOUND)
+            return self.__generate_unsuccessful_response(
+                'There is no user registered with - ' + email, status.HTTP_404_NOT_FOUND)
         except Member.DoesNotExist as e:
-            return Response(str(e), status=status.HTTP_404_NOT_FOUND)
+            return self.__generate_unsuccessful_response(str(e), status.HTTP_404_NOT_FOUND)
 
     """
     User forget password. They want to reset the password via a randomly generated code
@@ -429,7 +440,8 @@ class MemberViewSet(ModelViewSet):
             retrieved_user = User.objects.get(email=email_address)
             matched_members = Member.objects.filter(user_id=retrieved_user)
             if not matched_members:
-                return Response("The user does not exist!", status=status.HTTP_404_NOT_FOUND)
+                return self.__generate_unsuccessful_response(
+                    "The user does not exist!", status.HTTP_404_NOT_FOUND)
             registration_code = str(uuid.uuid5(uuid.NAMESPACE_URL, retrieved_user.username))
 
             for m in matched_members:
@@ -444,10 +456,11 @@ class MemberViewSet(ModelViewSet):
             response['location'] =registration_code
             return response
         except ValidationError:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return self.__generate_unsuccessful_response(status.HTTP_400_BAD_REQUEST)
         except User.DoesNotExist:
-            return Response("{username} does not exist!".format(username=email_address),
-                             status=status.HTTP_404_NOT_FOUND)
+            return self.__generate_unsuccessful_response(
+                "{username} does not exist!".format(username=email_address),
+                status.HTTP_404_NOT_FOUND)
 
     """
     User forget password. They want to reset the password via
@@ -459,10 +472,12 @@ class MemberViewSet(ModelViewSet):
     def reset_password_by_code(self, request):
         verification_code = request.query_params.get('verification_code')
         if verification_code is None:
-            return Response('No verification code is provided!', status=status.HTTP_400_BAD_REQUEST)
+            return self.__generate_unsuccessful_response(
+                'No verification code is provided!', status.HTTP_400_BAD_REQUEST)
         new_password = request.query_params.get('password')
         if new_password is None:
-            return Response('No password is provided!', status=status.HTTP_400_BAD_REQUEST)
+            return self.__generate_unsuccessful_response(
+                'No password is provided!', status.HTTP_400_BAD_REQUEST)
         try:
             email_address = request.query_params.get('email')
             retrieved_user = User.objects.get(email=email_address)
@@ -477,10 +492,11 @@ class MemberViewSet(ModelViewSet):
             matched_member.save()
             return Response(status=status.HTTP_202_ACCEPTED)
         except ValidationError as e:
-            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+            return self.__generate_unsuccessful_response(str(e), status.HTTP_400_BAD_REQUEST)
         except User.DoesNotExist:
-            return Response("{email} is not registered".format(email=request.query_params.get('email')),
-                            status=status.HTTP_404_NOT_FOUND)
+            return self.__generate_unsuccessful_response(
+                "{email} is not registered".format(email=request.query_params.get('email')),
+                status.HTTP_404_NOT_FOUND)
 
     """
     Reset the password for the user.
@@ -491,7 +507,8 @@ class MemberViewSet(ModelViewSet):
     def reset_password(self, request, pk=None):
         new_password = request.query_params.get('new_password')
         if new_password is None:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return self.__generate_unsuccessful_response(
+                "Invalid password is provided", status.HTTP_400_BAD_REQUEST)
         try:
             validated_pass = UserSerializer().validate_password(new_password)
             user = User.objects.get(username=request.user.username)
@@ -499,7 +516,8 @@ class MemberViewSet(ModelViewSet):
             user.save()
             return Response(status=status.HTTP_202_ACCEPTED)
         except ValidationError:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return self.__generate_unsuccessful_response(
+                "Invalid password is provided", status.HTTP_400_BAD_REQUEST)
 
         
     @action(methods=['PUT'], detail=False, url_path='add-student', name='Add student to the member',
@@ -509,24 +527,24 @@ class MemberViewSet(ModelViewSet):
         try:
             serializer = StudentSerializer(data=request.data)
             if not serializer.is_valid():
-                return Response(JSONRenderer().render(serializer.errors),
-                                status=status.HTTP_400_BAD_REQUEST)
+                return self.__generate_unsuccessful_response(
+                    JSONRenderer().render(serializer.errors), status.HTTP_400_BAD_REQUEST)
             user = User.objects.get(username=request.user.username)
             matched_member = Member.objects.get(user_id=user)
             # Only parent can add students.
             if matched_member.member_type != 'P':
-                return Response("Only parent can add students!",
-                                status=status.HTTP_400_BAD_REQUEST)
+                return self.__generate_unsuccessful_response(
+                    "Only parent can add students!", status.HTTP_400_BAD_REQUEST)
             new_student = serializer.create(serializer.validated_data)
             existing_students = Student.objects.filter(parent_id=matched_member)
             for s in existing_students:
                 if s.first_name.upper() == new_student.first_name.upper() and s.last_name.upper() == new_student.last_name.upper():
-                    return Response("The student already exists!", status=status.HTTP_409_CONFLICT)
+                    return self.__generate_unsuccessful_response("The student already exists!", status.HTTP_409_CONFLICT)
             new_student.parent_id = matched_member
             new_student.save()
             return Response(status=status.HTTP_201_CREATED)
         except User.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return self.__generate_unsuccessful_response("No user is found!", status.HTTP_404_NOT_FOUND)
 
 
     @action(methods=['PUT'], detail=False, url_path='remove-student', name='Remove student from member',
@@ -542,18 +560,20 @@ class MemberViewSet(ModelViewSet):
             matched_member = Member.objects.get(user_id=user)
             # Only parent can remove students.
             if matched_member.member_type != 'P':
-                return Response("Only parent can remove students!",
-                                status=status.HTTP_400_BAD_REQUEST)
+                return self.__generate_unsuccessful_response(
+                    "Only parent can remove students!", status.HTTP_400_BAD_REQUEST)
             existing_students = Student.objects.filter(parent_id=matched_member,
                                                        first_name=student_to_delete.first_name,
                                                        last_name=student_to_delete.last_name)
             if not existing_students:
-                return Response("The student does not exist!", status=status.HTTP_400_BAD_REQUEST)
+                return self.__generate_unsuccessful_response(
+                    "The student does not exist!", status.HTTP_400_BAD_REQUEST)
             for s in existing_students:
                 registration = Registration.objects.filter(student=s)
                 if registration:
-                    return Response("""The student still has active enrollments! Please remove their enrollments first on the registration page before removing the student!""",
-                                    status=status.HTTP_400_BAD_REQUEST)
+                    return self.__generate_unsuccessful_response(
+                        """The student still has active enrollments! Please remove their enrollments first on the registration page before removing the student!""",
+                        status.HTTP_400_BAD_REQUEST)
                 s.delete()
             return Response(status=status.HTTP_202_ACCEPTED)
         except User.DoesNotExist:
@@ -580,9 +600,10 @@ class MemberViewSet(ModelViewSet):
                     'data': students
                 }
             return Response(data=content, status=status.HTTP_200_OK)
-        except User.DoesNotExist or Member.DoesNotExist:
-            return Response('There is no user registered with - ' + request.user,
-                             status=status.HTTP_404_NOT_FOUND)
+        except (User.DoesNotExist, Member.DoesNotExist):
+            return self.__generate_unsuccessful_response(
+                'There is no user registered with - ' + request.user,
+                status.HTTP_404_NOT_FOUND)
 
     # list all registrations that associate with the user. If the user is board member, all registration
     # would be returned with pagination.
@@ -600,9 +621,10 @@ class MemberViewSet(ModelViewSet):
                 'dropouts': dropouts
             }
             return Response(data=content, status=status.HTTP_200_OK)
-        except User.DoesNotExist or Member.DoesNotExist:
-            return Response('There is no user registered with - ' + request.user,
-                             status=status.HTTP_404_NOT_FOUND)
+        except (User.DoesNotExist, Member.DoesNotExist) as e:
+            return self.__generate_unsuccessful_response(
+                'There is no user registered with - ' + request.user,
+                status.HTTP_404_NOT_FOUND)
 
     @action(methods=['PUT'], detail=False, url_path='register-course', name='Register a student to a course',
             authentication_classes=[SessionAuthentication, BasicAuthentication],
@@ -615,15 +637,16 @@ class MemberViewSet(ModelViewSet):
                 
             course_id = request.data['course_id']
             if not course_id:
-                return Response("No course is provided", status=status.HTTP_400_BAD_REQUEST)
+                return self.__generate_unsuccessful_response(
+                    "No course is provided", status.HTTP_400_BAD_REQUEST)
             persisted_course = Course.objects.get(id=course_id)
             if persisted_course.course_status != 'A':
-                return Response("The class is no longer open for registration",
-                                status=status.HTTP_400_BAD_REQUEST)
+                return self.__generate_unsuccessful_response(
+                    "The class is no longer open for registration", status.HTTP_400_BAD_REQUEST)
             
             student_serializer = StudentSerializer(data=request.data['student'])
             if not student_serializer.is_valid():
-                return Response("Invalid student is provided", status=status.HTTP_400_BAD_REQUEST)
+                return self.__generate_unsuccessful_response("Invalid student is provided", status.HTTP_400_BAD_REQUEST)
             validated = student_serializer.validated_data
 
             user = User.objects.get(username=request.user)
@@ -634,8 +657,8 @@ class MemberViewSet(ModelViewSet):
             matched_registration = Registration.objects.filter(student=persisted_student)
             for m in matched_registration:
                 if self.__has_conflict__(m.course, persisted_course) and m.course.course_status == 'A':
-                    return Response("The student already registered a same type of course!",
-                                    status=status.HTTP_409_CONFLICT)
+                    return self.__generate_unsuccessful_response(
+                        "The student already registered a same type of course!", status.HTTP_409_CONFLICT)
             registration = Registration()
             registration.registration_code = str(uuid.uuid5(uuid.NAMESPACE_OID,
                                                             persisted_student.first_name + persisted_student.last_name + persisted_course.name))
@@ -652,6 +675,7 @@ class MemberViewSet(ModelViewSet):
             registration.registration_date = datetime.date.today()
             registration.expiration_date = registration.school_year_end
             registration.last_update_date = registration.registration_date
+
             if 'textbook_ordered' in request.data:
                 registration.textbook_ordered = request.data['textbook_ordered']
             registration.save()
@@ -659,14 +683,10 @@ class MemberViewSet(ModelViewSet):
                 self.__record_coupon_usage__(coupon, registration, matched_member)
             self.__send_registration_email__(user, registration)
             return Response(status=status.HTTP_201_CREATED)
-        except ValueError as e:
-            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
-        except User.DoesNotExist or Member.DoesNotExist as e:
-            return Response(str(e), status=status.HTTP_404_NOT_FOUND)
-        except Student.DoesNotExist as e:
-            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
-        except Course.DoesNotExist as e:
-            return Response(str(3), status=status.HTTP_400_BAD_REQUEST)
+        except (User.DoesNotExist, Member.DoesNotExist) as e:
+            return self.__generate_unsuccessful_response(str(e), status.HTTP_404_NOT_FOUND)
+        except (ValueError, Student.DoesNotExist, Course.DoesNotExist) as e:
+            return self.__generate_unsuccessful_response(str(e), status.HTTP_400_BAD_REQUEST)
 
     @action(methods=['PUT'], detail=False, url_path='update-registration', name='Update a registration',
         authentication_classes=[SessionAuthentication, BasicAuthentication],
@@ -675,25 +695,27 @@ class MemberViewSet(ModelViewSet):
         try:
             registration_serializer = RegistrationSerializer(data=request.data)
             if not registration_serializer.is_valid():
-                return Response("Received invalid registration object!",
-                                status=status.HTTP_400_BAD_REQUEST)
+                return self.__generate_unsuccessful_response(
+                    "Received invalid registration object!", status.HTTP_400_BAD_REQUEST)
             
             registraion_id = int(request.data['id'])
             matched_registration = Registration.objects.get(id = registraion_id)
             new_course_id = int(request.data['course'])
             if not new_course_id:
-                return Response("No course is provided", status=status.HTTP_400_BAD_REQUEST)
+                return self.__generate_unsuccessful_response(
+                    "No course is provided", status.HTTP_400_BAD_REQUEST)
             
             if 'coupons' in request.data and len(request.data['coupons']) > 0:
                 if len(request.data['coupons']) > 1:
-                    return Response("Only one coupon can be accepted at a time!",
-                                    status=status.HTTP_400_BAD_REQUEST)
+                    return self.__generate_unsuccessful_response(
+                        "Only one coupon can be accepted at a time!", status.HTTP_400_BAD_REQUEST)
                 coupon = self.__fetch_coupon__(request.user, request.data['coupons'][0], matched_registration)
                 member = Member.objects.get(user_id=request.user)
                 self.__record_coupon_usage__(coupon, matched_registration, member)
             
             if 'textbook_ordered' in registration_serializer.validated_data:
                 matched_registration.textbook_ordered = registration_serializer.validated_data['textbook_ordered']
+
             # No change to the class, but still need to save updates in other fields.
             if matched_registration.course.id == new_course_id:
                 matched_registration.save()
@@ -701,14 +723,15 @@ class MemberViewSet(ModelViewSet):
             
             new_course = Course.objects.get(id=new_course_id)
             if new_course.course_status != 'A':
-                return Response("The selected class ({name}) is no longer open for registration".format(name=new_course.name),
-                                status=status.HTTP_400_BAD_REQUEST)
+                return self.__generate_unsuccessful_response(
+                    "The selected class ({name}) is no longer open for registration".format(name=new_course.name),
+                    status.HTTP_400_BAD_REQUEST)
             # Registration can only be updated for the same type of class.     
             if new_course.course_type != matched_registration.course.course_type:
-                return Response(
+                return self.__generate_unsuccessful_response(
                     "The registration is for {old_type} class. If you're interested in {new_type} class, please submit a new registration!".format(
                     old_type=matched_registration.course.course_type, new_type=new_course.type),
-                    status=status.HTTP_400_BAD_REQUEST)
+                    status.HTTP_400_BAD_REQUEST)
             old_course = matched_registration.course
             matched_registration.course = new_course
             matched_registration.last_update_date = datetime.datetime.today()
@@ -719,16 +742,10 @@ class MemberViewSet(ModelViewSet):
             self.__send_registration_email__(user, matched_registration)
             self.__update_waiting_list__(old_course)
             return Response(status=status.HTTP_202_ACCEPTED)
-        except ValueError as e:
-            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
-        except User.DoesNotExist or Member.DoesNotExist as e:
-            return Response(str(e), status=status.HTTP_404_NOT_FOUND)
-        except Student.DoesNotExist as e:
-            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
-        except Course.DoesNotExist as e:
-            return Response(str(3), status=status.HTTP_400_BAD_REQUEST)
-        except Coupon.DoesNotExist as e:
-            return Response('The coupon code does not exist!', status=status.HTTP_400_BAD_REQUEST)
+        except (User.DoesNotExist, Member.DoesNotExist) as e:
+            return self.__generate_unsuccessful_response(str(e), status.HTTP_404_NOT_FOUND)
+        except (ValueError, Student.DoesNotExist, Course.DoesNotExist, Coupon.DoesNotExist) as e:
+            return self.__generate_unsuccessful_response(str(e), status.HTTP_400_BAD_REQUEST)
 
 
     @action(methods=['PUT'], detail=True, url_path='unregister-course', name='Unregister a student to a course',
@@ -765,13 +782,11 @@ class MemberViewSet(ModelViewSet):
 
             matched_registration.delete()
             return Response(status=status.HTTP_202_ACCEPTED)
-        except User.DoesNotExist or Member.DoesNotExist:
-            return Response('There is no user registered with - ' + request.user,
-                             status=status.HTTP_404_NOT_FOUND)
-        except Student.DoesNotExist or Course.DoesNotExist as e:
-            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
-        except Registration.DoesNotExist as e:
-            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)   
+        except (User.DoesNotExist, Member.DoesNotExist) as e:
+            return self.__generate_unsuccessful_response(
+                'There is no user registered with - ' + request.user, status.HTTP_404_NOT_FOUND)
+        except (Registration.DoesNotExist, Student.DoesNotExist, Course.DoesNotExist) as e:
+            return self.__generate_unsuccessful_response(str(e), status.HTTP_400_BAD_REQUEST)
 
     # Return a list of courses
     @action(methods=['GET'], detail=False, url_path='list-courses', name='list all courses',
@@ -804,9 +819,9 @@ class MemberViewSet(ModelViewSet):
             }
             return Response(content, status=status.HTTP_200_OK)
         except User.DoesNotExist as e:
-            return Response(str(e), status=status.HTTP_401_UNAUTHORIZED)
+            return self.__generate_unsuccessful_response(str(e), status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
-            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)  
+            return self.__generate_unsuccessful_response(str(e), status.HTTP_400_BAD_REQUEST)  
 
     # Add or update existing course
     @action(methods=['PUT'], detail=False, url_path='upsert-course', name='Add or update a course',
@@ -816,18 +831,18 @@ class MemberViewSet(ModelViewSet):
         try:
             course_serializer = CourseSerializer(data=request.data)
             if not course_serializer.is_valid():
-                return Response("Invalid course information is provided",
-                                status=status.HTTP_400_BAD_REQUEST)
+                return self.__generate_unsuccessful_response(
+                    "Invalid course information is provided", status.HTTP_400_BAD_REQUEST)
             user = User.objects.get(username=request.user.username)
             matched_member = Member.objects.get(user_id=user.id)
             if matched_member.member_type != 'B':
-                return Response("The user has no rights to add course!",
-                                status=status.HTTP_401_UNAUTHORIZED)
+                return self.__generate_unsuccessful_response(
+                    "The user has no rights to add course!", status.HTTP_401_UNAUTHORIZED)
             matched_course = Course.objects.filter(name=course_serializer.validated_data['name'])
             if matched_course:
                 if len(matched_course) > 1:
-                    return Response("There are multiple courses with the same name",
-                                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    return self.__generate_unsuccessful_response(
+                        "There are multiple courses with the same name", status.HTTP_500_INTERNAL_SERVER_ERROR)
             # Can only update class size limit, cost, course_status
                 if 'size_limit' in course_serializer.validated_data:
                     matched_course[0].size_limit = course_serializer.validated_data['size_limit']
@@ -848,9 +863,9 @@ class MemberViewSet(ModelViewSet):
             course.save()
             return Response(status=status.HTTP_201_CREATED)
         except User.DoesNotExist as e:
-            return Response(str(e), status=status.HTTP_401_UNAUTHORIZED)
+            return self.__generate_unsuccessful_response(str(e), status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
-            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)  
+            return self.__generate_unsuccessful_response(str(e), status.HTTP_400_BAD_REQUEST)  
 
     @action(methods=['PUT'], detail=False, url_path='delete-course', name='Delete a course',
     authentication_classes=[SessionAuthentication, BasicAuthentication],
@@ -859,21 +874,21 @@ class MemberViewSet(ModelViewSet):
         try:
             course_serializer = CourseSerializer(request.data)
             if not course_serializer.is_valid():
-                return Response("Invalid course information is provided",
-                                status=status.HTTP_400_BAD_REQUEST)
+                return self.__generate_unsuccessful_response(
+                    "Invalid course information is provided", status.HTTP_400_BAD_REQUEST)
             user = User.objects.get(username=request.user.username)
             matched_member = Member.objects.get(user_id=user.id)
             if matched_member.member_type != 'B':
-                return Response("The user has no rights to delete course!",
-                                status=status.HTTP_401_UNAUTHORIZED)
+                return self.__generate_unsuccessful_response(
+                    "The user has no rights to delete course!", status.HTTP_401_UNAUTHORIZED)
             matched_course = Course.objects.filter(name=course_serializer.validated_data['name'])
             for c in matched_course:
                 c.delete()
             return Response(status=status.HTTP_202_ACCEPTED)
         except User.DoesNotExist as e:
-            return Response(str(e), status=status.HTTP_401_UNAUTHORIZED)
+            return self.__generate_unsuccessful_response(str(e), status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
-            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)     
+            return self.__generate_unsuccessful_response(str(e), status.HTTP_400_BAD_REQUEST)     
         
 
     @action(methods=['GET'], detail=True, url_path='coupon-details', name='get details of a coupon',
@@ -885,8 +900,6 @@ class MemberViewSet(ModelViewSet):
             return Response(JSONRenderer().render(CouponSerializer(matched_coupon).data),
                             status=status.HTTP_200_OK)
         except ValueError as e:
-            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
-        except User.DoesNotExist as e:
-            return Response(str(e), status=status.HTTP_404_NOT_FOUND)
-        except Coupon.DoesNotExist as e:
-            return Response(str(e), status=status.HTTP_404_NOT_FOUND)
+            return self.__generate_unsuccessful_response(str(e), status.HTTP_400_BAD_REQUEST)
+        except (User.DoesNotExist, Coupon.DoesNotExist) as e:
+            return self.__generate_unsuccessful_response(str(e), status.HTTP_404_NOT_FOUND)

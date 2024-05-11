@@ -41,7 +41,7 @@ const DeleteRegistrationRequest = async (registration, authInfo, callBack) => {
     .catch((e) => {
       callBack({
         status: RemoveStatus.FAILED,
-        msg: JSON.stringify(e.response.data),
+        msg: JSON.stringify(e.response.data.detail),
       });
     });
 };

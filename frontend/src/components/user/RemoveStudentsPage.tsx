@@ -37,7 +37,7 @@ const RemoveStudentRequest = async (student, authInfo, callBack) => {
       console.log(e.response.data);
       callBack({
         status: RemoveStatus.FAILED,
-        msg: JSON.stringify(e.response.data),
+        msg: JSON.stringify(e.response.data.detail),
       });
     });
 };
