@@ -30,8 +30,8 @@ class MemberViewSet(ModelViewSet):
     serializer_class = MemberSerializer
     authentication_classes = [SessionAuthentication, BasicAuthentication]
 
-    def __generate_unsuccessful_response(self, error_msg, status_code):
-        return Response({'detail': error_msg}, status=status_code)
+    def __generate_unsuccessful_response(self, error_msg, status):
+        return Response({'detail': error_msg}, status=status)
 
     def __generate_user_info__(self, user, member):
         balance = self.__calculate_balance__(member)
@@ -297,8 +297,8 @@ class MemberViewSet(ModelViewSet):
 
             if 'phone_number' in request.data:
                 if not utils.validators.request_validator.ValidatePhoneNumber(request.data['phone_number']):
-                    return Response("Invalid phone number is provided",
-                                     status=status.HTTP_400_BAD_REQUEST)
+                    return self.__generate_unsuccessful_response(
+                        "Invalid phone number is provided", status=status.HTTP_400_BAD_REQUEST)
                 
             new_user = serialized.create(serialized.validated_data)
             registration_code = str(uuid.uuid5(uuid.NAMESPACE_URL, new_user.username))
@@ -394,8 +394,8 @@ class MemberViewSet(ModelViewSet):
         verification_code = request.query_params.get('verification_code')
         email = request.query_params.get('email')
         if verification_code is None or verification_code == '':
-            return Response(
-                {'detail': "No verification code is provided!"},
+            return self.__generate_unsuccessful_response(
+                "No verification code is provided!",
                 status=status.HTTP_400_BAD_REQUEST)
         if email is None:
             return self.__generate_unsuccessful_response(
@@ -675,7 +675,6 @@ class MemberViewSet(ModelViewSet):
             registration.registration_date = datetime.date.today()
             registration.expiration_date = registration.school_year_end
             registration.last_update_date = registration.registration_date
-
             if 'textbook_ordered' in request.data:
                 registration.textbook_ordered = request.data['textbook_ordered']
             registration.save()
@@ -715,7 +714,6 @@ class MemberViewSet(ModelViewSet):
             
             if 'textbook_ordered' in registration_serializer.validated_data:
                 matched_registration.textbook_ordered = registration_serializer.validated_data['textbook_ordered']
-
             # No change to the class, but still need to save updates in other fields.
             if matched_registration.course.id == new_course_id:
                 matched_registration.save()
