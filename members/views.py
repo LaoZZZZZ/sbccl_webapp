@@ -30,6 +30,15 @@ class MemberViewSet(ModelViewSet):
     serializer_class = MemberSerializer
     authentication_classes = [SessionAuthentication, BasicAuthentication]
 
+    def __get_all_coupons_per_registration(self, registration : Registration):
+        coupons = []
+        if not registration.coupons:
+            return []
+        for c in registration.coupons.all():
+            coupons.append(CouponSerializer(c).data)
+        return coupons
+        
+
     def __generate_unsuccessful_response(self, error_msg, status):
         return Response({'detail': error_msg}, status=status)
 
@@ -58,6 +67,7 @@ class MemberViewSet(ModelViewSet):
             'student': StudentSerializer(registration.student).data,
             'registration': RegistrationSerializer(registration).data,
             'course': CourseSerializer(registration.course).data,
+            'coupons': self.__get_all_coupons_per_registration(registration),
             'teacher': [self.__get_teacher_infomation__(teacher) for teacher in registration.course.instructor.all() if teacher.member_type == 'T']})
 
     def __calculate_balance__(self, member):
@@ -708,9 +718,10 @@ class MemberViewSet(ModelViewSet):
                 if len(request.data['coupons']) > 1:
                     return self.__generate_unsuccessful_response(
                         "Only one coupon can be accepted at a time!", status.HTTP_400_BAD_REQUEST)
-                coupon = self.__fetch_coupon__(request.user, request.data['coupons'][0], matched_registration)
-                member = Member.objects.get(user_id=request.user)
-                self.__record_coupon_usage__(coupon, matched_registration, member)
+                if not isinstance(request.data['coupons'][0], int):
+                    coupon = self.__fetch_coupon__(request.user, request.data['coupons'][0], matched_registration)
+                    member = Member.objects.get(user_id=request.user)
+                    self.__record_coupon_usage__(coupon, matched_registration, member)
             
             if 'textbook_ordered' in registration_serializer.validated_data:
                 matched_registration.textbook_ordered = registration_serializer.validated_data['textbook_ordered']

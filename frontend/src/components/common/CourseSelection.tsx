@@ -18,7 +18,8 @@ interface Props {
   user_auth: {};
   courses: ClassInformation[];
   defaultCourseSelection: "";
-  defaultPoDSelection: "";
+  textbookOrdered: boolean;
+  existingCoupon: {};
   setCourseSelection: () => {};
   populateCouponCode: (code: string) => {};
   setOrderBook: (orderBook: boolean) => {};
@@ -55,16 +56,14 @@ const CourseSelection = ({
   user_auth,
   courses,
   defaultCourseSelection,
+  textbookOrdered,
+  existingCoupon,
   setCourseSelection,
   populateCouponCode,
   setOrderBook,
 }: Props) => {
-  const calculateOriginalAmount = (registrationCost, bookCost) => {
-    return registrationCost + bookCost;
-  };
-
   const bookCost = 50;
-  const [wantTextBook, setWantTextBook] = useState(false);
+  const [wantTextBook, setWantTextBook] = useState(textbookOrdered);
   const selectedCourse = findSelectedCourse(courses, defaultCourseSelection);
   const [selected, setSelected] = useState(selectedCourse !== null);
 
@@ -80,10 +79,29 @@ const CourseSelection = ({
     course_end: selectedCourse !== null ? selectedCourse.course_end_time : "NA",
   });
   const [waitForResponse, setWaitForResponse] = useState(false);
-  const [cost, setCost] = useState(classInfo.cost);
 
-  const [couponCode, setCouponCode] = useState("");
-  const [couponApplied, setCouponApplied] = useState(false);
+  const [coupon, setCoupon] = useState({
+    errMsg: "",
+    couponDetails: existingCoupon,
+  });
+
+  const [couponApplied, setCouponApplied] = useState(existingCoupon !== null);
+  const calculateOriginalAmount = (registrationCost) => {
+    return registrationCost + (wantTextBook ? bookCost : 0);
+  };
+
+  const calculateUpdatedAmount = (registrationCost) => {
+    const totalCost = calculateOriginalAmount(registrationCost);
+
+    if (coupon.couponDetails !== null) {
+      if (coupon.couponDetails.type === "A") {
+        return Math.max(0, totalCost - coupon.couponDetails.dollar_amount);
+      } else if (coupon.couponDetails.type === "P") {
+        return (totalCost * (100 - coupon.couponDetails.percentage)) / 100.0;
+      }
+    }
+    return totalCost;
+  };
   return (
     <>
       <div className="form-group pb-2">
@@ -119,7 +137,6 @@ const CourseSelection = ({
                 course_start: selected_course.course_start_time,
                 course_end: selected_course.course_end_time,
               });
-              setCost(selected_course.cost);
               setSelected(true);
             }
           }}
@@ -177,39 +194,45 @@ const CourseSelection = ({
                 type="checkbox"
                 value=""
                 id="orderBook"
-                onClick={(e) => {
+                onChange={(e) => {
                   if (e.target.checked) {
-                    setCost(cost + bookCost);
-                    setOrderBook(true);
                     setWantTextBook(true);
+                    setOrderBook(true);
                   } else {
-                    setCost(Math.max(0, cost - bookCost));
                     setWantTextBook(false);
                     setOrderBook(false);
                   }
                 }}
                 disabled={classInfo.type === "E"}
+                checked={wantTextBook}
               />
               <label className="form-check-label">Order textbook</label>
             </div>
             <div className="row g-3 input-group pb-2">
               <div className="col-auto">
                 <TotalCost
-                  original_amount={calculateOriginalAmount(
-                    classInfo.cost,
-                    wantTextBook ? bookCost : 0
-                  )}
-                  updated_amount={cost}
+                  original_amount={calculateOriginalAmount(classInfo.cost)}
+                  updated_amount={calculateUpdatedAmount(classInfo.cost)}
                 />
               </div>
               <div className="col-auto">
                 <input
                   type="text"
                   className="form-control col-auto"
-                  placeholder="Coupon code"
+                  value={
+                    coupon.couponDetails === null
+                      ? "Enter Coupon Code"
+                      : coupon.couponDetails.code
+                  }
                   aria-label="Coupon"
+                  disabled={existingCoupon !== null}
                   onChange={(e) => {
-                    setCouponCode(e.target.value);
+                    setCoupon({
+                      errMsg: "",
+                      couponDetails: {
+                        code: e.target.value,
+                      },
+                    });
                   }}
                 />
               </div>
@@ -219,30 +242,32 @@ const CourseSelection = ({
                   className="btn btn-outline-primary"
                   value={couponApplied ? "Remove" : "Apply"}
                   id="coupon-button"
-                  disabled={waitForResponse || classInfo.type === "E"}
+                  disabled={
+                    waitForResponse ||
+                    classInfo.type === "E" ||
+                    existingCoupon !== null
+                  }
                   onClick={() => {
                     setWaitForResponse(true);
-                    if (!couponApplied && couponCode.length > 0) {
+                    if (!couponApplied && coupon.couponDetails !== null) {
                       GetCoupon(
                         user_auth,
-                        couponCode,
-                        calculateOriginalAmount(
-                          classInfo.cost,
-                          wantTextBook ? bookCost : 0
-                        ),
-                        (updatedCost) => {
-                          setCost(updatedCost);
-                          setCouponApplied(true);
-                          populateCouponCode(couponCode);
+                        coupon.couponDetails.code,
+                        (coupon) => {
+                          setCoupon(coupon);
+                          calculateOriginalAmount(classInfo.cost);
+                          if (coupon.couponDetails !== null) {
+                            setCouponApplied(true);
+                            populateCouponCode(coupon.couponDetails.code);
+                          }
                         }
                       );
                     } else {
-                      setCost(
-                        calculateOriginalAmount(
-                          classInfo.cost,
-                          wantTextBook ? bookCost : 0
-                        )
-                      );
+                      // Remove code
+                      setCoupon({
+                        errMsg: "",
+                        couponDetails: null,
+                      });
                       setCouponApplied(false);
                       populateCouponCode("");
                     }

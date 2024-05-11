@@ -135,6 +135,8 @@ const AddRegistration = ({
           setOrderBook={(orderBook: boolean) => {
             registration.textbook_ordered = orderBook;
           }}
+          textbookOrdered={false}
+          existingCoupon={null}
         />
         <div className="btn-group pt-2">
           <input

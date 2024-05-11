@@ -102,6 +102,12 @@ const EditableRegistration = ({
   const student = selectedRegistration["student"];
   const registration = selectedRegistration["registration"];
   const originalCourse = selectedRegistration["course"];
+
+  const coupons =
+    selectedRegistration["coupons"] === null ||
+    selectedRegistration["coupons"].length === 0
+      ? null
+      : selectedRegistration["coupons"][0];
   const [buttonMsg, setButtonMsg] = useState("Update");
   const [needsUpdate, setNeedsUpdate] = useState<boolean>(false);
   const [removeRegistration, setRemoveRegistration] = useState(false);
@@ -149,10 +155,10 @@ const EditableRegistration = ({
               })}
               defaultCourseSelection={originalCourse.name}
               setCourseSelection={(course) => {
-                const updated = originalCourse.id !== course.id;
-                setNeedsUpdate(updated);
+                const update = originalCourse.id !== course.id;
+                setNeedsUpdate(update);
                 setButtonMsg(
-                  course.enrollment >= course.size_limit && updated
+                  course.enrollment >= course.size_limit && needsUpdate
                     ? "Add to waiting list"
                     : "Update"
                 );
@@ -162,7 +168,7 @@ const EditableRegistration = ({
                 if (code.length > 0) {
                   setNeedsUpdate(
                     registration.coupons === null ||
-                      registration.coupons.length == 0
+                      registration.coupons.length === 0
                   );
                   registration.coupons = [code];
                 } else {
@@ -171,9 +177,12 @@ const EditableRegistration = ({
                 }
               }}
               setOrderBook={(orderBook: boolean) => {
-                setNeedsUpdate(registration.order_book != orderBook);
+                setNeedsUpdate(registration.textbook_ordered !== orderBook);
+
                 registration.textbook_ordered = orderBook;
               }}
+              textbookOrdered={registration["textbook_ordered"]}
+              existingCoupon={coupons}
             />
           </div>
           <div className="form-group pb-2 mb-2">
@@ -210,6 +219,7 @@ const EditableRegistration = ({
               disabled={!needsUpdate || waitForResponse}
               value={buttonMsg}
               onClick={() => {
+                console.log(registration);
                 setWaitForResponse(true);
                 UpdateRegistrationRequest(registration, userAuth, (result) => {
                   setUpdateStatus(result);
