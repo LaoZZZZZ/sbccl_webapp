@@ -711,12 +711,17 @@ class MemberViewSet(ModelViewSet):
             if 'coupons' in request.data and len(request.data['coupons']) > 0:
                 if len(request.data['coupons']) > 1:
 <<<<<<< HEAD
+<<<<<<< HEAD
                     return self.__generate_unsuccessful_response(
                         "Only one coupon can be accepted at a time!", status.HTTP_400_BAD_REQUEST)
 =======
                     return Response("Only one coupon can be accepted at a time!",
                                     status=status.HTTP_400_BAD_REQUEST)
 >>>>>>> 8c12e01 (Indicate if the registration needs textbook or not in the database.)
+=======
+                    return self.__generate_unsuccessful_response(
+                        "Only one coupon can be accepted at a time!", status.HTTP_400_BAD_REQUEST)
+>>>>>>> 40c6dcf (Return error message in response.data.detail field)
                 coupon = self.__fetch_coupon__(request.user, request.data['coupons'][0], matched_registration)
                 member = Member.objects.get(user_id=request.user)
                 self.__record_coupon_usage__(coupon, matched_registration, member)
