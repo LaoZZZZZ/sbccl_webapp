@@ -39,7 +39,7 @@ const sendSignUpRequest = async (user_info, callback) => {
   } catch (error) {
     callback({
       status: SignUpStatus.FAILED,
-      msg: JSON.stringify(error.response.data),
+      msg: JSON.stringify(error.response.data.detail),
     });
     return false;
   }

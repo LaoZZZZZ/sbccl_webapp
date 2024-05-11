@@ -56,7 +56,7 @@ const UpdateRegistrationRequest = async (registration, authInfo, callBack) => {
     .catch((e) => {
       callBack({
         status: UpdateStatus.FAILED,
-        msg: JSON.stringify(e.response.data),
+        msg: JSON.stringify(e.response.data.detail),
       });
     });
 };
