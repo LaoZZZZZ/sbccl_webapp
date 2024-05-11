@@ -30,6 +30,10 @@ class MemberViewSet(ModelViewSet):
     serializer_class = MemberSerializer
     authentication_classes = [SessionAuthentication, BasicAuthentication]
 
+    # send email to board member about book ordering updates.
+    def __email_for_textbook(self, registration: Registration):
+        pass
+
     def __get_all_coupons_per_registration(self, registration : Registration):
         coupons = []
         if not registration.coupons:
@@ -724,9 +728,13 @@ class MemberViewSet(ModelViewSet):
                     self.__record_coupon_usage__(coupon, matched_registration, member)
             
             if 'textbook_ordered' in registration_serializer.validated_data:
+                if matched_registration.textbook_ordered != registration_serializer.validated_data['textbook_ordered']:
+                    self.__email_for_textbook(matched_registration)
                 matched_registration.textbook_ordered = registration_serializer.validated_data['textbook_ordered']
+
             # No change to the class, but still need to save updates in other fields.
             if matched_registration.course.id == new_course_id:
+                matched_registration.last_update_date = datetime.datetime.today()
                 matched_registration.save()
                 return Response(status=status.HTTP_202_ACCEPTED)
             
@@ -910,5 +918,5 @@ class MemberViewSet(ModelViewSet):
                             status=status.HTTP_200_OK)
         except ValueError as e:
             return self.__generate_unsuccessful_response(str(e), status.HTTP_400_BAD_REQUEST)
-        except (User.DoesNotExist, Coupon.DoesNotExist) as e:
-            return self.__generate_unsuccessful_response(str(e), status.HTTP_404_NOT_FOUND)
+        except (Coupon.DoesNotExist) as e:
+            return self.__generate_unsuccessful_response("The coupon does not exist!", status.HTTP_404_NOT_FOUND)
