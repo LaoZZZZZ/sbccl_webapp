@@ -7,7 +7,6 @@ interface Props {
 }
 
 export const Alert = ({ success, message, parentCallback }: Props) => {
-  console.log(message);
   return (
     <div
       className={

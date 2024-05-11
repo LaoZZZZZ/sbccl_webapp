@@ -17,16 +17,7 @@ interface Coupon {
  * @param callback:
  * @returns
  */
-const GetCoupon = async (user_auth, coupon_code, original_amount, callback) => {
-  const ApplyCoupon = (amount: number, coupon: Coupon) => {
-    if (coupon.type === "A") {
-      return Math.max(0, amount - coupon.dollar_amount);
-    } else if (coupon.type === "P") {
-      return (amount * (100 - coupon.percentage)) / 100.0;
-    }
-    return amount;
-  };
-
+const GetCoupon = async (user_auth: {}, coupon_code: string, callback) => {
   await axios
     .get(
       process.env.REACT_APP_BE_URL_PREFIX +
@@ -41,11 +32,17 @@ const GetCoupon = async (user_auth, coupon_code, original_amount, callback) => {
       }
     )
     .then((response) => {
-      callback(ApplyCoupon(original_amount, JSON.parse(response.data)));
+      callback({
+        errMsg: "",
+        couponDetails: JSON.parse(response.data),
+      });
       return;
     })
     .catch((error) => {
-      callback(original_amount);
+      callback({
+        errMsg: error.response.data.detail,
+        couponDetails: null,
+      });
     });
 };
 
