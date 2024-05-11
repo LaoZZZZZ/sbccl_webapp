@@ -2,6 +2,7 @@ import React from "react";
 import { useState } from "react";
 import TotalCost from "./TotalCost.tsx";
 import GetCoupon from "./GetCoupon.tsx";
+import Alert from "./Alert.tsx";
 
 export interface ClassInformation {
   enrollment: number;
@@ -275,6 +276,19 @@ const CourseSelection = ({
                   }}
                 />
               </div>
+              {coupon.errMsg.length !== 0 && (
+                <div>
+                  <Alert
+                    message={coupon.errMsg}
+                    parentCallback={function (): void {
+                      setCoupon({
+                        errMsg: "",
+                        couponDetails: null,
+                      });
+                    }}
+                  ></Alert>
+                </div>
+              )}
             </div>
           </div>
         </div>
