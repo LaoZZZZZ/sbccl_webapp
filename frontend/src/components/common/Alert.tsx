@@ -2,11 +2,12 @@ import React, { ReactNode } from "react";
 
 interface Props {
   success?: boolean;
-  message: ReactNode;
+  message: string;
   parentCallback: () => void;
 }
 
 export const Alert = ({ success, message, parentCallback }: Props) => {
+  console.log(message);
   return (
     <div
       className={
