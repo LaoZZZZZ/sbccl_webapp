@@ -207,7 +207,9 @@ const CourseSelection = ({
                 disabled={classInfo.type === "E"}
                 checked={wantTextBook}
               />
-              <label className="form-check-label">Order textbook</label>
+              <label className="form-check-label">
+                Order textbook (${bookCost})
+              </label>
             </div>
             <div className="row g-3 input-group pb-2">
               <div className="col-auto">
