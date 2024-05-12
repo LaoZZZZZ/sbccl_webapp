@@ -232,5 +232,15 @@ class Dropout(models.Model):
     dropout_date = models.DateField(null=False)
     user = models.ForeignKey('members.Member', on_delete=models.CASCADE, verbose_name='Dropout requester')
 
-
+# A group for each class
+class ClassGroup(models.Model):
+    # a google group will be created with the same name, name@sbcclny.com
+    name = models.CharField(max_length=255, null=False)
+    # delete the class group first before deleting the course
+    course = models.ForeignKey(Course, on_delete=models.PROTECT)
+    creation_date = models.DateField(null=False)
+    last_update_date = models.DateField(null=False)
+    last_update_person = models.CharField(max_length=255, null=False)
+    last_udpate_person = models.CharField(max_length=255, null=False)
+    
 
