@@ -147,6 +147,7 @@ class Course(models.Model):
     creater_name = models.CharField(max_length=255, null=False)
     # how much is this course in dollars
     cost = models.FloatField(null=True)
+    # cost for the course. This not does not include the book cost.
     last_update_person = models.CharField(max_length=255, null=False)
     # classroom assignment to this course.
     classroom = models.CharField(max_length=255, null=True, default="Unassigned")
@@ -154,9 +155,11 @@ class Course(models.Model):
     # one course (Morning and afternoong sessions for the same grade). So this should be a manytomany
     # relationship.
     instructor = models.ManyToManyField(Member, through="InstructorAssignment")
-    # When the course starts and ends
+    # When the course starts and ends.
     course_start_time = models.TimeField(null=True)
     course_end_time = models.TimeField(null=True)
+    # The cost of the textbook.
+    book_cost = models.FloatField(null=True)
 
     def __str__(self):
         return 'Course: {name} Course Type: {course_type} Status: {course_status}'.format(

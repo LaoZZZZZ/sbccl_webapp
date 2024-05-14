@@ -75,7 +75,7 @@ class CourseSerializer(serializers.ModelSerializer):
         model = Course
         fields = ('id', 'name', 'course_description', 'course_type',
                   'course_status', 'size_limit', 'cost', 'classroom',
-                  'course_start_time', 'course_end_time')
+                  'course_start_time', 'course_end_time', 'book_cost')
     
     def validate_course_type(self, course_type):
         if course_type not in ['L', 'E']:
@@ -102,7 +102,12 @@ class CourseSerializer(serializers.ModelSerializer):
         if cost < 0:
             raise ValueError("invalid cost for the new course!")
         return cost
-    
+
+    def validate_book_cost(self, book_cost):
+        if book_cost < 0:
+            raise ValueError("invalid book cost for the new course!")
+        return book_cost
+
     def validate_classroom(self, classroom):
         if not classroom:
             raise ValueError("Invalid classroom assignment")
