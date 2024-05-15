@@ -13,6 +13,7 @@ export interface ClassInformation {
   classroom: string;
   course_start: string;
   course_end: string;
+  book_cost: number;
 }
 
 interface Props {
@@ -63,7 +64,6 @@ const CourseSelection = ({
   populateCouponCode,
   setOrderBook,
 }: Props) => {
-  const bookCost = 50;
   const [wantTextBook, setWantTextBook] = useState(textbookOrdered);
   const selectedCourse = findSelectedCourse(courses, defaultCourseSelection);
   const [selected, setSelected] = useState(selectedCourse !== null);
@@ -78,6 +78,7 @@ const CourseSelection = ({
     course_start:
       selectedCourse !== null ? selectedCourse.course_start_time : "NA",
     course_end: selectedCourse !== null ? selectedCourse.course_end_time : "NA",
+    book_cost: selectedCourse !== null ? selectedCourse.book_cost : 0,
   });
   const [waitForResponse, setWaitForResponse] = useState(false);
 
@@ -88,7 +89,7 @@ const CourseSelection = ({
 
   const [couponApplied, setCouponApplied] = useState(existingCoupon !== null);
   const calculateOriginalAmount = (registrationCost) => {
-    return registrationCost + (wantTextBook ? bookCost : 0);
+    return registrationCost + (wantTextBook ? classInfo.book_cost : 0);
   };
 
   const calculateUpdatedAmount = (registrationCost) => {
@@ -123,6 +124,7 @@ const CourseSelection = ({
               teacher: "NA",
               course_start: "NA",
               course_end: "NA",
+              book_cost: 0,
             });
             const selected_course = findSelectedCourse(courses, e.target.value);
             if (selected_course !== null) {
@@ -137,6 +139,7 @@ const CourseSelection = ({
                 teacher: selected_course.teacher,
                 course_start: selected_course.course_start_time,
                 course_end: selected_course.course_end_time,
+                book_cost: selected_course.book_cost,
               });
               setSelected(true);
             }
@@ -208,7 +211,7 @@ const CourseSelection = ({
                 checked={wantTextBook}
               />
               <label className="form-check-label">
-                Order textbook (${bookCost})
+                Order textbook (${classInfo.book_cost})
               </label>
             </div>
             <div className="row g-3 input-group pb-2">
