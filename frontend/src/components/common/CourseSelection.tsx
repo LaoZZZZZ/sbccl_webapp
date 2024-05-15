@@ -139,7 +139,10 @@ const CourseSelection = ({
                 teacher: selected_course.teacher,
                 course_start: selected_course.course_start_time,
                 course_end: selected_course.course_end_time,
-                book_cost: selected_course.book_cost,
+                book_cost:
+                  selected_course.book_cost !== ""
+                    ? selected_course.book_cost
+                    : 0,
               });
               setSelected(true);
             }
