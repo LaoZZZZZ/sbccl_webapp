@@ -920,3 +920,30 @@ class MemberViewSet(ModelViewSet):
             return self.__generate_unsuccessful_response(str(e), status.HTTP_400_BAD_REQUEST)
         except (Coupon.DoesNotExist) as e:
             return self.__generate_unsuccessful_response("The coupon does not exist!", status.HTTP_404_NOT_FOUND)
+    
+    @action(methods=['POST'], detail=False, url_path='google-auth', name="log in with google",
+            authentication_classes=[SessionAuthentication])
+    def google_login(self, request):
+        try:
+            # TODO: ADD CLIENT ID AND CLIENT SECRET TO .ENV VARIABLE .David
+            url = 'https://oauth2.googleapis.com/token'
+            redirect_uri = 'http://localhost:3000'
+            grant_type = 'authorization_code'
+            client_id = '1063032216143-j2nctfl980cdh4ii6858da2ap83q3e52.apps.googleusercontent.com'
+            client_secret = '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'
+            code = request.data.get('code')
+
+            response = request.post(url, data = {
+                "redirect_uri": redirect_uri,
+                "grant_type": grant_type,
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "code": code,
+            })
+        
+            if response.ok:
+                return Response(response.json(), status = status.HTTP_200_OK)
+            else:
+                return Response(response.json(), status = response.status_code)
+        except Exception as e:
+            return self.__generate_unsuccessful_response(str(e), status.HTTP_400_BAD_REQUEST)

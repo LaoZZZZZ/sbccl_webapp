@@ -1,4 +1,5 @@
 import React, { useReducer } from "react";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 import UserMainPage from "../user/UserMainPage.tsx";
 import UserFrontPage from "../user/UserFrontPage.tsx";
@@ -67,20 +68,22 @@ const App = () => {
   };
 
   return (
-    <div>
-      <Provider value={[user_profile, transitionUserState]}>
-        {user_profile.page === Page.StartLogin && (
-          <UserFrontPage loginSuccessCallback={loginSuccess} />
-        )}
+    <GoogleOAuthProvider clientId = "1063032216143-j2nctfl980cdh4ii6858da2ap83q3e52.apps.googleusercontent.com">
+      <div>
+        <Provider value={[user_profile, transitionUserState]}>
+          {user_profile.page === Page.StartLogin && (
+            <UserFrontPage loginSuccessCallback={loginSuccess} />
+          )}
 
-        {user_profile.page === Page.PostLogin && (
-          <UserMainPage
-            userInfo={user_profile.user_info}
-            logOutCallback={logOut}
-          />
-        )}
-      </Provider>
-    </div>
+          {user_profile.page === Page.PostLogin && (
+            <UserMainPage
+              userInfo={user_profile.user_info}
+              logOutCallback={logOut}
+            />
+          )}
+        </Provider>
+      </div>
+    </GoogleOAuthProvider>
   );
 };
 
