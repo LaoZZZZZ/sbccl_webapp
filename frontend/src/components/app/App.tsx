@@ -66,9 +66,10 @@ const App = () => {
   const logOut = () => {
     transitionUserState({ type: "logout", user_info: null });
   };
+  const scritpLoadSuccess = false;
 
   return (
-    <GoogleOAuthProvider clientId = "1063032216143-j2nctfl980cdh4ii6858da2ap83q3e52.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId="1063032216143-j2nctfl980cdh4ii6858da2ap83q3e52.apps.googleusercontent.com">
       <div>
         <Provider value={[user_profile, transitionUserState]}>
           {user_profile.page === Page.StartLogin && (

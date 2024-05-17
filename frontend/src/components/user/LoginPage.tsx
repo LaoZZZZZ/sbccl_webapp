@@ -19,24 +19,30 @@ const LoginPage = ({ onLoginSuccess, onSignUp, onResetPassword }: Props) => {
   const [loginErrorMsg, setLoginErrorMsg] = useState("");
 
   const googleLogin = useGoogleLogin({
+    flow: "auth-code",
     onSuccess: (codeResponse) => {
-      axios.post(process.env.REACT_APP_BE_URL_PREFIX + "/rest_api/members/google-auth/", {code: codeResponse.code})
-      .then(response => {
-        console.log('Backend Response: ', response.data);
-      })
-      .catch(error => {
-        console.error('Google Login Failed');
-        if (error.response.data) {
-          setLoginErrorMsg(error.response.data.detail);
-        } else {
-          setLoginErrorMsg("Unexpected error!");
-        }
-        setLoginFailed(true);
-      })
-    }, onError: () => {
-      console.error('Google Login Failed');
+      axios
+        .post(
+          process.env.REACT_APP_BE_URL_PREFIX +
+            "/rest_api/members/google-auth/",
+          { code: codeResponse.code }
+        )
+        .then((response) => {
+          console.log("Backend Response: ", response.data);
+        })
+        .catch((error) => {
+          console.error("Google Login Failed");
+          if (error.response.data) {
+            setLoginErrorMsg(error.response.data.detail);
+          } else {
+            setLoginErrorMsg("Unexpected error!");
+          }
+          setLoginFailed(true);
+        });
     },
-    flow: 'auth-code', 
+    onError: () => {
+      console.error("Google Login Failed");
+    },
   });
 
   return (
@@ -128,12 +134,14 @@ const LoginPage = ({ onLoginSuccess, onSignUp, onResetPassword }: Props) => {
           </div>
         )}
       </div>
-      <input
-        className = "btn btn-secondary"
-        type = "button"
-        value = "Sign in with Google"
-        onClick = {()=> googleLogin()}
-      />
+      <div>
+        <input
+          className="btn btn-secondary"
+          type="button"
+          value="Sign in with Google"
+          onClick={() => googleLogin()}
+        />
+      </div>
       {/* <GoogleLogin
         onSuccess={handleSuccess}
         onError={handleError}
