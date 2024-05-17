@@ -210,4 +210,5 @@ CORS_ORIGIN_WHITELIST = [
     'https://ccl-be-dev.eba-z2za2tfq.us-east-1.elasticbeanstalk.com',
     # Frontend delopyed by AWS amplify
     'https://main.d3mkx65my7y2ey.amplifyapp.com',
+    'https://main.d2p00a6wps5hgc.amplifyapp.com',
 ]
