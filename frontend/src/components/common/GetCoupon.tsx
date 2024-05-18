@@ -1,6 +1,6 @@
 import axios from "axios";
 
-interface Coupon {
+export interface Coupon {
   code: string;
   expiration_date: Date;
   reason: string;
@@ -10,6 +10,10 @@ interface Coupon {
   application_rule: string;
 }
 
+export interface CouponResponse {
+  errMsg: string;
+  coupontDetails: Coupon;
+}
 /**
  *
  * @param user_auth: user authentication information for api call
@@ -17,7 +21,11 @@ interface Coupon {
  * @param callback:
  * @returns
  */
-const GetCoupon = async (user_auth: {}, coupon_code: string, callback) => {
+export const GetCoupon = async (
+  user_auth: {},
+  coupon_code: string,
+  callback
+) => {
   await axios
     .get(
       process.env.REACT_APP_BE_URL_PREFIX +
@@ -45,5 +53,3 @@ const GetCoupon = async (user_auth: {}, coupon_code: string, callback) => {
       });
     });
 };
-
-export default GetCoupon;

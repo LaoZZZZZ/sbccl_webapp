@@ -1,7 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import TotalCost from "./TotalCost.tsx";
-import GetCoupon from "./GetCoupon.tsx";
+import { GetCoupon, CouponResponse, Coupon } from "./GetCoupon.tsx";
 import Alert from "./Alert.tsx";
 import { CourseInfo, ClassInformation } from "./CourseInfo.tsx";
 
@@ -10,7 +10,7 @@ interface Props {
   courses: ClassInformation[];
   defaultCourseSelection: "";
   textbookOrdered: boolean;
-  existingCoupon: {};
+  existingCoupon: Coupon;
   setCourseSelection: (course: ClassInformation) => {};
   populateCouponCode: (code: string) => {};
   setOrderBook: (orderBook: boolean) => {};
@@ -55,7 +55,7 @@ const CourseSelection = ({
   });
   const [waitForResponse, setWaitForResponse] = useState(false);
 
-  const [coupon, setCoupon] = useState({
+  const [coupon, setCoupon] = useState<CouponResponse>({
     errMsg: "",
     couponDetails: existingCoupon,
   });
