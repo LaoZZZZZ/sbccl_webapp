@@ -4,6 +4,7 @@ import Logout from "./Logout.tsx";
 import Registrations from "./RegistrationsPage.tsx";
 import StudentsPage from "./StudentsPage.tsx";
 import UserInfo from "./UserInfo.tsx";
+import { Calendar, SchoolDate } from "../common/Calendar.tsx";
 
 interface Props {
   userInfo: UserInfo;
@@ -14,6 +15,7 @@ const Page = {
   AccountDetail: 0,
   Students: 1,
   Registration: 2,
+  Calendar: 3,
 };
 
 const SwitchPage = (state, action) => {
@@ -32,6 +34,11 @@ const SwitchPage = (state, action) => {
       return {
         ...state,
         page: Page.AccountDetail,
+      };
+    case "go_to_calendar":
+      return {
+        ...state,
+        page: Page.Calendar,
       };
   }
 };
@@ -102,6 +109,17 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
               </li>
               <li className="nav-item">
                 <button
+                  className="btn btn-borderless"
+                  onClick={() => {
+                    transitionPageState({ type: "go_to_calendar" });
+                  }}
+                  id="calendar"
+                >
+                  Calendar
+                </button>
+              </li>
+              <li className="nav-item">
+                <button
                   className="btn btn-borderless fixed-right"
                   onClick={() => {
                     Logout(userInfo, logOutCallback);
@@ -128,6 +146,44 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
       {state?.page === Page.Registration && (
         <div className="pt-3 w-75 mx-auto">
           <Registrations userInfo={userInfo} />
+        </div>
+      )}
+      {state?.page === Page.Calendar && (
+        <div className="pt-3 w-75 mx-auto">
+          <Calendar
+            schoolDates={[
+              {
+                event: "Dragon Boat Festival",
+                date: new Date("Sep 14, 2024"),
+                school_year_start: new Date("Sep 14, 2024"),
+                school_year_end: new Date("Jun 14, 2025"),
+              },
+              {
+                event: "School start day",
+                date: new Date("Sep 07, 2024"),
+                school_year_start: new Date("Sep 07, 2024"),
+                school_year_end: new Date("Jun 07, 2025"),
+              },
+              {
+                event: "Last school date",
+                date: new Date("Jun 07, 2025"),
+                school_year_start: new Date("Sep 07, 2024"),
+                school_year_end: new Date("Jun 07, 2025"),
+              },
+              {
+                event: "Last school date",
+                date: new Date("Mar 07, 2024"),
+                school_year_start: new Date("Sep 07, 2024"),
+                school_year_end: new Date("Jun 07, 2025"),
+              },
+              {
+                event: "Dragon Boat Festival",
+                date: new Date("Feb 14, 2024"),
+                school_year_start: new Date("Sep 14, 2024"),
+                school_year_end: new Date("Jun 14, 2025"),
+              },
+            ]}
+          />
         </div>
       )}
     </div>

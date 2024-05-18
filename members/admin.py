@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Member, Registration, Student, Course, Payment, InstructorAssignment, Dropout, Coupon
+from .models import Member, Registration, Student, Course, Payment, InstructorAssignment, Dropout, Coupon, SchoolCalendar
 from django.contrib.auth.models import User
 
 class MemberAdmin(admin.ModelAdmin):
@@ -32,6 +32,10 @@ class CouponAdmin(admin.ModelAdmin):
     list_disply = ('type', 'reason', 'creation_date', 'expiration_date', 'creator',
                    'last_update_person', 'last_update_date', 'dolloar_amount', 'percentage')
 
+class SchoolCalendarAdmin(admin.ModelAdmin):
+    list_disply = ('event', 'date', 'creation_date', 'school_year_start', 'school_year_end')
+
+
 admin.site.register(Member, MemberAdmin)
 admin.site.register(Student, StudentAdmin)
 admin.site.register(Course, CourseAdmin)
@@ -40,3 +44,5 @@ admin.site.register(Registration, RegistrationAdmin)
 admin.site.register(InstructorAssignment, InstructorAssignmentAdmin)
 admin.site.register(Dropout, DropoutAdmin)
 admin.site.register(Coupon, CouponAdmin)
+admin.site.register(SchoolCalendar, SchoolCalendarAdmin)
+
