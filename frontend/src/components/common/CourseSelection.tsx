@@ -3,18 +3,7 @@ import { useState } from "react";
 import TotalCost from "./TotalCost.tsx";
 import GetCoupon from "./GetCoupon.tsx";
 import Alert from "./Alert.tsx";
-
-export interface ClassInformation {
-  enrollment: number;
-  capacity: number;
-  teacher: string;
-  cost: number;
-  type: string;
-  classroom: string;
-  course_start: string;
-  course_end: string;
-  book_cost: number;
-}
+import { CourseInfo, ClassInformation } from "./CourseInfo.tsx";
 
 interface Props {
   user_auth: {};
@@ -22,7 +11,7 @@ interface Props {
   defaultCourseSelection: "";
   textbookOrdered: boolean;
   existingCoupon: {};
-  setCourseSelection: () => {};
+  setCourseSelection: (course: ClassInformation) => {};
   populateCouponCode: (code: string) => {};
   setOrderBook: (orderBook: boolean) => {};
 }
@@ -34,24 +23,6 @@ const findSelectedCourse = (courses, value) => {
     return selected_course[0];
   }
   return null;
-};
-
-const extractCourseTime = (course: ClassInformation) => {
-  var start = new Date("2024-10-01T" + course.course_start);
-  var end = new Date("2024-10-01T" + course.course_end);
-  return (
-    start.toLocaleString("en-US", {
-      hour: "numeric",
-      hour12: true,
-      minute: "numeric",
-    }) +
-    " - " +
-    end.toLocaleString("en-US", {
-      hour: "numeric",
-      hour12: true,
-      minute: "numeric",
-    })
-  );
 };
 
 const CourseSelection = ({
@@ -79,6 +50,8 @@ const CourseSelection = ({
       selectedCourse !== null ? selectedCourse.course_start_time : "NA",
     course_end: selectedCourse !== null ? selectedCourse.course_end_time : "NA",
     book_cost: selectedCourse !== null ? selectedCourse.book_cost : 0,
+    course_description:
+      selectedCourse !== null ? selectedCourse.course_description : "",
   });
   const [waitForResponse, setWaitForResponse] = useState(false);
 
@@ -121,28 +94,32 @@ const CourseSelection = ({
               type: "",
               cost: 0,
               classroom: "NA",
-              teacher: "NA",
+              teacher: "Unassigned",
               course_start: "NA",
               course_end: "NA",
               book_cost: 0,
+              course_description: "",
             });
             const selected_course = findSelectedCourse(courses, e.target.value);
             if (selected_course !== null) {
               setCourseSelection(selected_course);
-
               setClassInfo({
                 enrollment: selected_course.enrollment,
                 capacity: selected_course.size_limit,
                 cost: selected_course.cost,
                 type: selected_course.course_type,
                 classroom: selected_course.classroom,
-                teacher: selected_course.teacher,
+                teacher:
+                  selected_course.teacher === ""
+                    ? "Unassigned"
+                    : selected_course.teacher,
                 course_start: selected_course.course_start_time,
                 course_end: selected_course.course_end_time,
                 book_cost:
                   selected_course.book_cost !== ""
                     ? selected_course.book_cost
                     : 0,
+                course_description: selected_course.course_description,
               });
               setSelected(true);
             }
@@ -160,144 +137,109 @@ const CourseSelection = ({
       </div>
       {selected && (
         <div className="form-control">
-          <label>
-            <strong>Class Information</strong>
-          </label>
-          <div className="input-group pb-2">
-            <div className="input-group pb-2">
-              <span className="input-group-text bg-info">Time</span>
-              <span className="input-group-text bg-white">
-                {extractCourseTime(classInfo)}
-              </span>
-              <span className="input-group-text bg-info">Classroom</span>
-              <span className="input-group-text bg-white">
-                {classInfo.classroom}
-              </span>
-              <span className="input-group-text bg-info">Teacher</span>
-              <span className="input-group-text bg-white">
-                {classInfo.teacher}
-              </span>
-            </div>
-            <div className="input-group pb-2">
-              <span className="input-group-text bg-info">Capacity:</span>
-              <span className="input-group-text bg-white">
-                {classInfo.capacity}
-              </span>
-              <span className="input-group-text bg-info">Enrollment:</span>
-              <span
-                className={
-                  "input-group-text " +
-                  (classInfo.enrollment >= classInfo.capacity
-                    ? "bg-danger"
-                    : "bg-white")
+          <CourseInfo classInfo={classInfo} />
+          <div className="form-check pb-2">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              value=""
+              id="orderBook"
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setWantTextBook(true);
+                  setOrderBook(true);
+                } else {
+                  setWantTextBook(false);
+                  setOrderBook(false);
                 }
-              >
-                {classInfo.enrollment}
-              </span>
-            </div>
-            <div className="form-check pb-2">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                value=""
-                id="orderBook"
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setWantTextBook(true);
-                    setOrderBook(true);
-                  } else {
-                    setWantTextBook(false);
-                    setOrderBook(false);
-                  }
-                }}
-                disabled={classInfo.type === "E"}
-                checked={wantTextBook}
+              }}
+              disabled={classInfo.type === "E"}
+              checked={wantTextBook}
+            />
+            <label className="form-check-label">
+              Order textbook (${classInfo.book_cost})
+            </label>
+          </div>
+          <div className="row g-3 input-group pb-2">
+            <div className="col-auto">
+              <TotalCost
+                original_amount={calculateOriginalAmount(classInfo.cost)}
+                updated_amount={calculateUpdatedAmount(classInfo.cost)}
               />
-              <label className="form-check-label">
-                Order textbook (${classInfo.book_cost})
-              </label>
             </div>
-            <div className="row g-3 input-group pb-2">
-              <div className="col-auto">
-                <TotalCost
-                  original_amount={calculateOriginalAmount(classInfo.cost)}
-                  updated_amount={calculateUpdatedAmount(classInfo.cost)}
-                />
-              </div>
-              <div className="col-auto">
-                <input
-                  type="text"
-                  className="form-control col-auto"
-                  value={
-                    coupon.couponDetails === null
-                      ? "Enter Coupon Code"
-                      : coupon.couponDetails.code
-                  }
-                  aria-label="Coupon"
-                  disabled={existingCoupon !== null}
-                  onChange={(e) => {
+            <div className="col-auto">
+              <input
+                type="text"
+                className="form-control col-auto"
+                value={
+                  coupon.couponDetails === null
+                    ? "Enter Coupon Code"
+                    : coupon.couponDetails.code
+                }
+                aria-label="Coupon"
+                disabled={existingCoupon !== null}
+                onChange={(e) => {
+                  setCoupon({
+                    errMsg: "",
+                    couponDetails: {
+                      code: e.target.value,
+                    },
+                  });
+                }}
+              />
+            </div>
+            <div className="col-auto">
+              <input
+                type="button"
+                className="btn btn-outline-primary"
+                value={couponApplied ? "Remove" : "Apply"}
+                id="coupon-button"
+                disabled={
+                  waitForResponse ||
+                  classInfo.type === "E" ||
+                  existingCoupon !== null
+                }
+                onClick={() => {
+                  setWaitForResponse(true);
+                  if (!couponApplied && coupon.couponDetails !== null) {
+                    GetCoupon(
+                      user_auth,
+                      coupon.couponDetails.code,
+                      (coupon) => {
+                        setCoupon(coupon);
+                        calculateOriginalAmount(classInfo.cost);
+                        if (coupon.couponDetails !== null) {
+                          setCouponApplied(true);
+                          populateCouponCode(coupon.couponDetails.code);
+                        }
+                      }
+                    );
+                  } else {
+                    // Remove code
                     setCoupon({
                       errMsg: "",
-                      couponDetails: {
-                        code: e.target.value,
-                      },
+                      couponDetails: null,
+                    });
+                    setCouponApplied(false);
+                    populateCouponCode("");
+                  }
+                  setWaitForResponse(false);
+                }}
+              />
+            </div>
+            {coupon.errMsg.length !== 0 && (
+              <div>
+                <Alert
+                  message={coupon.errMsg}
+                  parentCallback={function (): void {
+                    setCoupon({
+                      errMsg: "",
+                      couponDetails: null,
                     });
                   }}
-                />
+                ></Alert>
               </div>
-              <div className="col-auto">
-                <input
-                  type="button"
-                  className="btn btn-outline-primary"
-                  value={couponApplied ? "Remove" : "Apply"}
-                  id="coupon-button"
-                  disabled={
-                    waitForResponse ||
-                    classInfo.type === "E" ||
-                    existingCoupon !== null
-                  }
-                  onClick={() => {
-                    setWaitForResponse(true);
-                    if (!couponApplied && coupon.couponDetails !== null) {
-                      GetCoupon(
-                        user_auth,
-                        coupon.couponDetails.code,
-                        (coupon) => {
-                          setCoupon(coupon);
-                          calculateOriginalAmount(classInfo.cost);
-                          if (coupon.couponDetails !== null) {
-                            setCouponApplied(true);
-                            populateCouponCode(coupon.couponDetails.code);
-                          }
-                        }
-                      );
-                    } else {
-                      // Remove code
-                      setCoupon({
-                        errMsg: "",
-                        couponDetails: null,
-                      });
-                      setCouponApplied(false);
-                      populateCouponCode("");
-                    }
-                    setWaitForResponse(false);
-                  }}
-                />
-              </div>
-              {coupon.errMsg.length !== 0 && (
-                <div>
-                  <Alert
-                    message={coupon.errMsg}
-                    parentCallback={function (): void {
-                      setCoupon({
-                        errMsg: "",
-                        couponDetails: null,
-                      });
-                    }}
-                  ></Alert>
-                </div>
-              )}
-            </div>
+            )}
           </div>
         </div>
       )}
