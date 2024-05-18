@@ -160,7 +160,7 @@ const CourseSelection = ({
               Order textbook (${classInfo.book_cost})
             </label>
           </div>
-          <div className="row g-3 input-group pb-2">
+          <div className="row g-3 input-group">
             <div className="col-auto">
               <TotalCost
                 original_amount={calculateOriginalAmount(classInfo.cost)}

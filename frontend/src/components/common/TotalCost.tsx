@@ -11,7 +11,7 @@ interface TotalCostProps {
 const TotalCost = ({ original_amount, updated_amount }: TotalCostProps) => {
   const hasDiscount = original_amount > updated_amount;
   return (
-    <div className="row g-3 align-items-left">
+    <div className="row g-2 align-items-left">
       <div className="col-auto">
         <label className="col-form-label">
           <strong>Total cost</strong>:

@@ -147,7 +147,7 @@ const EditableRegistration = ({
               disabled
             />
           </div>
-          <div>
+          <div className="form-group pb-2 mb-2">
             <CourseSelection
               user_auth={userAuth}
               courses={courses.filter((course) => {
