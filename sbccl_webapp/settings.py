@@ -211,4 +211,7 @@ CORS_ORIGIN_WHITELIST = [
     # Frontend delopyed by AWS amplify
     'https://main.d3mkx65my7y2ey.amplifyapp.com',
     'https://main.d2p00a6wps5hgc.amplifyapp.com',
+    'https://www.app.sbcclny.com',
+    'https://app.sbcclny.com',
+    'https://prod.api.sbcclny.com'
 ]
