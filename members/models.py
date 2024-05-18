@@ -245,6 +245,16 @@ class ClassGroup(models.Model):
     creation_date = models.DateField(null=False)
     last_update_date = models.DateField(null=False)
     last_update_person = models.CharField(max_length=255, null=False)
-    last_udpate_person = models.CharField(max_length=255, null=False)
+
+class SchoolCalendar(models.Model):
+    # School event that happen on that day. If no event, then it can be null.
+    event = models.CharField(max_length=255, null=True, db_comment="Event name")
+    date = models.DateField(null=False)
+    school_year_start = models.DateField(null=False)
+    school_year_end = models.DateField(null=False)
+    creation_date = models.DateField(null=False)
+    last_update_date = models.DateField(null=False)
+    last_update_person = models.CharField(max_length=255, null=False)
+
     
 
