@@ -33,7 +33,8 @@ class CouponAdmin(admin.ModelAdmin):
                    'last_update_person', 'last_update_date', 'dolloar_amount', 'percentage')
 
 class SchoolCalendarAdmin(admin.ModelAdmin):
-    list_disply = ('event', 'date', 'creation_date', 'school_year_start', 'school_year_end')
+    list_disply = ('event', 'date', 'creation_date', 'school_year_start', 'school_year_end',
+                   'day_type')
 
 
 admin.site.register(Member, MemberAdmin)

@@ -1,7 +1,7 @@
 
 from rest_framework.test import APITestCase, APIRequestFactory, APIClient
 from rest_framework import status
-from .models import Coupon, Member, Student, Course, Registration, InstructorAssignment, CouponUsageRecord
+from .models import Coupon, Member, Student, Course, Registration, InstructorAssignment, CouponUsageRecord, SchoolCalendar
 from django.contrib.auth.models import User
 from rest_framework.test import force_authenticate
 import datetime
@@ -1283,3 +1283,39 @@ class MemberViewSetTest(APITestCase):
     #                                format='json')
         
     #     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        
+    def test_get_calendar(self):
+        day = SchoolCalendar()
+        day.event = "School start"
+        day.date = datetime.date.today()
+        day.day_type = 'SD'
+        day.school_year_end = day.date.year
+        day.school_year_start = day.date.year - 1
+        day.creation_date = datetime.date.today()
+        day.last_update_date = datetime.datetime.today()
+        day.last_update_person = 'test'
+        day.save()
+
+        expired_day = SchoolCalendar()
+        expired_day.event = "School Start"
+        expired_day.school_year_end = datetime.date.today().year - 1
+        expired_day.school_year_start = datetime.date.today().year - 2
+        expired_day.date = datetime.date.today().replace(year=expired_day.school_year_end)
+        expired_day.creation_date = datetime.date.today().replace(year=expired_day.school_year_start)
+        expired_day.last_update_date = expired_day.creation_date
+        expired_day.last_update_person = 'test'
+        expired_day.save()
+
+        exist_user = self.create_user('test_name', 'david@gmail.com')
+        self.create_member(exist_user, sign_up_status='V',
+                           verification_code="12345-1231", member_type='P')
+        self.client.force_authenticate(user=exist_user)
+        response = self.client.get('/rest_api/members/fetch-calendar/', format='json')
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        fetched_dates = json.loads(response.data[0])
+        self.assertEqual(fetched_dates['school_year_start'], day.school_year_start)
+        self.assertEqual(fetched_dates['school_year_end'], day.school_year_end)
+
+        
