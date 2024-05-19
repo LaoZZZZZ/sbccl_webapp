@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Member, Student, Course, Registration, Coupon
+from .models import Member, Student, Course, Registration, Coupon, SchoolCalendar
 from django.contrib.auth.models import User
 import re
 import pytz
@@ -146,4 +146,15 @@ class CouponSerializer(serializers.ModelSerializer):
         coupon.creation_date = datetime.date.today()
         coupon.creator = user.username
         return coupon
+    
+    
+class SchoolCalendarSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SchoolCalendar
+        fields = ('event', 'date', 'school_year_start', 'school_year_end', 'day_type')
+
+    def create(self, validated_data):
+        school_date = SchoolCalendar(**validated_data)
+        school_date.creation_date = datetime.date.today()
+        return school_date
     

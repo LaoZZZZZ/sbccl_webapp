@@ -8,8 +8,8 @@ from django.template import loader
 from django.utils.html import strip_tags
 import pytz
 from rest_framework.viewsets import ModelViewSet
-from .serializers import StudentSerializer, UserSerializer, MemberSerializer, CourseSerializer, RegistrationSerializer, CouponSerializer
-from .models import Course, Member, Student, Registration, Dropout, Payment, InstructorAssignment, Coupon, CouponUsageRecord
+from .serializers import StudentSerializer, UserSerializer, MemberSerializer, CourseSerializer, RegistrationSerializer, CouponSerializer, SchoolCalendarSerializer
+from .models import Course, Member, Student, Registration, Dropout, Payment, InstructorAssignment, Coupon, CouponUsageRecord, SchoolCalendar
 from rest_framework.decorators import action
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.renderers import JSONRenderer
@@ -29,6 +29,16 @@ class MemberViewSet(ModelViewSet):
     queryset = Member.objects.all()
     serializer_class = MemberSerializer
     authentication_classes = [SessionAuthentication, BasicAuthentication]
+
+    # Find the current active shcool year.
+    def __find_current_school_year(self):
+        current_year = datetime.date.today().year
+        current_month = datetime.date.today().month
+        # For next academic year.
+        if current_month >= 7:
+            return (current_year, current_year + 1)
+        else:
+            return (current_year - 1, current_year)
 
     # send email to board member about book ordering updates.
     def __email_for_textbook(self, registration: Registration):
@@ -680,11 +690,11 @@ class MemberViewSet(ModelViewSet):
             
             registration.course = persisted_course
             registration.student = persisted_student
-            # TODO(luke): The calculation of school start and end should be based on the calendar instead
-            # of course creation year.
-            registration.school_year_start = datetime.date(year=persisted_course.creation_date.year,
+
+            start_year, end_year = self.__find_current_school_year()
+            registration.school_year_start = datetime.date(year=start_year,
                                                            month=9, day = 1)
-            registration.school_year_end = registration.school_year_start.replace(year=datetime.datetime.today().year + 1,
+            registration.school_year_end = registration.school_year_start.replace(year=end_year,
                                                                                   month=7)
             registration.registration_date = datetime.date.today()
             registration.expiration_date = registration.school_year_end
@@ -920,3 +930,29 @@ class MemberViewSet(ModelViewSet):
             return self.__generate_unsuccessful_response(str(e), status.HTTP_400_BAD_REQUEST)
         except (Coupon.DoesNotExist) as e:
             return self.__generate_unsuccessful_response("The coupon does not exist!", status.HTTP_404_NOT_FOUND)
+        
+    @action(methods=['GET'], detail=False, url_path='fetch-calendar', name='get calendar',
+    authentication_classes=[SessionAuthentication, BasicAuthentication],
+    permission_classes=[permissions.IsAuthenticated])
+    def get_calendar(self, request):  
+        try:
+            start_year, end_year = self.__find_current_school_year()
+            school_dates = SchoolCalendar.objects.filter(school_year_start = start_year,
+                                                         school_year_end = end_year)
+            # check if the next year's calendar is available
+            next_year_dates = SchoolCalendar.objects.filter(school_year_start = start_year + 1,
+                                                            school_year_end = end_year + 1)
+            data = []
+            for day in school_dates.all():
+                data.append(JSONRenderer().render(SchoolCalendarSerializer(day).data))
+            for day in next_year_dates.all():
+                data.append(JSONRenderer().render(SchoolCalendarSerializer(day).data))
+
+            return Response(data, status=status.HTTP_200_OK)
+        except ValueError as e:
+            return self.__generate_unsuccessful_response(str(e), status.HTTP_400_BAD_REQUEST)
+        except SchoolCalendar.DoesNotExist as e:
+            return self.__generate_unsuccessful_response("Could not find valid !", status.HTTP_404_NOT_FOUND)
+        
+        
+    

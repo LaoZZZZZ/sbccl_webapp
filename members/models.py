@@ -250,11 +250,31 @@ class SchoolCalendar(models.Model):
     # School event that happen on that day. If no event, then it can be null.
     event = models.CharField(max_length=255, null=True, db_comment="Event name")
     date = models.DateField(null=False)
-    school_year_start = models.DateField(null=False)
-    school_year_end = models.DateField(null=False)
+    school_year_start = models.IntegerField(null=False)
+    school_year_end = models.IntegerField(null=False)
     creation_date = models.DateField(null=False)
     last_update_date = models.DateField(null=False)
     last_update_person = models.CharField(max_length=255, null=False)
+    DAY_TYPE = [
+        ('SD', 'School Day'),  # Normal school day
+        ('HD', 'Holiday'), # Holiday. school is closed
+        ('OE', 'Offsite event')]  # off site event, no school
+    day_type = models.CharField(max_length=2, choices=DAY_TYPE)
+
+    def getType(self):
+        if self.day_type == 'SD':
+            return "School Day"
+        elif self.day_type == 'HD':
+            return "Holiday. School is closed"
+        elif self.day_type == 'OE':
+            return "Offsite event. No class"
+        else:
+            return "Unknown day type!"
+    
+    def __str__(self):
+        return '{start}-{end} date: {date} event: {event} type: {day_type}'.format(
+            start=self.school_year_start, end=self.school_year_end,
+            date=self.date, event=self.event, day_type=self.getType())
 
     
 
