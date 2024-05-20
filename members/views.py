@@ -947,8 +947,10 @@ class MemberViewSet(ModelViewSet):
                 data.append(JSONRenderer().render(SchoolCalendarSerializer(day).data))
             for day in next_year_dates.all():
                 data.append(JSONRenderer().render(SchoolCalendarSerializer(day).data))
-
-            return Response(data, status=status.HTTP_200_OK)
+            content = {
+                'calendar': data
+            }
+            return Response(content, status=status.HTTP_200_OK)
         except ValueError as e:
             return self.__generate_unsuccessful_response(str(e), status.HTTP_400_BAD_REQUEST)
         except SchoolCalendar.DoesNotExist as e:

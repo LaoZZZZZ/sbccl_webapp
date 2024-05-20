@@ -47,7 +47,6 @@ const processSchoolDates = (schoolDates: SchoolDate[]) => {
  */
 export const Calendar = ({ schoolDates }: CalendarProps) => {
   const hasSchool = schoolDates.length > 0;
-
   const calendar = processSchoolDates(schoolDates);
   const table_columns_names = ["Date", "Event"];
   return (
@@ -60,7 +59,7 @@ export const Calendar = ({ schoolDates }: CalendarProps) => {
       {hasSchool && (
         <div className="container text-center pb-2">
           <div>
-            <h1>CCL Calendar</h1>
+            <h1>Calendar</h1>
           </div>
           <div className="table-responsive">
             <table className="table table-primary table-striped-columns">
@@ -72,7 +71,7 @@ export const Calendar = ({ schoolDates }: CalendarProps) => {
                 </tr>
               </thead>
               <tbody>
-                <tr className="table-secondary">
+                <tr className="table-primary">
                   <th colspan="2"> Future Events</th>
                 </tr>
                 {calendar.future.map((day: SchoolDate) => (
@@ -81,7 +80,7 @@ export const Calendar = ({ schoolDates }: CalendarProps) => {
                     <td>{day.event}</td>
                   </tr>
                 ))}
-                <tr className="table-secondary">
+                <tr className="table-light">
                   <th colspan="2"> Past Events</th>
                 </tr>
                 {calendar.past.map((day: SchoolDate) => (

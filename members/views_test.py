@@ -1313,8 +1313,8 @@ class MemberViewSetTest(APITestCase):
         response = self.client.get('/rest_api/members/fetch-calendar/', format='json')
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
-        fetched_dates = json.loads(response.data[0])
+        self.assertEqual(len(response.data['calendar']), 1)
+        fetched_dates = json.loads(response.data['calendar'][0])
         self.assertEqual(fetched_dates['school_year_start'], day.school_year_start)
         self.assertEqual(fetched_dates['school_year_end'], day.school_year_end)
 
