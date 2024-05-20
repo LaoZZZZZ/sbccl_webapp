@@ -4,7 +4,7 @@ import Logout from "./Logout.tsx";
 import Registrations from "./RegistrationsPage.tsx";
 import StudentsPage from "./StudentsPage.tsx";
 import UserInfo from "./UserInfo.tsx";
-import { Calendar, SchoolDate } from "../common/Calendar.tsx";
+import CalendarDetailPage from "./CalendarDetailPage.tsx";
 
 interface Props {
   userInfo: UserInfo;
@@ -150,40 +150,7 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
       )}
       {state?.page === Page.Calendar && (
         <div className="pt-3 w-75 mx-auto">
-          <Calendar
-            schoolDates={[
-              {
-                event: "Dragon Boat Festival",
-                date: new Date("Sep 14, 2024"),
-                school_year_start: new Date("Sep 14, 2024"),
-                school_year_end: new Date("Jun 14, 2025"),
-              },
-              {
-                event: "School start day",
-                date: new Date("Sep 07, 2024"),
-                school_year_start: new Date("Sep 07, 2024"),
-                school_year_end: new Date("Jun 07, 2025"),
-              },
-              {
-                event: "Last school date",
-                date: new Date("Jun 07, 2025"),
-                school_year_start: new Date("Sep 07, 2024"),
-                school_year_end: new Date("Jun 07, 2025"),
-              },
-              {
-                event: "Last school date",
-                date: new Date("Mar 07, 2024"),
-                school_year_start: new Date("Sep 07, 2024"),
-                school_year_end: new Date("Jun 07, 2025"),
-              },
-              {
-                event: "Dragon Boat Festival",
-                date: new Date("Feb 14, 2024"),
-                school_year_start: new Date("Sep 14, 2024"),
-                school_year_end: new Date("Jun 14, 2025"),
-              },
-            ]}
-          />
+          <CalendarDetailPage userAuth={userInfo.auth} />
         </div>
       )}
     </div>
