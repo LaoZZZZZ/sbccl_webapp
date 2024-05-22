@@ -13,6 +13,7 @@ export interface FetchResponse {
   errMsg: string;
   calendar: CalendarDate[];
 }
+
 // #endregion
 
 /**
@@ -39,9 +40,7 @@ export const FetchCalendar = async (
       if (response.data.calendar !== null) {
         var calendar: CalendarDate[] = [];
         response.data.calendar.forEach((day) => {
-          let parsed_day = JSON.parse(day);
-          parsed_day.date = new Date(parsed_day.date);
-          calendar.push(parsed_day);
+          calendar.push(day);
         });
         callback({
           errMsg: "",
@@ -57,7 +56,7 @@ export const FetchCalendar = async (
     })
     .catch((error) => {
       callback({
-        errMsg: error.response.data,
+        errMsg: error.response.data.detail,
         calendar: [],
       });
     });
