@@ -62,7 +62,6 @@ const LoginPage = ({ onLoginSuccess, onSignUp, onResetPassword }: Props) => {
                   }
                 })
                 .catch(function (error) {
-                  console.log(error);
                   if (error.response.data) {
                     setLoginErrorMsg(error.response.data.detail);
                   } else {
