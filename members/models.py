@@ -166,9 +166,9 @@ class Course(models.Model):
     available_date = models.DateField(null=True)
 
     def __str__(self):
-        return 'Course: {name} Course Type: {course_type} Status: {course_status} School Year: {year} Available Date: {date}'.format(
+        return 'Course: {name} Course Type: {course_type} Status: {course_status} School Year: {year}'.format(
             name=self.name, course_type=self.course_type, course_status=self.course_status,
-            year='-'.join(self.school_year_start, self.school_year_end), date=self.available_date)
+            year='-'.join([str(self.school_year_start), str(self.school_year_end)]))
 
 """
 Record the usage of coupons by each member/user.
