@@ -20,12 +20,6 @@ const generatePerYearCalendar = (response: FetchResponse) => {
   response.calendar.forEach((schoolDay: CalendarDate) => {
     const key: string =
       schoolDay.school_year_start + "-" + schoolDay.school_year_end;
-    console.log(
-      schoolDay,
-      schoolDay["school_year_start"],
-      schoolDay.school_year_end,
-      schoolDay.event
-    );
 
     if (result.has(key)) {
       result.get(key).push(schoolDay);
