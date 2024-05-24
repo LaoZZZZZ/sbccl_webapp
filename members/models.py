@@ -161,10 +161,14 @@ class Course(models.Model):
     course_end_time = models.TimeField(null=True)
     # The cost of the textbook.
     book_cost = models.FloatField(null=True)
+    school_year_start = models.IntegerField(null=False, default=2024)
+    school_year_end = models.IntegerField(null=False, default=2025)
+    available_date = models.DateField(null=True)
 
     def __str__(self):
-        return 'Course: {name} Course Type: {course_type} Status: {course_status}'.format(
-            name=self.name, course_type=self.course_type, course_status=self.course_status)
+        return 'Course: {name} Course Type: {course_type} Status: {course_status} School Year: {year} Available Date: {date}'.format(
+            name=self.name, course_type=self.course_type, course_status=self.course_status,
+            year='-'.join(self.school_year_start, self.school_year_end), date=self.available_date)
 
 """
 Record the usage of coupons by each member/user.
