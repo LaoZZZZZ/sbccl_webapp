@@ -21,7 +21,9 @@ interface CalendarProps {
 }
 
 const processSchoolDates = (schoolDates: CalendarDate[]) => {
-  schoolDates.sort((a, b) => a.date.getTime() - b.date.getTime());
+  schoolDates.sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
   const today = new Date();
   today.setHours(16);
   var past_date: CalendarDate[] = [];
@@ -54,6 +56,18 @@ export const Calendar = ({ schoolYear, schoolDates }: CalendarProps) => {
     timeZone: "UTC",
   };
 
+  const dayType = ["SD", "HD", "OE"];
+  const legends = new Map([
+    ["SD", "School Day"],
+    ["HD", "Holiday"],
+    ["OE", "Offsite Event"],
+  ]);
+
+  const colors = new Map([
+    ["SD", "bg-success"],
+    ["HD", "bg-secondary"],
+    ["OE", "bg-info"],
+  ]);
   return (
     <div>
       {!hasSchool && (
@@ -81,11 +95,7 @@ export const Calendar = ({ schoolYear, schoolDates }: CalendarProps) => {
                 </tr>
                 {calendar.future.map((day: CalendarDate) => (
                   <tr>
-                    <td
-                      className={
-                        day.day_type === "SD" ? "bg-success" : "bg-info"
-                      }
-                    >
+                    <td className={colors.get(day.day_type)}>
                       {day.date.toLocaleDateString("en-US", options)}
                     </td>
                     <td>{day.event}</td>
@@ -104,8 +114,11 @@ export const Calendar = ({ schoolYear, schoolDates }: CalendarProps) => {
             </table>
           </div>
           <div>
-            <span className="badge bg-success">School Day</span>
-            <span className="badge bg-info">School Closed</span>
+            {dayType.map((day_type) => (
+              <span className={"badge " + colors.get(day_type)}>
+                {legends.get(day_type)}
+              </span>
+            ))}
           </div>
         </div>
       )}
