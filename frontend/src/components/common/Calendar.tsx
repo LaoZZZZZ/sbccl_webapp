@@ -21,7 +21,9 @@ interface CalendarProps {
 }
 
 const processSchoolDates = (schoolDates: CalendarDate[]) => {
-  schoolDates.sort((a, b) => a.date.getTime() - b.date.getTime());
+  schoolDates.sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
   const today = new Date();
   today.setHours(16);
   var past_date: CalendarDate[] = [];

@@ -15,21 +15,29 @@ interface AcademicYearCalendar {
   calendar: CalendarDate[];
 }
 
-const generatePerYearCalendar = (allCalendar: FetchResponse) => {
+const generatePerYearCalendar = (response: FetchResponse) => {
   const result = new Map();
-  allCalendar.calendar.forEach((day) => {
-    const key = day.school_year_start + "-" + day.school_year_end;
+  response.calendar.forEach((schoolDay: CalendarDate) => {
+    const key: string =
+      schoolDay.school_year_start + "-" + schoolDay.school_year_end;
+    console.log(
+      schoolDay,
+      schoolDay["school_year_start"],
+      schoolDay.school_year_end,
+      schoolDay.event
+    );
+
     if (result.has(key)) {
-      result.get(key).push(day);
+      result.get(key).push(schoolDay);
     } else {
-      result.set(key, [day]);
+      result.set(key, [schoolDay]);
     }
   });
   var perYarCalendar: AcademicYearCalendar[] = [];
-  result.forEach((v, k) => {
+  result.forEach((days, year) => {
     perYarCalendar.push({
-      schoolYear: k,
-      calendar: v,
+      schoolYear: year,
+      calendar: days,
     });
   });
   return perYarCalendar;
@@ -39,22 +47,22 @@ const generatePerYearCalendar = (allCalendar: FetchResponse) => {
  */
 const CalendarDetailPage = ({ userAuth }: CalendarDetailPageProps) => {
   const [fetched, setFetched] = useState(false);
-
   const [perYearCalendar, setPerYearCalendar] = useState<
     AcademicYearCalendar[]
   >([]);
 
   const [selectedYear, setSelectedYear] = useState({
     selected: false,
-    schoolDates: {},
+    schoolDates: {
+      schoolYear: "",
+      calendar: [],
+    },
   });
 
   const handleFetchResponse = (response: FetchResponse) => {
     const allyears = generatePerYearCalendar(response);
     setPerYearCalendar(allyears);
-    if (allyears.length > 0) {
-      setFetched(true);
-    }
+    setFetched(allyears.length > 0);
   };
 
   useEffect(() => {
@@ -82,6 +90,7 @@ const CalendarDetailPage = ({ userAuth }: CalendarDetailPageProps) => {
                 <button
                   className="dropdown-item"
                   onClick={() => {
+                    console.log(day);
                     setSelectedYear({ selected: true, schoolDates: day });
                   }}
                 >

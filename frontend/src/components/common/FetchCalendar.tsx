@@ -1,5 +1,4 @@
 import axios from "axios";
-import { json } from "stream/consumers";
 
 export interface CalendarDate {
   date: Date;
@@ -13,7 +12,6 @@ export interface FetchResponse {
   errMsg: string;
   calendar: CalendarDate[];
 }
-
 // #endregion
 
 /**
@@ -36,15 +34,17 @@ export const FetchCalendar = async (
         auth: user_auth,
       }
     )
-    .then((response) => {
+    .then(function (response) {
       if (response.data.calendar !== null) {
-        var calendar: CalendarDate[] = [];
+        var schoolDays: CalendarDate[] = [];
         response.data.calendar.forEach((day) => {
-          calendar.push(day);
+          let calendarDay: CalendarDate = JSON.parse(day);
+          calendarDay.date = new Date(calendarDay.date);
+          schoolDays.push(calendarDay);
         });
         callback({
           errMsg: "",
-          calendar: calendar,
+          calendar: schoolDays,
         });
       } else {
         callback({
@@ -52,12 +52,13 @@ export const FetchCalendar = async (
           calendar: [],
         });
       }
-      return;
     })
-    .catch((error) => {
-      callback({
-        errMsg: error.response.data.detail,
-        calendar: [],
-      });
+    .catch(function (error) {
+      if (error.response !== null) {
+        callback({
+          errMsg: error.response.data,
+          calendar: [],
+        });
+      }
     });
 };
