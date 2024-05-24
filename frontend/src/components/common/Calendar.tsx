@@ -80,6 +80,13 @@ export const Calendar = ({ schoolYear, schoolDates }: CalendarProps) => {
           <div>
             <h1>{schoolYear}</h1>
           </div>
+          <div className="pb-2">
+            {dayType.map((day_type) => (
+              <span className={"badge " + colors.get(day_type)}>
+                {legends.get(day_type)}
+              </span>
+            ))}
+          </div>
           <div className="table-responsive">
             <table className="table table-primary table-striped-columns">
               <thead>
@@ -112,13 +119,6 @@ export const Calendar = ({ schoolYear, schoolDates }: CalendarProps) => {
                 ))}
               </tbody>
             </table>
-          </div>
-          <div>
-            {dayType.map((day_type) => (
-              <span className={"badge " + colors.get(day_type)}>
-                {legends.get(day_type)}
-              </span>
-            ))}
           </div>
         </div>
       )}
