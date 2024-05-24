@@ -37,14 +37,8 @@ class MemberViewSet(ModelViewSet):
         return True
 
     # find the registration year
-    def __find_registration_year(self):
-        current_year = datetime.date.today().year
-        current_month = datetime.date.today().month
-        # For next academic year.
-        if current_month >= 6:
-            return (current_year, current_year + 1)
-        else:
-            return (current_year - 1, current_year)
+    def __find_registration_year(self, persisted_course : Course):
+        return (persisted_course.school_year_start, persisted_course.school_year_end)
 
     # Find the current active shcool year.
     def __find_current_school_year(self):
@@ -700,7 +694,7 @@ class MemberViewSet(ModelViewSet):
                     return self.__generate_unsuccessful_response(
                         "The student already registered a same type of course!", status.HTTP_409_CONFLICT)
 
-            start_year, end_year = self.__find_registration_year()
+            start_year, end_year = self.__find_registration_year(persisted_course)
             # Need to check if the student can register enrichment class
             if persisted_course.course_type == 'E' and not self.__has_language_class_registration(persisted_student, start_year, end_year):
                 return self.__generate_unsuccessful_response(
