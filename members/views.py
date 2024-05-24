@@ -30,6 +30,22 @@ class MemberViewSet(ModelViewSet):
     serializer_class = MemberSerializer
     authentication_classes = [SessionAuthentication, BasicAuthentication]
 
+    # check if the student has language class registration.
+    def __has_language_class_registration(persisted_student : Student, start_year : int,
+                                          end_year: int):
+        
+        return True
+
+    # find the registration year
+    def __find_registration_year(self):
+        current_year = datetime.date.today().year
+        current_month = datetime.date.today().month
+        # For next academic year.
+        if current_month >= 6:
+            return (current_year, current_year + 1)
+        else:
+            return (current_year - 1, current_year)
+
     # Find the current active shcool year.
     def __find_current_school_year(self):
         current_year = datetime.date.today().year
@@ -667,7 +683,6 @@ class MemberViewSet(ModelViewSet):
             if persisted_course.course_status != 'A':
                 return self.__generate_unsuccessful_response(
                     "The class is no longer open for registration", status.HTTP_400_BAD_REQUEST)
-            
             student_serializer = StudentSerializer(data=request.data['student'])
             if not student_serializer.is_valid():
                 return self.__generate_unsuccessful_response("Invalid student is provided", status.HTTP_400_BAD_REQUEST)
@@ -678,11 +693,20 @@ class MemberViewSet(ModelViewSet):
             persisted_student = Student.objects.get(first_name=validated['first_name'],
                                                     last_name=validated['last_name'],
                                                     parent_id=matched_member)
+            
             matched_registration = Registration.objects.filter(student=persisted_student)
             for m in matched_registration:
                 if self.__has_conflict__(m.course, persisted_course) and m.course.course_status == 'A':
                     return self.__generate_unsuccessful_response(
                         "The student already registered a same type of course!", status.HTTP_409_CONFLICT)
+
+            start_year, end_year = self.__find_registration_year()
+            # Need to check if the student can register enrichment class
+            if persisted_course.course_type == 'E' and not self.__has_language_class_registration(persisted_student, start_year, end_year):
+                return self.__generate_unsuccessful_response(
+                    "The student must first register language class before registering enrichmeng class",
+                    status.HTTP_400_BAD_REQUEST)
+
             registration = Registration()
             registration.registration_code = str(uuid.uuid5(uuid.NAMESPACE_OID,
                                                             persisted_student.first_name + persisted_student.last_name + persisted_course.name))
@@ -691,7 +715,6 @@ class MemberViewSet(ModelViewSet):
             registration.course = persisted_course
             registration.student = persisted_student
 
-            start_year, end_year = self.__find_current_school_year()
             registration.school_year_start = datetime.date(year=start_year,
                                                            month=9, day = 1)
             registration.school_year_end = registration.school_year_start.replace(year=end_year,
