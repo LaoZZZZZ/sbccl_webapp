@@ -56,6 +56,12 @@ const CalendarDetailPage = ({ userAuth }: CalendarDetailPageProps) => {
   const handleFetchResponse = (response: FetchResponse) => {
     const allyears = generatePerYearCalendar(response);
     setPerYearCalendar(allyears);
+    if (allyears.length > 0) {
+      setSelectedYear({
+        selected: true,
+        schoolDates: allyears[0],
+      });
+    }
     setFetched(allyears.length > 0);
   };
 
