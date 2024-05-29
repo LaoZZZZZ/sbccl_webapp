@@ -33,8 +33,12 @@ class MemberViewSet(ModelViewSet):
     # check if the student has language class registration.
     def __has_language_class_registration(self, persisted_student : Student, start_year : int,
                                           end_year: int):
-        
-        return True
+        registrations = Registration.objects.filter(student=persisted_student,
+                                                    course__course_type='L')
+        for r in registrations:
+            if r.school_year_start.year == start_year and r.school_year_end.year == end_year:
+                return True
+        return False
 
     # find the registration year
     def __find_registration_year(self, persisted_course : Course):
