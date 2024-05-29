@@ -30,6 +30,8 @@ class MemberViewSet(ModelViewSet):
     serializer_class = MemberSerializer
     authentication_classes = [SessionAuthentication, BasicAuthentication]
 
+    # The student can not unregister the last language class before remove themselves
+    # from the active language class registration.
     def __need_unregister_enrichment_class(self, registration : Registration):
         student = registration.student
         language_registration = Registration.objects.filter(student=student,
