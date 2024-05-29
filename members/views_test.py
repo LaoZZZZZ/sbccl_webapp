@@ -687,7 +687,6 @@ class MemberViewSetTest(APITestCase):
         self.assertFalse(registration.textbook_ordered)
 
 
-
     def test_add_registration_enrichment_course_failed(self):
         # Add class first
         exist_user = self.create_user('test_name', 'david@gmail.com')
@@ -1184,6 +1183,115 @@ class MemberViewSetTest(APITestCase):
         # make sure the coupon usage is also removed once the registration is removed.
         coupon_usage = CouponUsageRecord.objects.filter(user=member)
         self.assertTrue(len(coupon_usage) == 0)
+
+    # 
+    def test_unregistration_failed_with_enrichment_class_registration(self):
+         # Add class first
+        exist_user = self.create_user('test_name', 'david@gmail.com')
+        self.create_member(exist_user, sign_up_status='V',
+                           verification_code="12345-1231", member_type='B')
+        course_json = {
+            'name': "B1A",
+            'course_description': 'Morning session for grade 1 class.',
+            'course_type': "L",
+            'course_status': 'A',
+            'size_limit': 20,
+            'cost': 500,
+            'classroom': 'N116',
+            'course_start_time': '10:00:00',
+            'course_end_time': '11:50:00'
+        }
+
+        self.client.force_authenticate(user=exist_user)
+        response = self.client.put('/rest_api/members/upsert-course/',
+                                   data=course_json, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        
+        persisted_course = Course.objects.get(name="B1A")
+        # Add student
+        parent_account = self.create_user('parent', 'parent@gmail.com')
+        self.create_member(parent_account, sign_up_status='V',
+                           verification_code="12345-1231", member_type='P')
+        student_json = {
+            'first_name': 'david',
+            'last_name': 'chatty',
+            'date_of_birth': '2015-10-01',
+            'gender': 'M'
+        }
+        self.client.force_authenticate(user=parent_account)
+        response = self.client.put('/rest_api/members/add-student/',
+                                   data=student_json, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        member = Member.objects.get(user_id=parent_account)
+        student = Student.objects.get(parent_id=member)
+        self.assertEqual(student.last_name, 'chatty')
+        self.assertEqual(student.first_name, 'david')
+        self.assertIsNotNone(student.joined_date)
+        # Add registration
+        payload = {
+            'course_id': persisted_course.id,
+            'student': {
+                'first_name': student.first_name,
+                'last_name': student.last_name,
+                'date_of_birth': student.date_of_birth,
+                'gender': 'M'
+            },
+        }
+        response = self.client.put('/rest_api/members/register-course/',
+                                   data=payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        l_registration = Registration.objects.get(student=student)
+        self.assertEqual(l_registration.course.name, "B1A")
+        self.assertEqual(l_registration.student.last_name, student.last_name)
+        self.assertEqual(l_registration.student.first_name, student.first_name)
+        self.assertIsNotNone(l_registration.school_year_start)
+        self.assertIsNotNone(l_registration.school_year_end)
+        self.assertEqual(l_registration.registration_date.day, datetime.datetime.today().day)
+
+        # make sure the student can also be searched 
+        updated_course = Course.objects.get(name='B1A')
+        self.assertEqual(len(updated_course.students.filter(first_name=student.first_name)), 1)
+        # Add enrichment class registration
+        course_json = {
+            'name': "Go Beginner",
+            'course_description': 'Enrichment class Go beginner.',
+            'course_type': "E",
+            'course_status': 'A',
+            'size_limit': 20,
+            'cost': 500,
+            'classroom': 'N101',
+            'course_start_time': '12:00:00',
+            'course_end_time': '12:50:00'
+        }
+
+        self.client.force_authenticate(user=exist_user)
+        response = self.client.put('/rest_api/members/upsert-course/',
+                                   data=course_json, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        enrichment_persisted_course = Course.objects.get(name="Go Beginner")
+        payload = {
+            'course_id': enrichment_persisted_course.id,
+            'student': {
+                'first_name': student.first_name,
+                'last_name': student.last_name,
+                'date_of_birth': student.date_of_birth,
+                'gender': 'M'
+            },
+            'textbook_ordered': False
+        }
+        self.client.force_authenticate(user=parent_account)
+        response = self.client.put('/rest_api/members/register-course/',
+                                   data=payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        unregister_url = '/rest_api/members/{registration_id}/unregister-course/'.format(
+            registration_id = l_registration.id
+        )
+        response = self.client.put(unregister_url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        updated_course = Course.objects.get(name='B1A')
+        self.assertEqual(len(updated_course.students.filter(first_name=student.first_name)), 1)
 
     def test_update_registration_course_succeed(self):
         coupon_code = 'EARLY_BIRD_2025'
