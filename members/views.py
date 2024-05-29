@@ -31,7 +31,7 @@ class MemberViewSet(ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication]
 
     # check if the student has language class registration.
-    def __has_language_class_registration(persisted_student : Student, start_year : int,
+    def __has_language_class_registration(self, persisted_student : Student, start_year : int,
                                           end_year: int):
         
         return True
