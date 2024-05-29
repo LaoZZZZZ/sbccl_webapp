@@ -30,11 +30,34 @@ class MemberViewSet(ModelViewSet):
     serializer_class = MemberSerializer
     authentication_classes = [SessionAuthentication, BasicAuthentication]
 
+    # The student can not unregister the last language class before remove themselves
+    # from the active language class registration.
+    def __need_unregister_enrichment_class(self, registration : Registration):
+        student = registration.student
+        language_registration = Registration.objects.filter(student=student,
+                                                            course__course_type='L',
+                                                            school_year_start__year=registration.school_year_start.year,
+                                                            school_year_end__year=registration.school_year_end.year,
+                                                            ).exclude(registration_code=registration.registration_code)
+        
+        if language_registration:
+            return False
+        # There is no other language class registration.
+        enrichment_class = Registration.objects.filter(student=student,
+                                                       course__course_type='E',
+                                                       school_year_start__year=registration.school_year_start.year,
+                                                       school_year_end__year=registration.school_year_end.year)
+        return enrichment_class.count() >= 1
+
     # check if the student has language class registration.
     def __has_language_class_registration(self, persisted_student : Student, start_year : int,
                                           end_year: int):
-        
-        return True
+        registrations = Registration.objects.filter(student=persisted_student,
+                                                    course__course_type='L')
+        for r in registrations:
+            if r.school_year_start.year == start_year and r.school_year_end.year == end_year:
+                return True
+        return False
 
     # find the registration year
     def __find_registration_year(self, persisted_course : Course):
@@ -698,7 +721,7 @@ class MemberViewSet(ModelViewSet):
             # Need to check if the student can register enrichment class
             if persisted_course.course_type == 'E' and not self.__has_language_class_registration(persisted_student, start_year, end_year):
                 return self.__generate_unsuccessful_response(
-                    "The student must first register language class before registering enrichmeng class",
+                    "The student must first register Language class before registering Enrichment class!",
                     status.HTTP_400_BAD_REQUEST)
 
             registration = Registration()
@@ -798,6 +821,11 @@ class MemberViewSet(ModelViewSet):
     def unregister_course(self, request, pk=None):
         try:
             matched_registration = Registration.objects.get(id=pk)
+            if matched_registration.course.course_type == 'L' and self.__need_unregister_enrichment_class(matched_registration):
+                return self.__generate_unsuccessful_response(
+                    'The student registers an Enrichment class. Please unregster enrichment class before quitting Language class.',
+                    status.HTTP_400_BAD_REQUEST)
+
             user = User.objects.get(username=request.user)
             persited_member = Member.objects.get(user_id=user)
             persisted_payment = Payment.objects.filter(registration_code=matched_registration)
