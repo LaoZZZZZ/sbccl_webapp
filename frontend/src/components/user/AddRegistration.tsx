@@ -88,7 +88,7 @@ const AddRegistration = ({
       date_of_birth: new Date("1997-01-01"),
     },
     coupon_code: "",
-    order_book: false,
+    textbook_ordered: true,
   });
 
   return (
@@ -135,7 +135,7 @@ const AddRegistration = ({
           setOrderBook={(orderBook: boolean) => {
             registration.textbook_ordered = orderBook;
           }}
-          textbookOrdered={false}
+          textbookOrdered={true}
           existingCoupon={null}
         />
         <div className="btn-group pt-2">
