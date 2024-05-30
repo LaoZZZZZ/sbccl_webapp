@@ -18,7 +18,6 @@ const fetchCourses = async (user_info, callback) => {
     const courses = response.data.courses.map((json) => {
       return JSON.parse(json);
     });
-
     callback({
       fetched: true,
       value: courses,
