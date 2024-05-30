@@ -18,11 +18,23 @@ interface Props {
 
 //
 const findSelectedCourse = (courses, value) => {
-  const selected_course = courses.filter((course) => value === course.name);
+  const selected_course = courses.filter((course) =>
+    value.endsWith(course.name)
+  );
   if (selected_course.length === 1) {
     return selected_course[0];
   }
   return null;
+};
+
+const getShownName = (course: ClassInformation) => {
+  if (course.course_type === "E") {
+    return "Enrichment - " + course.name;
+  } else if (course.course_type === "L") {
+    return "Language - " + course.name;
+  } else {
+    return course.name;
+  }
 };
 
 const CourseSelection = ({
@@ -36,19 +48,31 @@ const CourseSelection = ({
   setOrderBook,
 }: Props) => {
   const [wantTextBook, setWantTextBook] = useState(textbookOrdered);
+  courses.sort((a, b) => {
+    if (a.course_type < b.course_type) {
+      return -1;
+    } else if (a.course_type > b.course_type) {
+      return 1;
+    }
+    if (a.name < b.name) {
+      return -1;
+    }
+    return 1;
+  });
   const selectedCourse = findSelectedCourse(courses, defaultCourseSelection);
   const [selected, setSelected] = useState(selectedCourse !== null);
 
   const [classInfo, setClassInfo] = useState<ClassInformation>({
     enrollment: selectedCourse !== null ? selectedCourse.enrollment : 0,
-    capacity: selectedCourse !== null ? selectedCourse.size_limit : 0,
+    size_limit: selectedCourse !== null ? selectedCourse.size_limit : 0,
     teacher: selectedCourse != null ? selectedCourse.teacher : "NA",
     cost: selectedCourse !== null ? selectedCourse.cost : 0,
-    type: selectedCourse !== null ? selectedCourse.course_type : "",
+    course_type: selectedCourse !== null ? selectedCourse.course_type : "",
     classroom: selectedCourse !== null ? selectedCourse.classroom : "NA",
-    course_start:
+    course_start_time:
       selectedCourse !== null ? selectedCourse.course_start_time : "NA",
-    course_end: selectedCourse !== null ? selectedCourse.course_end_time : "NA",
+    course_end_time:
+      selectedCourse !== null ? selectedCourse.course_end_time : "NA",
     book_cost: selectedCourse !== null ? selectedCourse.book_cost : 0,
     course_description:
       selectedCourse !== null ? selectedCourse.course_description : "",
@@ -90,13 +114,13 @@ const CourseSelection = ({
             setSelected(false);
             setClassInfo({
               enrollment: 0,
-              capacity: 0,
+              size_limit: 0,
               type: "",
               cost: 0,
               classroom: "NA",
               teacher: "Unassigned",
-              course_start: "NA",
-              course_end: "NA",
+              course_start_time: "NA",
+              course_end_time: "NA",
               book_cost: 0,
               course_description: "",
             });
@@ -105,9 +129,9 @@ const CourseSelection = ({
               setCourseSelection(selected_course);
               setClassInfo({
                 enrollment: selected_course.enrollment,
-                capacity: selected_course.size_limit,
+                size_limit: selected_course.size_limit,
                 cost: selected_course.cost,
-                type: selected_course.course_type,
+                course_type: selected_course.course_type,
                 classroom: selected_course.classroom,
                 teacher:
                   selected_course.teacher === ""
@@ -131,7 +155,7 @@ const CourseSelection = ({
               return course.name !== defaultCourseSelection;
             })
             .map((course) => {
-              return <option>{course.name}</option>;
+              return <option>{getShownName(course)}</option>;
             })}
         </select>
       </div>

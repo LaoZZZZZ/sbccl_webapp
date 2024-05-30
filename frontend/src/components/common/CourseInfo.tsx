@@ -15,13 +15,13 @@ import React from "react";
 // #region component
 export interface ClassInformation {
   enrollment: number;
-  capacity: number;
+  size_limit: number;
   teacher: string;
   cost: number;
-  type: string;
+  course_type: string;
   classroom: string;
-  course_start: string;
-  course_end: string;
+  course_start_time: string;
+  course_end_time: string;
   book_cost: number;
   course_description: string;
 }
@@ -31,8 +31,8 @@ interface CourseInfoProps {
 }
 
 const extractCourseTime = (course: ClassInformation) => {
-  var start = new Date("2024-10-01T" + course.course_start);
-  var end = new Date("2024-10-01T" + course.course_end);
+  var start = new Date("2024-10-01T" + course.course_start_time);
+  var end = new Date("2024-10-01T" + course.course_end_time);
   return (
     start.toLocaleString("en-US", {
       hour: "numeric",
@@ -81,7 +81,7 @@ export const CourseInfo = ({ classInfo }: CourseInfoProps) => {
           <div className="col-4">
             <span className="input-group-text bg-info">Capacity:</span>
             <span className="input-group-text bg-white">
-              {classInfo.capacity}
+              {classInfo.size_limit}
             </span>
           </div>
           <div className="col-4">
@@ -89,7 +89,7 @@ export const CourseInfo = ({ classInfo }: CourseInfoProps) => {
             <span
               className={
                 "input-group-text " +
-                (classInfo.enrollment >= classInfo.capacity
+                (classInfo.enrollment >= classInfo.size_limit
                   ? "bg-danger"
                   : "bg-white")
               }
