@@ -137,8 +137,8 @@ const CourseSelection = ({
                   selected_course.teacher === ""
                     ? "Unassigned"
                     : selected_course.teacher,
-                course_start: selected_course.course_start_time,
-                course_end: selected_course.course_end_time,
+                course_start_time: selected_course.course_start_time,
+                course_end_time: selected_course.course_end_time,
                 book_cost:
                   selected_course.book_cost !== ""
                     ? selected_course.book_cost

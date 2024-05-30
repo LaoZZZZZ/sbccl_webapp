@@ -90,7 +90,6 @@ const CalendarDetailPage = ({ userAuth }: CalendarDetailPageProps) => {
                 <button
                   className="dropdown-item"
                   onClick={() => {
-                    console.log(day);
                     setSelectedYear({ selected: true, schoolDates: day });
                   }}
                 >
