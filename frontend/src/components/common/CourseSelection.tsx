@@ -56,9 +56,8 @@ const CourseSelection = ({
     }
     if (a.name < b.name) {
       return -1;
-    } else {
-      return 1;
     }
+    return 1;
   });
   const selectedCourse = findSelectedCourse(courses, defaultCourseSelection);
   const [selected, setSelected] = useState(selectedCourse !== null);
