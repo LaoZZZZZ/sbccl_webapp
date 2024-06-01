@@ -100,8 +100,7 @@ class MemberViewSet(ModelViewSet):
             'member_type': member.getMemberType(),
             'last_login': user.last_login.date() if user.last_login else '',
             'date_joined': user.date_joined.date(),
-            'balance': '{negative}${amount}'.format(negative='-' if balance < 0 else '',
-                                                    amount=self.__calculate_balance__(member))
+            'balance': '${amount}'.format(amount=self.__calculate_balance__(member))
         }
 
     def __get_teacher_infomation__(self, teacher_account):
@@ -118,7 +117,7 @@ class MemberViewSet(ModelViewSet):
             'teacher': [self.__get_teacher_infomation__(teacher) for teacher in registration.course.instructor.all() if teacher.member_type == 'T']})
 
     def __calculate_registration_due__(self, registration : Registration):
-        return CouponUtils.applyCoupons(registration.course.cost  + registration.course.book_cost if registration.textbook_ordered else 0,
+        return CouponUtils.applyCoupons(registration.course.cost  + (registration.course.book_cost if registration.textbook_ordered else 0),
                                         registration.coupons.all())
 
     def __calculate_balance__(self, member):

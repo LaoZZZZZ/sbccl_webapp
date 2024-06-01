@@ -524,7 +524,8 @@ class MemberViewSetTest(APITestCase):
             'cost': 500,
             'classroom': 'N101',
             'course_start_time': '10:00:00',
-            'course_end_time': '11:50:00'
+            'course_end_time': '11:50:00',
+            'book_cost': 50
         }
 
         self.client.force_authenticate(user=exist_user)
