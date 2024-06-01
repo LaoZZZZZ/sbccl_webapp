@@ -100,8 +100,7 @@ class MemberViewSet(ModelViewSet):
             'member_type': member.getMemberType(),
             'last_login': user.last_login.date() if user.last_login else '',
             'date_joined': user.date_joined.date(),
-            'balance': '{negative}${amount}'.format(negative='-' if balance < 0 else '',
-                                                    amount=self.__calculate_balance__(member))
+            'balance': '${amount}'.format(amount=self.__calculate_balance__(member))
         }
 
     def __get_teacher_infomation__(self, teacher_account):
@@ -117,13 +116,17 @@ class MemberViewSet(ModelViewSet):
             'coupons': self.__get_all_coupons_per_registration(registration),
             'teacher': [self.__get_teacher_infomation__(teacher) for teacher in registration.course.instructor.all() if teacher.member_type == 'T']})
 
+    def __calculate_registration_due__(self, registration : Registration):
+        return CouponUtils.applyCoupons(registration.course.cost  + (registration.course.book_cost if registration.textbook_ordered else 0),
+                                        registration.coupons.all())
+
     def __calculate_balance__(self, member):
         students = Student.objects.filter(parent_id=member)
         balance = 0.0
         for s in students:
             registrations = Registration.objects.filter(student=s)
             for r in registrations:
-                balance += CouponUtils.applyCoupons(r.course.cost, r.coupons.all())
+                balance += self.__calculate_registration_due__(r)
                 payment = Payment.objects.filter(registration_code=r.id)
                 for p in payment:
                     balance -= p.amount_in_dollar
@@ -270,7 +273,8 @@ class MemberViewSet(ModelViewSet):
                                                 'class_name': registration.course.name,
                                                 'school_start': registration.school_year_start.year,
                                                 'school_end': registration.school_year_end.year,
-                                                'status': "On Waiting List" if registration.on_waiting_list else "Enrolled"})
+                                                'status': "On Waiting List" if registration.on_waiting_list else "Enrolled",
+                                                "balance": "$" + str(self.__calculate_registration_due__(registration))})
         subject = 'Class Registration confirmation'
         plain_message = strip_tags(html_message)
         send_mail(subject, plain_message, from_email=None, recipient_list=[user.email],
