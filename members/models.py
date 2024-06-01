@@ -210,7 +210,7 @@ class Payment(models.Model):
     # Either registration_code or droput_info is null. They can not be set at the same time.
     registration_code = models.ForeignKey(
         'Registration', on_delete=models.SET_NULL, verbose_name='Related registration', null=True)
-    dropout_info = models.ForeignKey('Dropout', on_delete=models.SET_NULL, verbose_name='Related dropout', null=True)
+    dropout_info = models.ForeignKey('Dropout', on_delete=models.SET_NULL, verbose_name='Related dropout', null=True, blank=True)
     user = models.ForeignKey(Member, on_delete=models.CASCADE, verbose_name='Payment sender')
     pay_date = models.DateField(null=False)
     original_amount = models.FloatField(null=False)
@@ -224,9 +224,10 @@ class Payment(models.Model):
         ('FP', 'FullPayment'),
         ('PP', 'PartialPayment'),
         ('FR', 'FullRefund'),
-        ('PR', 'PartialRefund')
+        ('PR', 'PartialRefund'),
+        ('NP', 'NotPaid')
     ]
-    payment_status = models.CharField(max_length=2, choices=PAYMENT_STATUS)
+    payment_status = models.CharField(max_length=2, choices=PAYMENT_STATUS, default='NP')
     last_udpate_date = models.DateField(null=False)
     last_update_person = models.CharField(max_length=255, null=False)
 
