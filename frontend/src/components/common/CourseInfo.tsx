@@ -58,17 +58,19 @@ export const CourseInfo = ({ classInfo }: CourseInfoProps) => {
         <strong>Class Information</strong>
       </label>
       <div className="card">
-        <div className="card body">{classInfo.course_description}</div>
+        <div className="card body text-start">
+          {classInfo.course_description}
+        </div>
       </div>
       <div className="card">
-        <div className="row justify-content-start">
-          <div className="col-4">
+        <div className="row">
+          <div className="col-4 text-wrap">
             <span className="input-group-text bg-info">Time</span>
             <span className="input-group-text bg-white">
               {extractCourseTime(classInfo)}
             </span>
           </div>
-          <div className="col-4">
+          <div className="col-4 text-wrap">
             <span className="input-group-text bg-info">Classroom</span>
             <span className="input-group-text bg-white">
               {classInfo.classroom}
