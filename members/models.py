@@ -231,6 +231,22 @@ class Payment(models.Model):
     last_udpate_date = models.DateField(null=False)
     last_update_person = models.CharField(max_length=255, null=False)
 
+    def __str__(self):
+        username = self.user.user_id
+        registration_info = ""
+        if self.registration_code:
+            student_info = self.registration_code.student.last_name + ' ' + self.registration_code.student.first_name
+            registration_code = self.registration_code.registration_code
+            registration_info = 'student: {student_info} code: {registration_code}'.format(
+                student_info=student_info,
+                registration_code = registration_code
+            )
+        else:
+            if self.dropout_info:
+                student_info = self.dropout_info.student.last_name + ' ' + self.dropout_info.student.first_name
+                registration_code = self.dropout_info.original_registration_code
+        return 'User: {username} Registration: {registration}'.format(username=username, registration=registration_info)
+
 # If a registration is cancelled, it would become a dropout record.
 class Dropout(models.Model):
     school_year_start = models.DateField(null=False)

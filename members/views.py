@@ -85,6 +85,25 @@ class MemberViewSet(ModelViewSet):
             coupons.append(CouponSerializer(c).data)
         return coupons
         
+    # Set up the initial payment for new registration or update existing one if an registration
+    # is updated.
+    def __set_up_payment__(self, registration : Registration, member : Member):
+        payments = Payment.objects.filter(registration_code=registration)
+        if not payments:
+            payment = Payment()
+            payment.user = member
+            payment.payment_status = 'NP'
+            payment.last_update_person = member.user_id.username
+            payment.registration_code = registration
+            payment.amount_in_dollar = 0
+            # Temporarily set the pay date as today.
+            payment.pay_date = datetime.date.today()
+        else:
+            payment = payments[0]
+        payment.original_amount = self.__calculate_registration_due__(registration)
+        payment.last_udpate_date = datetime.date.today()
+        payment.save()
+            
 
     def __generate_unsuccessful_response(self, error_msg, status):
         return Response({'detail': error_msg}, status=status)
@@ -745,14 +764,19 @@ class MemberViewSet(ModelViewSet):
             registration.last_update_date = registration.registration_date
             if 'textbook_ordered' in request.data:
                 registration.textbook_ordered = request.data['textbook_ordered']
+            # Set up a payment entry
             registration.save()
             if coupon:
                 self.__record_coupon_usage__(coupon, registration, matched_member)
             self.__send_registration_email__(user, registration)
+            self.__set_up_payment__(registration, matched_member)
             return Response(status=status.HTTP_201_CREATED)
         except (User.DoesNotExist, Member.DoesNotExist) as e:
             return self.__generate_unsuccessful_response(str(e), status.HTTP_404_NOT_FOUND)
         except (ValueError, Student.DoesNotExist, Course.DoesNotExist) as e:
+            return self.__generate_unsuccessful_response(str(e), status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            registration.delete()
             return self.__generate_unsuccessful_response(str(e), status.HTTP_400_BAD_REQUEST)
 
     @action(methods=['PUT'], detail=False, url_path='update-registration', name='Update a registration',
@@ -807,7 +831,7 @@ class MemberViewSet(ModelViewSet):
             matched_registration.course = new_course
             matched_registration.last_update_date = datetime.datetime.today()
             matched_registration.save()
-  
+            self.__set_up_payment__(matched_registration, member)
             user = User.objects.get(username=request.user)
             self.__send_unregistration_email__(user, matched_registration, old_course)
             self.__send_registration_email__(user, matched_registration)
@@ -834,24 +858,29 @@ class MemberViewSet(ModelViewSet):
             persited_member = Member.objects.get(user_id=user)
             persisted_payment = Payment.objects.filter(registration_code=matched_registration)
             if persisted_payment:
-                # Only create dropout record if there is a payment record. Dropout record is designed
-                # to track refund and followup if needed.
-                dropout = Dropout()
-                dropout.dropout_date = datetime.datetime.today()
-                dropout.student =  matched_registration.student
-                dropout.original_registration_code = matched_registration.registration_code
-                dropout.user = persited_member
-                dropout.course_name = matched_registration.course.name
-                dropout.school_year_end = matched_registration.school_year_end
-                dropout.school_year_start = matched_registration.school_year_start
-                dropout.save()
                 if len(persisted_payment) > 1:
                     return Response("There are more than one payments associated with this registration!",
                                     status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-                persisted_payment[0].dropout_info = dropout
-                persisted_payment[0].last_udpate_date = dropout.dropout_date
-                persisted_payment[0].last_update_person = user.username
-                persisted_payment[0].save()
+                if persisted_payment[0].payment_status != 'NP':
+                    # Only create dropout record if there is a payment record. Dropout record is designed
+                    # to track refund and followup if needed.
+                    dropout = Dropout()
+                    dropout.dropout_date = datetime.datetime.today()
+                    dropout.student =  matched_registration.student
+                    dropout.original_registration_code = matched_registration.registration_code
+                    dropout.user = persited_member
+                    dropout.course_name = matched_registration.course.name
+                    dropout.school_year_end = matched_registration.school_year_end
+                    dropout.school_year_start = matched_registration.school_year_start
+                    dropout.save()
+
+                    persisted_payment[0].dropout_info = dropout
+                    persisted_payment[0].last_udpate_date = dropout.dropout_date
+                    persisted_payment[0].last_update_person = user.username
+                    persisted_payment[0].save()
+                else:
+                    # Delete the payment record if no payment is made for this registration.
+                    persisted_payment[0].delete()
             self.__send_unregistration_email__(user, matched_registration)
             if not matched_registration.on_waiting_list:
                 self.__update_waiting_list__(matched_registration.course)
