@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Member, Student, Course, Registration, Coupon, SchoolCalendar
+from .models import Member, Student, Course, Registration, Coupon, SchoolCalendar, Dropout
 from django.contrib.auth.models import User
 import re
 import pytz
@@ -134,6 +134,12 @@ class RegistrationSerializer(serializers.ModelSerializer):
         registration.student = student
         registration.course = course
         return registration
+
+class DropoutSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Dropout
+        fields = ('id', 'course_name', 'student', 'school_year_start', 'school_year_end',
+                  'original_registration_code', 'dropout_date')
     
 class CouponSerializer(serializers.ModelSerializer):
     class Meta:

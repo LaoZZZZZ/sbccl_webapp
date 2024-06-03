@@ -8,7 +8,7 @@ from django.template import loader
 from django.utils.html import strip_tags
 import pytz
 from rest_framework.viewsets import ModelViewSet
-from .serializers import StudentSerializer, UserSerializer, MemberSerializer, CourseSerializer, RegistrationSerializer, CouponSerializer, SchoolCalendarSerializer
+from .serializers import StudentSerializer, UserSerializer, MemberSerializer, CourseSerializer, RegistrationSerializer, CouponSerializer, DropoutSerializer, SchoolCalendarSerializer
 from .models import Course, Member, Student, Registration, Dropout, Payment, InstructorAssignment, Coupon, CouponUsageRecord, SchoolCalendar
 from rest_framework.decorators import action
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
@@ -89,18 +89,21 @@ class MemberViewSet(ModelViewSet):
     # is updated.
     def __set_up_payment__(self, registration : Registration, member : Member):
         payments = Payment.objects.filter(registration_code=registration)
+        balance = self.__calculate_registration_due__(registration)
         if not payments:
+            if balance == 0:
+                return
             payment = Payment()
             payment.user = member
-            payment.payment_status = 'NP'
             payment.last_update_person = member.user_id.username
             payment.registration_code = registration
             payment.amount_in_dollar = 0
             # Temporarily set the pay date as today.
             payment.pay_date = datetime.date.today()
+            payment.payment_status = 'NP'
         else:
             payment = payments[0]
-        payment.original_amount = self.__calculate_registration_due__(registration)
+        payment.original_amount = balance
         payment.last_udpate_date = datetime.date.today()
         payment.save()
             
@@ -175,7 +178,7 @@ class MemberViewSet(ModelViewSet):
             matched_registrations = Registration.objects.filter(student=s)
             registrations = registrations + [self.__generate_registration_info__(r) for r in matched_registrations]
             matched_dropouts = Dropout.objects.filter(student=s)
-            dropouts = dropouts + [JSONRenderer().render(d) for d in matched_dropouts]
+            dropouts = dropouts + [JSONRenderer().render(DropoutSerializer(d).data) for d in matched_dropouts]
         return (registrations, dropouts)
 
     def __send_account_creation_html_email__(self, new_user, new_member, verification_url):
