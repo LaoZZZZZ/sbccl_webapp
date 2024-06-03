@@ -1,7 +1,7 @@
 
 from rest_framework.test import APITestCase, APIRequestFactory, APIClient
 from rest_framework import status
-from .models import Coupon, Member, Student, Course, Registration, InstructorAssignment, CouponUsageRecord, SchoolCalendar
+from .models import Coupon, Member, Student, Course, Registration, Payment, InstructorAssignment, CouponUsageRecord, SchoolCalendar
 from django.contrib.auth.models import User
 from rest_framework.test import force_authenticate
 import datetime
@@ -503,6 +503,8 @@ class MemberViewSetTest(APITestCase):
         self.assertEqual(registration.registration_date.day, datetime.datetime.today().day)
         self.assertEqual(registration.expiration_date, registration.school_year_end)
 
+        payment = Payment.objects.get(registration_code=registration)
+        self.assertEqual(payment.payment_status, 'NP')
         # make sure the student can also be searched 
         updated_course = Course.objects.get(name='B1A')
         updated_course.students.get(first_name=student.first_name)
@@ -578,6 +580,9 @@ class MemberViewSetTest(APITestCase):
         self.assertEqual(registration.expiration_date, registration.school_year_end)
         self.assertFalse(registration.textbook_ordered)
 
+        payment = Payment.objects.get(registration_code=registration)
+        self.assertEqual(payment.payment_status, 'NP')
+        
         # make sure the student can also be searched 
         updated_course = Course.objects.get(name='B1A')
         updated_course.students.get(first_name=student.first_name)
