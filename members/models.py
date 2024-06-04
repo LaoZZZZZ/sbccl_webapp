@@ -200,10 +200,9 @@ class Registration(models.Model):
     textbook_ordered = models.BooleanField(null=True, default=False)
 
     def __str__(self):
-        return 'student: {name} course: {course_name} registration date: {registration_date} textbook: {order}'.format(
+        return 'student: {name} course: {course_name} registration code: {registration_code}'.format(
             name=self.student.last_name + ' ' + self.student.first_name,
-            course_name=self.course.name, registration_date=self.registration_date,
-            order= 'ordered' if self.textbook_ordered else 'not ordered')
+            course_name=self.course.name, registration_code=self.registration_code)
 
 # Payment history
 class Payment(models.Model):
