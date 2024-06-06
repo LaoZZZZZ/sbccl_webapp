@@ -4,11 +4,12 @@ from django.contrib.auth.models import User
 
 class MemberAdmin(admin.ModelAdmin):
     list_display = ('user_id', 'phone_number',  'member_type', 'sign_up_status')
-    search_fields = ['user_id__email', 'phone_number', 'member_type', 'sign_up_status']
+    search_fields = ['user_id__email', 'user_id__first_name', 'user_id__last_name',
+                     'phone_number', 'member_type', 'sign_up_status']
 
 class StudentAdmin(admin.ModelAdmin):
     list_display = ('first_name', "last_name", 'gender', 'joined_date')
-    search_fields = ['first_name', 'last_name', 'gender']
+    search_fields = ['first_name', 'last_name', 'gender', 'date_of_birth']
 
 class CourseAdmin(admin.ModelAdmin):
     list_display = ('name', 'course_description', 'course_type', 'course_status', 'size_limit',
@@ -35,7 +36,8 @@ class DropoutAdmin(admin.ModelAdmin):
 class InstructorAssignmentAdmin(admin.ModelAdmin):
     list_display = ('school_year_start', 'school_year_end', 'course', 'instructor', 'assigned_date',
                     'expiration_date', 'last_update_person', 'last_update_date')
-    search_fields = ['course__name', 'instructor__user_id__email', 'instructor__user_id__first_name']
+    search_fields = ['course__name', 'instructor__user_id__email',
+                     'instructor__user_id__first_name', 'instructor__user_id__last_name']
     
 class CouponAdmin(admin.ModelAdmin):
     list_disply = ('type', 'reason', 'creation_date', 'expiration_date', 'creator',
