@@ -368,15 +368,16 @@ class MemberViewSet(ModelViewSet):
         try:
             existing_user = User.objects.filter(username=request.data['email'])
             if existing_user:
-                return Response("This email address has been registered!",
-                                status=status.HTTP_409_CONFLICT)
+                return self.__generate_unsuccessful_response(
+                    "This email address has been registered!", status=status.HTTP_409_CONFLICT)
             serialized = UserSerializer(data=request.data)
             if not serialized.is_valid():
-                return Response("Invalid data is provided", status=status.HTTP_400_BAD_REQUEST)
+                return self.__generate_unsuccessful_response("Invalid data is provided", status=status.HTTP_400_BAD_REQUEST)
 
             member_type = self.__validate_member_type__(request.data['member_type'])
             if not member_type:
-                return Response("Invalid account type is not provided!", status=status.HTTP_400_BAD_REQUEST)
+                return self.__generate_unsuccessful_response(
+                    "Invalid account type is not provided!", status=status.HTTP_400_BAD_REQUEST)
 
             if 'phone_number' in request.data:
                 if not utils.validators.request_validator.ValidatePhoneNumber(request.data['phone_number']):
