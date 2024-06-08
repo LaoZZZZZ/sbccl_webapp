@@ -1327,7 +1327,7 @@ class MemberViewSetTest(APITestCase):
             'course_type': "L",
             'course_status': 'A',
             'size_limit': 20,
-            'cost': 500
+            'cost': 400
         }
 
         self.client.force_authenticate(user=exist_user)
@@ -1381,6 +1381,8 @@ class MemberViewSetTest(APITestCase):
         updated_course = Course.objects.get(name='B1A')
         students = updated_course.students.filter(first_name=student.first_name)
         self.assertEqual(len(students), 1)
+        payment = Payment.objects.get(registration_code=registration)
+        self.assertEqual(payment.original_amount, updated_course.cost)
 
         # Update registration
         persisted_course = Course.objects.get(name="B2A")
@@ -1397,6 +1399,8 @@ class MemberViewSetTest(APITestCase):
         response = self.client.put('/rest_api/members/update-registration/',
                                    data=updated_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+        payment = Payment.objects.get(registration_code=registration)
+        self.assertEqual(payment.original_amount, persisted_course.cost - coupon.dollar_amount)
 
         # can not apply the same coupon to the same registration repeatedly.
         response = self.client.put('/rest_api/members/update-registration/',
