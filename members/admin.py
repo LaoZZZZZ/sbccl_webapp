@@ -20,7 +20,8 @@ class PaymentAdmin(admin.ModelAdmin):
     list_display = ('pay_date', 'registration_code', 'dropout_info', 'original_amount',
                     'amount_in_dollar', 'payment_status', 'payment_method', 'user')
     search_fields = ['payment_status', 'payment_method', 'last_update_person',
-                     'registration_code__registration_code', 'user__user_id__email']
+                     'registration_code__registration_code', 'user__user_id__email',
+                     'user__user_id__first_name', 'user__user_id__last_name']
 
 class RegistrationAdmin(admin.ModelAdmin):
     list_display = ('student', 'course', 'school_year_start', 'school_year_end', 'registration_code',
