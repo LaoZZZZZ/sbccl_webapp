@@ -195,13 +195,22 @@ const CourseSelection = ({
               <input
                 type="text"
                 className="form-control col-auto"
+                placeholder="Enter Coupon Code"
                 value={
-                  coupon.couponDetails === null
-                    ? "Enter Coupon Code"
-                    : coupon.couponDetails.code
+                  coupon.couponDetails === null ? "" : coupon.couponDetails.code
                 }
                 aria-label="Coupon"
                 disabled={existingCoupon !== null}
+                onClick={(e) => {
+                  if (e.target.value === "Enter Coupon Code") {
+                    e.target.value = "";
+                  }
+                }}
+                onmouseleave={(e) => {
+                  if (e.target.value == "") {
+                    e.target.value = "Enter Coupon Code";
+                  }
+                }}
                 onChange={(e) => {
                   setCoupon({
                     errMsg: "",
