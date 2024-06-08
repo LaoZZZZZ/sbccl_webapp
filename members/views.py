@@ -800,13 +800,13 @@ class MemberViewSet(ModelViewSet):
                 return self.__generate_unsuccessful_response(
                     "No course is provided", status.HTTP_400_BAD_REQUEST)
             
+            member = Member.objects.get(user_id=request.user)
             if 'coupons' in request.data and len(request.data['coupons']) > 0:
                 if len(request.data['coupons']) > 1:
                     return self.__generate_unsuccessful_response(
                         "Only one coupon can be accepted at a time!", status.HTTP_400_BAD_REQUEST)
                 if not isinstance(request.data['coupons'][0], int):
                     coupon = self.__fetch_coupon__(request.user, request.data['coupons'][0], matched_registration)
-                    member = Member.objects.get(user_id=request.user)
                     self.__record_coupon_usage__(coupon, matched_registration, member)
             
             if 'textbook_ordered' in registration_serializer.validated_data:
@@ -818,6 +818,7 @@ class MemberViewSet(ModelViewSet):
             if matched_registration.course.id == new_course_id:
                 matched_registration.last_update_date = datetime.datetime.today()
                 matched_registration.save()
+                self.__set_up_payment__(matched_registration, member)
                 return Response(status=status.HTTP_202_ACCEPTED)
             
             new_course = Course.objects.get(id=new_course_id)
