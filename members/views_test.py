@@ -580,9 +580,14 @@ class MemberViewSetTest(APITestCase):
         self.assertEqual(registration.expiration_date, registration.school_year_end)
         self.assertFalse(registration.textbook_ordered)
 
-        payment = Payment.objects.get(registration_code=registration)
-        self.assertEqual(payment.payment_status, 'NP')
-        
+        payment_response = self.client.get('/rest_api/members/fetch-payments/',format='json')
+        self.assertEqual(payment_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(payment_response.data['payments']), 1)
+        payment = json.loads(payment_response.data['payments'][0])
+        self.assertEqual(payment['original_amount'],
+                         persisted_course.cost - coupon.dollar_amount)
+        self.assertEqual(payment['payment_status'], 'NP')
+
         # make sure the student can also be searched 
         updated_course = Course.objects.get(name='B1A')
         updated_course.students.get(first_name=student.first_name)
@@ -613,7 +618,7 @@ class MemberViewSetTest(APITestCase):
         response = self.client.put('/rest_api/members/upsert-course/',
                                    data=course_json, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        persisted_course = Course.objects.get(name="B1A")
+        language_persisted_course = Course.objects.get(name="B1A")
         
          # Add student
         parent_account = self.create_user('parent', 'parent@gmail.com')
@@ -637,7 +642,7 @@ class MemberViewSetTest(APITestCase):
         self.assertIsNotNone(student.joined_date)
         # Add registration
         payload = {
-            'course_id': persisted_course.id,
+            'course_id': language_persisted_course.id,
             'student': {
                 'first_name': student.first_name,
                 'last_name': student.last_name,
@@ -657,7 +662,7 @@ class MemberViewSetTest(APITestCase):
             'course_type': "E",
             'course_status': 'A',
             'size_limit': 20,
-            'cost': 500,
+            'cost': 0,
             'classroom': 'N101',
             'course_start_time': '12:00:00',
             'course_end_time': '12:50:00'
@@ -692,6 +697,14 @@ class MemberViewSetTest(APITestCase):
         self.assertEqual(registration.expiration_date, registration.school_year_end)
         self.assertFalse(registration.textbook_ordered)
 
+        # No payment for enrichment class.
+        payment_response = self.client.get('/rest_api/members/fetch-payments/',format='json')
+        self.assertEqual(payment_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(payment_response.data['payments']), 1)
+        payment = json.loads(payment_response.data['payments'][0])
+        self.assertEqual(payment['original_amount'], language_persisted_course.cost)
+        self.assertEqual(payment['payment_status'], 'NP')
+        self.assertEqual(payment['registration_code'], Registration.objects.get(course=language_persisted_course).id)
 
     def test_add_registration_enrichment_course_failed(self):
         # Add class first
@@ -1190,6 +1203,11 @@ class MemberViewSetTest(APITestCase):
         coupon_usage = CouponUsageRecord.objects.filter(user=member)
         self.assertTrue(len(coupon_usage) == 0)
 
+        # Payment is also deleted.
+        payment_response = self.client.get('/rest_api/members/fetch-payments/',format='json')
+        self.assertEqual(payment_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(payment_response.data['payments']), 0)
+
     # 
     def test_unregistration_failed_with_enrichment_class_registration(self):
          # Add class first
@@ -1377,6 +1395,13 @@ class MemberViewSetTest(APITestCase):
         self.assertIsNotNone(registration.school_year_end)
         self.assertEqual(registration.registration_date.day, datetime.datetime.today().day)
 
+        # Make sure the payment is created and the balance is correct
+        payment_response = self.client.get('/rest_api/members/fetch-payments/',format='json')
+        self.assertEqual(payment_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(payment_response.data['payments']), 1)
+        payment = json.loads(payment_response.data['payments'][0])
+        self.assertEqual(payment['original_amount'], persisted_course.cost)
+
         # make sure the student can also be searched 
         updated_course = Course.objects.get(name='B1A')
         students = updated_course.students.filter(first_name=student.first_name)
@@ -1384,7 +1409,7 @@ class MemberViewSetTest(APITestCase):
         payment = Payment.objects.get(registration_code=registration)
         self.assertEqual(payment.original_amount, updated_course.cost)
 
-        # Update registration
+        # Update registration with a coupon
         persisted_course = Course.objects.get(name="B2A")
         updated_payload = {
             'id': registration.id,
@@ -1401,7 +1426,13 @@ class MemberViewSetTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
         payment = Payment.objects.get(registration_code=registration)
         self.assertEqual(payment.original_amount, persisted_course.cost - coupon.dollar_amount)
-
+        # Payment is also updated for the new class and coupon code application.
+        payment_response = self.client.get('/rest_api/members/fetch-payments/',format='json')
+        self.assertEqual(payment_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(payment_response.data['payments']), 1)
+        payment = json.loads(payment_response.data['payments'][0])
+        self.assertEqual(payment['original_amount'], persisted_course.cost - coupon.dollar_amount)
+        
         # can not apply the same coupon to the same registration repeatedly.
         response = self.client.put('/rest_api/members/update-registration/',
                                    data=updated_payload, format='json')
