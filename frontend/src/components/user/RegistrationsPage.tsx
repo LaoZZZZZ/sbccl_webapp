@@ -6,6 +6,11 @@ import UserInfo from "./UserInfo.tsx";
 import fetchRegistrations from "../common/FetchRegistrations.tsx";
 import EditableRegistration from "./EditableRegistration.tsx";
 import TeacherDetailPage from "./TeacherDetailPage.tsx";
+import {
+  FetchPayments,
+  Payment,
+  PaymentsResponse,
+} from "../common/FetchPayments.tsx";
 
 interface Props {
   userInfo: UserInfo;
@@ -35,8 +40,26 @@ const renderRegistration = (registration) => {
   );
 };
 
+const calculateBalance = (registration) => {
+  if (registration["payments"]) {
+    return (
+      "$" +
+      (
+        registration["payments"].original_amount -
+        registration["payments"].amount_in_dollar
+      ).toString()
+    );
+  }
+  return "$0";
+};
+
 const Registrations = ({ userInfo }: Props) => {
   const [registrationState, setRegistrationState] = useState<ValueState>({
+    fetched: false,
+    value: [],
+  });
+
+  const [paymentsState, setPaymentsState] = useState<ValueState>({
     fetched: false,
     value: [],
   });
@@ -78,13 +101,21 @@ const Registrations = ({ userInfo }: Props) => {
         setRegistrationState(registrations);
       });
     }
-  }, [userInfo, studentState, courseState, registrationState, pageState]);
+  }, [
+    userInfo,
+    studentState,
+    courseState,
+    registrationState,
+    pageState,
+    paymentsState,
+  ]);
 
   const table_columns_names = [
     "Student",
     "Course",
     "School Year",
     "Status",
+    "Balance",
     "Teacher",
   ];
 
@@ -153,6 +184,7 @@ const Registrations = ({ userInfo }: Props) => {
                         ? "On Waiting List"
                         : "Enrolled"}
                     </td>
+                    <td>{calculateBalance(r)}</td>
                     <td>
                       <button
                         className={"btn btn-outline-secondary"}
