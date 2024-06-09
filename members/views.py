@@ -135,7 +135,7 @@ class MemberViewSet(ModelViewSet):
         if len(payment) == 1:
             payment_data = PaymentSerializer(payment[0]).data
         else:
-            payment_data = {}
+            payment_data = None # Do not have the payment field
         return json.dumps({
             'student': StudentSerializer(registration.student).data,
             'registration': RegistrationSerializer(registration).data,
