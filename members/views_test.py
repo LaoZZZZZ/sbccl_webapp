@@ -1395,7 +1395,7 @@ class MemberViewSetTest(APITestCase):
         self.assertIsNotNone(registration.school_year_end)
         self.assertEqual(registration.registration_date.day, datetime.datetime.today().day)
 
-        # Payment is also updated
+        # Make sure the payment is created and the balance is correct
         payment_response = self.client.get('/rest_api/members/fetch-payments/',format='json')
         self.assertEqual(payment_response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(payment_response.data['payments']), 1)
@@ -1426,7 +1426,7 @@ class MemberViewSetTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
         payment = Payment.objects.get(registration_code=registration)
         self.assertEqual(payment.original_amount, persisted_course.cost - coupon.dollar_amount)
-        # Payment is also updated
+        # Payment is also updated for the new class and coupon code application.
         payment_response = self.client.get('/rest_api/members/fetch-payments/',format='json')
         self.assertEqual(payment_response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(payment_response.data['payments']), 1)
