@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Member, Student, Course, Registration, Coupon, SchoolCalendar, Dropout
+from .models import Member, Student, Course, Registration, Coupon, SchoolCalendar, Dropout, Payment 
 from django.contrib.auth.models import User
 import re
 import pytz
@@ -163,4 +163,11 @@ class SchoolCalendarSerializer(serializers.ModelSerializer):
         school_date = SchoolCalendar(**validated_data)
         school_date.creation_date = datetime.date.today()
         return school_date
+    
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        # registraiton_code is actually the id of the registration.
+        fields = ('registration_code', 'pay_date', 'original_amount', 'amount_in_dollar',
+                  'payment_method', 'payment_status', 'last_udpate_date')
     

@@ -8,7 +8,7 @@ from django.template import loader
 from django.utils.html import strip_tags
 import pytz
 from rest_framework.viewsets import ModelViewSet
-from .serializers import StudentSerializer, UserSerializer, MemberSerializer, CourseSerializer, RegistrationSerializer, CouponSerializer, DropoutSerializer, SchoolCalendarSerializer
+from .serializers import StudentSerializer, UserSerializer, MemberSerializer, CourseSerializer, PaymentSerializer, RegistrationSerializer, CouponSerializer, DropoutSerializer, SchoolCalendarSerializer
 from .models import Course, Member, Student, Registration, Dropout, Payment, InstructorAssignment, Coupon, CouponUsageRecord, SchoolCalendar
 from rest_framework.decorators import action
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
@@ -1038,6 +1038,28 @@ class MemberViewSet(ModelViewSet):
             return self.__generate_unsuccessful_response(str(e), status.HTTP_400_BAD_REQUEST)
         except SchoolCalendar.DoesNotExist as e:
             return self.__generate_unsuccessful_response("Could not find valid !", status.HTTP_404_NOT_FOUND)
-        
-        
+
+    @action(methods=['GET'], detail=False, url_path='fetch-payments', name='get payments for this or next school year',
+    authentication_classes=[SessionAuthentication, BasicAuthentication],
+    permission_classes=[permissions.IsAuthenticated])   
+    def get_payments(self, request):
+        try:
+            user = User.objects.get(username=request.user.username)
+            matched_member = Member.objects.get(user_id=user)
+            payments = Payment.objects.filter(user=matched_member)
+            
+            start_year, end_year = self.__find_current_school_year()
+            next_year_start = start_year + 1
+            serialized_payments = []
+            for payment in payments.all():
+                if payment.registration_code.school_year_start.year in (start_year, next_year_start):
+                    serialized_payments.append(JSONRenderer().render(PaymentSerializer(payment).data))
+            content = {
+                'payments': serialized_payments
+            }
+            return Response(content, status=status.HTTP_200_OK)
+        except ValueError as e:
+            return self.__generate_unsuccessful_response(str(e), status.HTTP_400_BAD_REQUEST)
+        except SchoolCalendar.DoesNotExist as e:
+            return self.__generate_unsuccessful_response("Could not find valid !", status.HTTP_404_NOT_FOUND)
     
