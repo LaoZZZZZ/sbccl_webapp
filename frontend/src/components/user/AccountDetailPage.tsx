@@ -56,10 +56,6 @@ const AccountDetail = ({ userInfo }: Props) => {
               <th>Date Joined</th>
               <td>{userState.value.date_joined}</td>
             </tr>
-            <tr id="balance">
-              <th>Balance</th>
-              <td>{userState.value.balance}</td>
-            </tr>
           </tbody>
         </table>
       )}
