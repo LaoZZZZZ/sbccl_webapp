@@ -131,12 +131,19 @@ class MemberViewSet(ModelViewSet):
         return info
 
     def __generate_registration_info__(self, registration):
+        payment = Payment.objects.filter(registration_code=registration)
+        if len(payment) == 1:
+            payment_data = PaymentSerializer(payment[0]).data
+        else:
+            payment_data = {}
         return json.dumps({
             'student': StudentSerializer(registration.student).data,
             'registration': RegistrationSerializer(registration).data,
             'course': CourseSerializer(registration.course).data,
             'coupons': self.__get_all_coupons_per_registration(registration),
-            'teacher': [self.__get_teacher_infomation__(teacher) for teacher in registration.course.instructor.all() if teacher.member_type == 'T']})
+            'teacher': [self.__get_teacher_infomation__(teacher) for teacher in registration.course.instructor.all() if teacher.member_type == 'T'],
+            'payments': payment_data
+            })
 
     def __calculate_registration_due__(self, registration : Registration):
         return CouponUtils.applyCoupons(registration.course.cost  + (registration.course.book_cost if registration.textbook_ordered else 0),
@@ -1052,7 +1059,7 @@ class MemberViewSet(ModelViewSet):
             next_year_start = start_year + 1
             serialized_payments = []
             for payment in payments.all():
-                if payment.registration_code.school_year_start.year in (start_year, next_year_start):
+                if payment.registration_code and payment.registration_code.school_year_start.year in (start_year, next_year_start):
                     serialized_payments.append(JSONRenderer().render(PaymentSerializer(payment).data))
             content = {
                 'payments': serialized_payments
