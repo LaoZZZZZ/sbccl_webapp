@@ -760,7 +760,7 @@ class MemberViewSet(ModelViewSet):
 
             registration = Registration()
             registration.registration_code = str(uuid.uuid5(uuid.NAMESPACE_OID,
-                                                            persisted_student.first_name + persisted_student.last_name + persisted_course.name))
+                                                            persisted_student.first_name + persisted_student.last_name + persisted_course.name + user.email))
             registration.on_waiting_list = persisted_course.size_limit <= persisted_course.students.count()
             
             registration.course = persisted_course
