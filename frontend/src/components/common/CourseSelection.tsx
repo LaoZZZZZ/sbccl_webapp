@@ -200,7 +200,10 @@ const CourseSelection = ({
                   coupon.couponDetails === null ? "" : coupon.couponDetails.code
                 }
                 aria-label="Coupon"
-                disabled={existingCoupon !== null}
+                disabled={
+                  existingCoupon !== null ||
+                  calculateUpdatedAmount(classInfo.cost) === 0
+                }
                 onClick={(e) => {
                   if (e.target.value === "Enter Coupon Code") {
                     e.target.value = "";
@@ -229,7 +232,7 @@ const CourseSelection = ({
                 id="coupon-button"
                 disabled={
                   waitForResponse ||
-                  classInfo.type === "E" ||
+                  calculateUpdatedAmount(classInfo.cost) === 0 ||
                   existingCoupon !== null
                 }
                 onClick={() => {
