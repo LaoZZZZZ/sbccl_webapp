@@ -27,6 +27,11 @@ class CouponUtilsTest(unittest.TestCase):
         self.assertEqual(CouponUtils.applyCoupons(original_amount, [coupon, expired_coupon, percentage_coupon]),
                         100 - 50)
         
+        # make sure negative balance is not generated.
+        original_amount = 0
+        self.assertEqual(CouponUtils.applyCoupons(original_amount, [coupon, expired_coupon, percentage_coupon]),
+                         0)
+        
     def test_canBeUsed(self):
         coupon = Coupon(type='A', dollar_amount=50, code='early_bird', application_rule='PA')
         coupon.expiration_date = datetime.date.today()
