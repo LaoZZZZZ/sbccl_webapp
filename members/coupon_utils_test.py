@@ -27,6 +27,7 @@ class CouponUtilsTest(unittest.TestCase):
         self.assertEqual(CouponUtils.applyCoupons(original_amount, [coupon, expired_coupon, percentage_coupon]),
                         100 - 50)
         
+        # make sure negative balance is not generated.
         original_amount = 0
         self.assertEqual(CouponUtils.applyCoupons(original_amount, [coupon, expired_coupon, percentage_coupon]),
                          0)
