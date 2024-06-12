@@ -31,7 +31,7 @@ class CouponUtils(object):
                 amount -= c.dollar_amount
             else:
                 print('Percentage type of coupon is not supported yet')
-        return amount
+        return max(amount, 0)
     
     def canBeUsed(coupon : Coupon, usage_history: list[CouponUsageRecord], matched_registration: Registration=None):
         """
