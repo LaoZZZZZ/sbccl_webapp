@@ -29,6 +29,8 @@ class CouponUtils(object):
                 continue
             if c.type == 'A':
                 amount -= c.dollar_amount
+                if amount <= 0:
+                    break
             else:
                 print('Percentage type of coupon is not supported yet')
         return max(amount, 0)
