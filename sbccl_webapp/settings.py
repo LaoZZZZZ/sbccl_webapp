@@ -59,8 +59,14 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
+SESSION_ENGINE='django.contrib.sessions.backends.signed_cookies'
+# Session cookie will be deactivated upon browser closure. Basically the user needs to
+# login every time they open a browser.
+SESSION_EXPIRE_AT_BROWSER_CLOSE=True
+SESSION_COOKIE_AGE=300
 ROOT_URLCONF = 'sbccl_webapp.urls'
+# prevent access to the stored data from Javascript
+SESSION_COOKIE_HTTPONLY=True
 
 # Emails sent to the admins when there is server errors
 # SERVER_EMAIL = 'ccl_admin@sbcclny.com'
