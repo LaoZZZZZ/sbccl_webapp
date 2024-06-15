@@ -6,11 +6,6 @@ import UserInfo from "./UserInfo.tsx";
 import fetchRegistrations from "../common/FetchRegistrations.tsx";
 import EditableRegistration from "./EditableRegistration.tsx";
 import TeacherDetailPage from "./TeacherDetailPage.tsx";
-import {
-  FetchPayments,
-  Payment,
-  PaymentsResponse,
-} from "../common/FetchPayments.tsx";
 
 interface Props {
   userInfo: UserInfo;
@@ -38,19 +33,6 @@ const renderRegistration = (registration) => {
     " " +
     registration["student"]["first_name"]
   );
-};
-
-const calculateBalance = (registration) => {
-  if (registration["payments"]) {
-    return (
-      "$" +
-      (
-        registration["payments"].original_amount -
-        registration["payments"].amount_in_dollar
-      ).toString()
-    );
-  }
-  return "$0";
 };
 
 const Registrations = ({ userInfo }: Props) => {
@@ -184,7 +166,7 @@ const Registrations = ({ userInfo }: Props) => {
                         ? "On Waiting List"
                         : "Enrolled"}
                     </td>
-                    <td>{calculateBalance(r)}</td>
+                    <td>{"$" + r["balance"].toString()}</td>
                     <td>
                       <button
                         className={"btn btn-outline-secondary"}

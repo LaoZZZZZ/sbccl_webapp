@@ -1,5 +1,15 @@
 import axios from "axios";
 
+export interface Student {
+  first_name: string;
+  last_name: string;
+  middle_name: string;
+  gender: string;
+  date_of_birth: Date;
+  joined_date: Date;
+  chinese_name: string;
+}
+
 const fetchStudents = async (user_info, callback) => {
   const response = await axios.get(
     process.env.REACT_APP_BE_URL_PREFIX + "/rest_api/members/fetch-students",
