@@ -115,6 +115,18 @@ const EditableRegistration = ({
 
   return (
     <div className="col w-75 mx-auto align-middle">
+      <div>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => {
+            cancelCallback();
+          }}
+        >
+          All Registrations
+        </button>
+      </div>
+      <hr className="pb-2" />
       {!removeRegistration && (
         <form className="form-label form-control">
           <div className="form-group pb-2 mb-2">
