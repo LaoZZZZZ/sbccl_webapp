@@ -20,6 +20,7 @@ from rest_framework.response import Response
 from members import models
 import utils.validators.request_validator
 from .coupon_utils import CouponUtils
+from .balance_utils import BalanceUtils
 import uuid
 import json
 
@@ -130,7 +131,7 @@ class MemberViewSet(ModelViewSet):
         del info['password']
         return info
 
-    def __generate_registration_info__(self, registration):
+    def __generate_registration_info__(self, registration : Registration):
         payment = Payment.objects.filter(registration_code=registration)
         if len(payment) == 1:
             payment_data = PaymentSerializer(payment[0]).data
@@ -142,7 +143,18 @@ class MemberViewSet(ModelViewSet):
             'course': CourseSerializer(registration.course).data,
             'coupons': self.__get_all_coupons_per_registration(registration),
             'teacher': [self.__get_teacher_infomation__(teacher) for teacher in registration.course.instructor.all() if teacher.member_type == 'T'],
-            'payments': payment_data
+            # TODO: Remove this field once balance field is in back end.
+            'payments': payment_data,
+            'balance': 0 if not payment else BalanceUtils.CalculateBalance(registration, payment[0])
+            })
+    
+    def __generate_dropout_info__(self, dropout : Dropout):
+        payment = Payment.objects.filter(dropout_info=dropout)
+
+        return json.dumps({
+            'student': StudentSerializer(dropout.student).data,
+            'dropout': DropoutSerializer(dropout).data,
+            'balance': 0 if not payment else BalanceUtils.CalculateRefund(dropout, payment[0])
             })
 
     def __calculate_registration_due__(self, registration : Registration):
@@ -185,7 +197,7 @@ class MemberViewSet(ModelViewSet):
             matched_registrations = Registration.objects.filter(student=s)
             registrations = registrations + [self.__generate_registration_info__(r) for r in matched_registrations]
             matched_dropouts = Dropout.objects.filter(student=s)
-            dropouts = dropouts + [JSONRenderer().render(DropoutSerializer(d).data) for d in matched_dropouts]
+            dropouts = dropouts + [self.__generate_dropout_info__(d) for d in matched_dropouts]
         return (registrations, dropouts)
 
     def __send_account_creation_html_email__(self, new_user, new_member, verification_url):
