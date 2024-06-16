@@ -215,10 +215,11 @@ class Payment(models.Model):
     original_amount = models.FloatField(null=False)
     amount_in_dollar = models.FloatField(null=False)
     PAYMENT_METHOD = [
+        ('NA', 'NOT_AVAILABLE') # Not paid, hence not set yet
         ('CA', 'CASH'),
         ('CH', 'Check'),
         ('EL', 'Electronic')]
-    payment_method = models.CharField(max_length=2, choices=PAYMENT_METHOD)
+    payment_method = models.CharField(max_length=2, choices=PAYMENT_METHOD, default='NA')
     PAYMENT_STATUS = [
         ('FP', 'FullPayment'),
         ('PP', 'PartialPayment'),
