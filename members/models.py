@@ -215,7 +215,7 @@ class Payment(models.Model):
     original_amount = models.FloatField(null=False)
     amount_in_dollar = models.FloatField(null=False)
     PAYMENT_METHOD = [
-        ('NA', 'NOT_AVAILABLE') # Not paid, hence not set yet
+        ('NA', 'NOT_AVAILABLE'), # Not paid, hence not set yet
         ('CA', 'CASH'),
         ('CH', 'Check'),
         ('EL', 'Electronic')]
