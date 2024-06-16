@@ -186,20 +186,28 @@ class MemberViewSet(ModelViewSet):
         else:
             return None
 
-    # Retrieve all registrations and dropouts for a member
+    # Retrieve all registrations for a member
     def __get_per_parent_registration__(self, matched_members):
         if matched_members.member_type != 'P':
             return ([], [])
         students = models.Student.objects.filter(parent_id=matched_members)
         registrations = []
-        dropouts = []
         for s in students:
             matched_registrations = Registration.objects.filter(student=s)
             registrations = registrations + [self.__generate_registration_info__(r) for r in matched_registrations]
+        return registrations
+
+    # Retrieve all dropouts for a member
+    def __get_per_parent_dropouts__(self, matched_members):
+        if matched_members.member_type != 'P':
+            return ([], [])
+        students = models.Student.objects.filter(parent_id=matched_members)
+        dropouts = []
+        for s in students:
             matched_dropouts = Dropout.objects.filter(student=s)
             dropouts = dropouts + [self.__generate_dropout_info__(d) for d in matched_dropouts]
-        return (registrations, dropouts)
-
+        return dropouts
+    
     def __send_account_creation_html_email__(self, new_user, new_member, verification_url):
         """
         Send account creation confirmation email.
@@ -718,16 +726,36 @@ class MemberViewSet(ModelViewSet):
         try:
             user = User.objects.get(username=request.user)
             matched_members = models.Member.objects.get(user_id=user)
-            registrations, dropouts = self.__get_per_parent_registration__(matched_members)
+            registrations = self.__get_per_parent_registration__(matched_members)
             content = {
                 'registrations': registrations,
-                'dropouts': dropouts
             }
             return Response(data=content, status=status.HTTP_200_OK)
         except (User.DoesNotExist, Member.DoesNotExist) as e:
             return self.__generate_unsuccessful_response(
                 'There is no user registered with - ' + request.user,
                 status.HTTP_404_NOT_FOUND)
+
+    # list all registrations that associate with the user. If the user is board member, all registration
+    # would be returned with pagination.
+    @action(methods=['GET'], detail=False, url_path='list-dropouts',
+            name='Get all course dropouts for the member',
+            authentication_classes=[SessionAuthentication, BasicAuthentication],
+            permission_classes=[permissions.IsAuthenticated])
+    def list_dropouts(self, request):
+        try:
+            user = User.objects.get(username=request.user)
+            matched_members = models.Member.objects.get(user_id=user)
+            dropouts = self.__get_per_parent_dropouts__(matched_members)
+            content = {
+                'dropouts': dropouts
+            }
+            return Response(data=content, status=status.HTTP_200_OK)
+        except (User.DoesNotExist, Member.DoesNotExist) as e:
+            return self.__generate_unsuccessful_response(
+                'There is no course dropouts with - ' + request.user,
+                status.HTTP_404_NOT_FOUND)
+
 
     @action(methods=['PUT'], detail=False, url_path='register-course', name='Register a student to a course',
             authentication_classes=[SessionAuthentication, BasicAuthentication],
