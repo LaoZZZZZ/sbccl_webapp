@@ -3,7 +3,8 @@ import datetime
 import os
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMessage, EmailMultiAlternatives
+
 from django.template import loader
 from django.utils.html import strip_tags
 import pytz
@@ -331,7 +332,8 @@ class MemberViewSet(ModelViewSet):
        
 
 
-    def __send_unregistration_email__(self, user, registration, old_course=None):
+    def __send_unregistration_email__(self, user, registration, payment: Payment,
+                                      old_course=None):
         html_message = loader.render_to_string("course_unregistration_email.html",
                                                {'account_url': os.environ["FRONTEND_URL"],
                                                 'student': ' '.join([registration.student.first_name, registration.student.last_name]),
@@ -340,8 +342,14 @@ class MemberViewSet(ModelViewSet):
                                                 'school_end': registration.school_year_end.year})
         subject = 'Class withdraw confirmation'
         plain_message = strip_tags(html_message)
-        send_mail(subject, plain_message, from_email=None, recipient_list=[user.email],
-                    html_message=html_message)
+        email = EmailMultiAlternatives(
+            subject=subject, body=plain_message, from_email=None, to=[user.email])
+        if payment and payment.payment_status in ('FP', 'PP'):
+            print(os.environ)
+            if "SCHOOL_ADMIN_EMAIL" in os.environ:
+                email.cc.append(os.environ["SCHOOL_ADMIN_EMAIL"])
+        email.attach_alternative(html_message, 'text/html')
+        email.send()
 
     def __update_waiting_list__(self, course):
         waiting_list = []
@@ -885,7 +893,7 @@ class MemberViewSet(ModelViewSet):
             matched_registration.save()
             self.__set_up_payment__(matched_registration, member)
             user = User.objects.get(username=request.user)
-            self.__send_unregistration_email__(user, matched_registration, old_course)
+            self.__send_unregistration_email__(user, matched_registration, payment=None, old_course=old_course)
             self.__send_registration_email__(user, matched_registration)
             self.__update_waiting_list__(old_course)
             return Response(status=status.HTTP_202_ACCEPTED)
@@ -933,7 +941,8 @@ class MemberViewSet(ModelViewSet):
                 else:
                     # Delete the payment record if no payment is made for this registration.
                     persisted_payment[0].delete()
-            self.__send_unregistration_email__(user, matched_registration)
+            payment = persisted_payment[0] if persisted_payment else None
+            self.__send_unregistration_email__(user, matched_registration, payment)
             if not matched_registration.on_waiting_list:
                 self.__update_waiting_list__(matched_registration.course)
 
