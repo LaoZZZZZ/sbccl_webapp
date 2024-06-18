@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Member, Registration, Student, Course, Payment, InstructorAssignment, Dropout, Coupon, SchoolCalendar
+from .models import CouponUsageRecord, Member, Registration, Student, Course, Payment, InstructorAssignment, Dropout, Coupon, SchoolCalendar
 from django.contrib.auth.models import User
 
 class MemberAdmin(admin.ModelAdmin):
@@ -50,6 +50,10 @@ class SchoolCalendarAdmin(admin.ModelAdmin):
                    'day_type')
     search_fields = ['school_year_start', 'school_year_end', 'day_type']
 
+class CouponUsageRecordAdmin(admin.ModelAdmin):
+    list_display = ('user', 'coupon', 'registration', 'used_date')
+    search_fields = ['user__user_id__email', 'coupon__code', 'registration__registration_code',
+                     'registration__student__first_name', 'registration__student__last_name']
 
 admin.site.register(Member, MemberAdmin)
 admin.site.register(Student, StudentAdmin)
@@ -60,4 +64,5 @@ admin.site.register(InstructorAssignment, InstructorAssignmentAdmin)
 admin.site.register(Dropout, DropoutAdmin)
 admin.site.register(Coupon, CouponAdmin)
 admin.site.register(SchoolCalendar, SchoolCalendarAdmin)
+admin.site.register(CouponUsageRecord, CouponUsageRecordAdmin)
 
