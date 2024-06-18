@@ -345,7 +345,6 @@ class MemberViewSet(ModelViewSet):
         email = EmailMultiAlternatives(
             subject=subject, body=plain_message, from_email=None, to=[user.email])
         if payment and payment.payment_status in ('FP', 'PP'):
-            print(os.environ)
             if "SCHOOL_ADMIN_EMAIL" in os.environ:
                 email.cc.append(os.environ["SCHOOL_ADMIN_EMAIL"])
         email.attach_alternative(html_message, 'text/html')
