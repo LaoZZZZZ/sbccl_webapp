@@ -3,11 +3,14 @@ import AddRegistration from "./AddRegistration.tsx";
 import fetchStudents from "./FetchStudents.tsx";
 import fetchCourses from "./FetchCourses.tsx";
 import UserInfo from "./UserInfo.tsx";
-import fetchRegistrations from "../common/FetchRegistrations.tsx";
+import fetchRegistrations, {
+  RegistrationBundle,
+} from "../common/FetchRegistrations.tsx";
 import EditableRegistration from "./EditableRegistration.tsx";
 import TeacherDetailPage from "./TeacherDetailPage.tsx";
 import { FetchDropouts } from "../common/FetchDropouts.tsx";
 import DropoutDetails from "../common/DropoutDetails.tsx";
+import RegistrationDetails from "../common/RegistrationDetails.tsx";
 
 interface Props {
   userInfo: UserInfo;
@@ -134,82 +137,33 @@ const Registrations = ({ userInfo }: Props) => {
       )}
       <hr className="pb-2" />
 
-      {pageState.pageState === PageStateEnum.ListRegistrations &&
-        registrationState.fetched && (
-          <div className="table-responsive">
-            <table className="table table-bordered table-hover table-striped">
-              <caption>List of registrations</caption>
-              <thead>
-                <tr id="column_name">
-                  {table_columns_names.map((colmunName) => {
-                    return (
-                      <th scope="col" className="bg-info">
-                        {colmunName}
-                      </th>
-                    );
-                  })}
-                </tr>
-              </thead>
-              <tbody>
-                {registrationState.value.map((r) => (
-                  <tr>
-                    <td>
-                      <button
-                        className={"btn btn-outline-secondary"}
-                        data-toggle="modal"
-                        onClick={(e) => {
-                          setSelectedRegistration(r);
-                          setPageState({
-                            ...pageState,
-                            pageState: PageStateEnum.EditRegistration,
-                          });
-                        }}
-                      >
-                        {renderRegistration(r)}
-                      </button>
-                    </td>
-                    <td>{r["course"]["name"]}</td>
-                    <td>
-                      {new Date(
-                        r["registration"]["school_year_start"]
-                      ).getFullYear() +
-                        " - " +
-                        new Date(
-                          r["registration"]["school_year_end"]
-                        ).getFullYear()}
-                    </td>
-                    <td>
-                      {r["registration"]["on_waiting_list"]
-                        ? "On Waiting List"
-                        : "Enrolled"}
-                    </td>
-                    <td>{"$" + r["balance"].toString()}</td>
-                    <td>
-                      <button
-                        className={"btn btn-outline-secondary"}
-                        data-toggle="modal"
-                        onClick={(e) => {
-                          setSelectedTeacher({
-                            class_name: r["course"]["name"],
-                            teachers_info: r["teacher"],
-                          });
-                          setPageState({
-                            ...pageState,
-                            pageState: PageStateEnum.TeacherDetails,
-                          });
-                        }}
-                      >
-                        Teacher information
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <hr className="pb-2" />
-            <DropoutDetails dropouts={dropoutState.value} />
-          </div>
-        )}
+      {pageState.pageState === PageStateEnum.ListRegistrations && (
+        <>
+          {registrationState.fetched && (
+            <div>
+              <RegistrationDetails
+                registrations={registrationState.value}
+                showTeacherInfo={(teacher) => {
+                  setSelectedTeacher(teacher);
+                  setPageState({
+                    ...pageState,
+                    pageState: PageStateEnum.TeacherDetails,
+                  });
+                }}
+                editRegistration={(r: RegistrationBundle) => {
+                  setSelectedRegistration(r);
+                  setPageState({
+                    ...pageState,
+                    pageState: PageStateEnum.EditRegistration,
+                  });
+                }}
+              />
+              <hr className="pb-2" />
+            </div>
+          )}
+          <DropoutDetails dropouts={dropoutState.value} />
+        </>
+      )}
       {pageState.pageState === PageStateEnum.AddRegistration && (
         <AddRegistration
           userAuth={userInfo.auth}

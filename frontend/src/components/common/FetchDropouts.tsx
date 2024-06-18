@@ -39,7 +39,7 @@ export const FetchDropouts = async (user_auth: {}, callback) => {
     )
     .then((response) => {
       callback({
-        errMsg: "",
+        fetched: true,
         value: response.data.dropouts.map(JSON.parse),
       });
     })
