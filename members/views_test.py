@@ -595,6 +595,80 @@ class MemberViewSetTest(APITestCase):
         self.assertTrue('dropouts' in response.data)
         self.assertEqual(len(response.data['dropouts']), 1)
 
+    def test_course_unregister_succeed_no_dropout_record(self):
+        # Add class first
+        exist_user = self.create_user('test_name', 'david@gmail.com')
+        self.create_member(exist_user, sign_up_status='V',
+                           verification_code="12345-1231", member_type='B')
+        
+        course_json = {
+            'name': "B1A",
+            'course_description': 'Morning session for grade 1 class.',
+            'course_type': "L",
+            'course_status': 'A',
+            'size_limit': 20,
+            'cost': 0,
+            'classroom': 'N101',
+            'course_start_time': '10:00:00',
+            'course_end_time': '11:50:00'
+        }
+
+        self.client.force_authenticate(user=exist_user)
+        response = self.client.put('/rest_api/members/upsert-course/',
+                                   data=course_json, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        persisted_course = Course.objects.get(name="B1A")
+        # Add student
+        parent_account = self.create_user('parent', 'parent@gmail.com')
+        self.create_member(parent_account, sign_up_status='V',
+                           verification_code="12345-1231", member_type='P')
+        student_json = {
+            'first_name': 'david',
+            'last_name': 'chatty',
+            'date_of_birth': '2015-10-01',
+            'gender': 'M'
+        }
+        self.client.force_authenticate(user=parent_account)
+        response = self.client.put('/rest_api/members/add-student/',
+                                   data=student_json, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        member = Member.objects.get(user_id=parent_account)
+        student = Student.objects.get(parent_id=member)
+        self.assertEqual(student.last_name, 'chatty')
+        self.assertEqual(student.first_name, 'david')
+        self.assertIsNotNone(student.joined_date)
+        # Add registration
+        payload = {
+            'course_id': persisted_course.id,
+            'student': {
+                'first_name': student.first_name,
+                'last_name': student.last_name,
+                'date_of_birth': student.date_of_birth,
+                'gender': 'M'
+            }
+        }
+        response = self.client.put('/rest_api/members/register-course/',
+                                   data=payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        registration = Registration.objects.get(student=student)
+        self.assertEqual(registration.course.name, "B1A")
+        self.assertEqual(registration.student.last_name, student.last_name)
+        self.assertEqual(registration.student.first_name, student.first_name)
+        self.assertIsNotNone(registration.school_year_start)
+        self.assertIsNotNone(registration.school_year_end)
+        self.assertEqual(registration.registration_date.day, datetime.datetime.today().day)
+        self.assertEqual(registration.expiration_date, registration.school_year_end)
+
+        # Unregister from the course. A dropout is created as a payment is created.
+        response = self.client.put('/rest_api/members/{id}/unregister-course/'.format(id=registration.id),
+                                   format='json')
+
+        response = self.client.get('/rest_api/members/list-dropouts/', format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue('dropouts' in response.data)
+        self.assertEqual(len(response.data['dropouts']), 0)
+
     def test_add_registration_course_with_coupon_succeed(self):
         coupon_code = 'EARLY_BIRD_2024'
         coupon = self.createCoupon(coupon_code, 'PA', expiration_date=datetime.date.today())

@@ -6,6 +6,8 @@ import UserInfo from "./UserInfo.tsx";
 import fetchRegistrations from "../common/FetchRegistrations.tsx";
 import EditableRegistration from "./EditableRegistration.tsx";
 import TeacherDetailPage from "./TeacherDetailPage.tsx";
+import { FetchDropouts } from "../common/FetchDropouts.tsx";
+import DropoutDetails from "../common/DropoutDetails.tsx";
 
 interface Props {
   userInfo: UserInfo;
@@ -37,6 +39,11 @@ const renderRegistration = (registration) => {
 
 const Registrations = ({ userInfo }: Props) => {
   const [registrationState, setRegistrationState] = useState<ValueState>({
+    fetched: false,
+    value: [],
+  });
+
+  const [dropoutState, setDropoutState] = useState<ValueState>({
     fetched: false,
     value: [],
   });
@@ -81,6 +88,12 @@ const Registrations = ({ userInfo }: Props) => {
     if (!registrationState.fetched) {
       fetchRegistrations(userInfo, (registrations) => {
         setRegistrationState(registrations);
+      });
+    }
+
+    if (!dropoutState.fetched) {
+      FetchDropouts(userInfo.auth, (dropoutInfo) => {
+        setDropoutState(dropoutInfo);
       });
     }
   }, [
@@ -190,6 +203,7 @@ const Registrations = ({ userInfo }: Props) => {
               </tbody>
             </table>
             <hr className="pb-2" />
+            <DropoutDetails dropouts={dropoutState.value} />
           </div>
         )}
       {pageState.pageState === PageStateEnum.AddRegistration && (
