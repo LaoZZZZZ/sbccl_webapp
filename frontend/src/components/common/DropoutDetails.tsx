@@ -27,7 +27,11 @@ const DropoutDetails = ({ dropouts }: DropoutDetailsProps): JSX.Element => {
             <thead>
               <tr id="column_name">
                 {table_columns_names.map((colmunName) => {
-                  return <th scope="col">{colmunName}</th>;
+                  return (
+                    <th scope="col" className="bg-secondary">
+                      {colmunName}
+                    </th>
+                  );
                 })}
               </tr>
             </thead>

@@ -142,7 +142,11 @@ const Registrations = ({ userInfo }: Props) => {
               <thead>
                 <tr id="column_name">
                   {table_columns_names.map((colmunName) => {
-                    return <th scope="col">{colmunName}</th>;
+                    return (
+                      <th scope="col" className="bg-info">
+                        {colmunName}
+                      </th>
+                    );
                   })}
                 </tr>
               </thead>
