@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import RemoveStudents from "./RemoveStudentsPage.tsx";
+import { Student } from "./FetchStudents.tsx";
 
 interface Props {
-  students: [];
+  students: Student[];
   userAuth: {};
   updateStudentList: () => {};
 }
