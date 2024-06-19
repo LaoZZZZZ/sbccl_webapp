@@ -79,6 +79,15 @@ class MemberViewSet(ModelViewSet):
     def __email_for_textbook(self, registration: Registration):
         pass
 
+    def __course_taught_by_teacher__(self, teacher: Member, course: Course):
+        found = False
+        for teacher in course.instructor.all():
+            found = teacher.user_id == teacher.user_id.id
+            if found:
+                break
+        return found
+    
+
     def __get_all_coupons_per_registration(self, registration : Registration):
         coupons = []
         if not registration.coupons:
@@ -221,65 +230,24 @@ class MemberViewSet(ModelViewSet):
             send_mail(subject, plain_message, from_email=None, recipient_list=[new_user.email],
                       html_message=html_message)
 
-    def __get_students_per_teacher__(self, matched_member):
+    def __get_students_per_course__(self, course : Course):
         """
-          Find all students that are taught by this teacher in current school year.
+          Find all students that register the course
         """
-        if matched_member.member_type != 'T':
-            return []
-        
-        assignments = InstructorAssignment.objects.filter(instructor=matched_member)
         all_students = []
-        for assignment in assignments:
-            if assignment.expiration_date < datetime.date.today():
-                continue
-            # Skip inactive course
-            if assignment.course.course_status != 'A':
-                continue
-            students = []
-            course = JSONRenderer().render(CourseSerializer(assignment.course).data)
-            for registration in Registration.objects.filter(course=assignment.course):
-                if not registration.expiration_date or registration.expiration_date < datetime.date.today():
-                    student = StudentSerializer(registration.student).data
-                    parent = registration.student.parent_id.user_id
-                    student['contact'] = JSONRenderer().render({
-                        'parent': ' '.join([parent.first_name, parent.last_name]),
-                        'email': parent.email,
-                        'phone': registration.student.parent_id.phone_number
-                    })
-                    students.append(JSONRenderer().render(student))
-            all_students.append({'students': students, 'course': course})
-        return all_students
 
-
-    def __get_students_per_teacher__(self, matched_member):
-        """
-          Find all students that are taught by this teacher in current school year.
-        """
-        if matched_member.member_type != 'T':
-            return []
-        
-        assignments = InstructorAssignment.objects.filter(instructor=matched_member)
-        all_students = []
-        for assignment in assignments:
-            if assignment.expiration_date < datetime.date.today():
-                continue
-            # Skip inactive course
-            if assignment.course.course_status != 'A':
-                continue
-            students = []
-            course = JSONRenderer().render(CourseSerializer(assignment.course).data)
-            for registration in Registration.objects.filter(course=assignment.course):
-                if registration.expiration_date < datetime.date.today():
-                    student = JSONRenderer().render(registration.student)
-                    parent = registration.student.parent_id.user_id
-                    student['contact'] = JSONRenderer().render({
-                        'parent': parent.user_id.last_name + ' ' + parent.user_id.first_name,
-                        'email': parent.user_id.email,
-                        'phone': parent.phone_number
-                    })
-                    students.append(student)
-            all_students.append({'students': students, 'course': course})
+        for student in course.students.all():
+            data = StudentSerializer(student).data
+            data['age'] = StudentSerializer.calculateAge(student.date_of_birth)
+            del data['date_of_birth']
+            # TODO: replace dob with age for privacy.
+            p_user =  student.parent_id.user_id
+            data['contact'] = JSONRenderer().render({
+                'parent': ' '.join([p_user.first_name, p_user.last_name]),
+                'email': p_user.email,
+                'phone': student.parent_id.phone_number
+            })
+            all_students.append(JSONRenderer().render(data))
         return all_students
 
     def __fetch_coupon__(self, user, coupon_code, registration=None):
@@ -702,25 +670,65 @@ class MemberViewSet(ModelViewSet):
             authentication_classes=[SessionAuthentication, BasicAuthentication],
             permission_classes=[permissions.IsAuthenticated])
     def fetch_students(self, request, pk=None):
+        """
+         Fetch students for parent account
+        """
         try:
             user = User.objects.get(username=request.user)
             matched_member = models.Member.objects.get(user_id=user)
             students = []
             # Fetch relevant students for different type of member
-            if matched_member.member_type == 'P':
-                students = models.Student.objects.filter(parent_id=matched_member)
-                content = {
-                    'students': [JSONRenderer().render(StudentSerializer(s).data) for s in students]
-                }
-            elif matched_member.member_type == 'T':
-                students = self.__get_students_per_teacher__(matched_member)
-                content = {
-                    'data': students
-                }
+            if matched_member.member_type != 'P':
+                return self.__generate_unsuccessful_response(
+                    "Non-parent account can not access all students",
+                    status=status.HTTP_403_FORBIDDEN)
+            students = models.Student.objects.filter(parent_id=matched_member)
+            content = {
+                'students': [JSONRenderer().render(StudentSerializer(s).data) for s in students]
+            }
+            
             return Response(data=content, status=status.HTTP_200_OK)
         except (User.DoesNotExist, Member.DoesNotExist):
             return self.__generate_unsuccessful_response(
                 'There is no user registered with - ' + request.user,
+                status.HTTP_404_NOT_FOUND)
+
+    @action(methods=['GET'], detail=True, url_path='list-students-per-class',
+            name='Get all students for a class',
+            authentication_classes=[SessionAuthentication, BasicAuthentication],
+            permission_classes=[permissions.IsAuthenticated])
+    def list_students(self, request, pk=None):
+        """
+          Fetch all students in this class.
+        """
+        try:
+            user = User.objects.get(username=request.user)
+            matched_member = models.Member.objects.get(user_id=user)
+            if matched_member.member_type == 'P':
+                return self.__generate_unsuccessful_response(
+                    "Parent account has no access to a class roster!", status.HTTP_403_FORBIDDEN)
+            persisted_class = Course.objects.get(id=pk)
+            # Teacher can only see the roster of their own classes
+            if matched_member.member_type == 'T':
+                found = False
+                for instructor in persisted_class.instructor.all():
+                    if instructor.user_id == user:
+                        found = True
+                        break
+                if not found:
+                    return self.__generate_unsuccessful_response(
+                    "You don't have access to the roster of this class!", status.HTTP_403_FORBIDDEN)
+            content = {
+                'students': self.__get_students_per_course__(persisted_class)
+            }
+            return Response(data=content, status=status.HTTP_200_OK)
+        except (User.DoesNotExist, Member.DoesNotExist) as e:
+            return self.__generate_unsuccessful_response(
+                'There is no user registered with - ' + request.user,
+                status.HTTP_404_NOT_FOUND)
+        except (Course.DoesNotExist) as e:
+            return self.__generate_unsuccessful_response(
+                'There is no such class with id = ' + pk,
                 status.HTTP_404_NOT_FOUND)
 
     # list all registrations that associate with the user. If the user is board member, all registration
@@ -958,20 +966,31 @@ class MemberViewSet(ModelViewSet):
         authentication_classes=[SessionAuthentication, BasicAuthentication],
         permission_classes=[permissions.IsAuthenticated])
     def list_courses(self, request):
+        """
+        Returns a list of courses
+
+        Depending on the account type, it returns
+        """
         try:
             user = User.objects.get(username=request.user.username)
             matched_member = Member.objects.get(user_id=user)
+            [start, end] = self.__find_current_school_year()
+
             # only board member can see all course.
-            show_inactive_class = matched_member.member_type == 'B'
-            courses = Course.objects.all()
+            if matched_member.member_type != 'B':
+                courses = Course.objects.filter(school_year_start=start,
+                                                school_year_end=end,
+                                                course_status='A')
+            else:
+                courses = Course.objects.all()
             courses_json = []
             # extract enrollment
             for c in courses:
-                if c.course_status == 'U' and not show_inactive_class:
+                # should only show course that is taught by the teacher
+                if matched_member.member_type == 'T' and not self.__course_taught_by_teacher__(matched_member, c):
                     continue
-                
                 course_data = CourseSerializer(c).data
-                course_data['enrollment'] = len(c.students.all())
+                course_data['enrollment'] = c.students.count()
                 instructors = c.instructor
                 if instructors:
                     teachers = []
