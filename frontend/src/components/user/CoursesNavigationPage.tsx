@@ -45,7 +45,6 @@ const CoursesNavigationPage = ({
   };
 
   const handleRosterResponse = (roster: Roster) => {
-    console.log(roster);
     setRoster(roster);
   };
   useEffect(() => {
