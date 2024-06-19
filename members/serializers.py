@@ -3,7 +3,7 @@ from .models import Member, Student, Course, Registration, Coupon, SchoolCalenda
 from django.contrib.auth.models import User
 import re
 import pytz
-from datetime import datetime
+from datetime import datetime, date
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -44,6 +44,10 @@ class StudentSerializer(serializers.ModelSerializer):
         model = Student
         fields = ('first_name', 'last_name', 'middle_name', 'gender',
                   'date_of_birth', 'joined_date', 'chinese_name')
+    
+    def calculateAge(dob : date):
+        days_in_year = 365.2425   
+        return int((datetime.today().date() - dob).days / days_in_year)
 
     def create(self, validated_data):
         student = Student(**validated_data)

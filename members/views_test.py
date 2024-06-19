@@ -63,12 +63,6 @@ class MemberViewSetTest(APITestCase):
         self.assertEqual(created_member.sign_up_status, 'S')
         self.assertEqual(created_member.member_type, 'T')
 
-        # Fetch the students
-        self.client.force_authenticate(user=user)
-
-        response = self.client.get('/rest_api/members/fetch-students/')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
 
     def test_create_parent_succeed(self):
         user_json = {'username': 'test_name', 'email': 'test4@gmail.com',
@@ -1612,7 +1606,7 @@ class MemberViewSetTest(APITestCase):
         self.assertEqual(len(students), 0)
 
 
-    def test_fetch_students_for_teacher(self):
+    def test_fetch_students_for_a_class(self):
         # Add class first
         exist_user = self.create_user('test_name', 'david@gmail.com')
         self.create_member(exist_user, sign_up_status='V',
@@ -1697,14 +1691,16 @@ class MemberViewSetTest(APITestCase):
         assignment.last_update_person="Test"
         assignment.save()
 
-        # fetch students under the teacher
+        # fetch students for the course
         self.client.force_authenticate(user=teacher_account)
-        response = self.client.get('/rest_api/members/fetch-students/', format='json')
+        response = self.client.get(
+            '/rest_api/members/{course_id}/list-students-per-class/'.format(course_id=persisted_course.id),
+            format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue('data' in response.data)
-        self.assertEqual(len(response.data['data']), 1)
-        self.assertTrue('students' in response.data['data'][0])
-        self.assertTrue('course' in response.data['data'][0])
+        self.assertTrue('students' in response.data)
+        self.assertEqual(len(response.data['students']), 1)
+        student = json.loads(response.data['students'][0])
+        self.assertTrue('age' in student)
 
 
     def test__get_coupon_details_succeed(self):
