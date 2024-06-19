@@ -1,4 +1,5 @@
 import React from "react";
+import { ClassInformation, extractCourseTime } from "../user/FetchCourses.tsx";
 
 // #region constants
 
@@ -13,40 +14,10 @@ import React from "react";
 // #endregion
 
 // #region component
-export interface ClassInformation {
-  enrollment: number;
-  size_limit: number;
-  teacher: string;
-  cost: number;
-  course_type: string;
-  classroom: string;
-  course_start_time: string;
-  course_end_time: string;
-  book_cost: number;
-  course_description: string;
-}
 
 interface CourseInfoProps {
   classInfo: ClassInformation;
 }
-
-const extractCourseTime = (course: ClassInformation) => {
-  var start = new Date("2024-10-01T" + course.course_start_time);
-  var end = new Date("2024-10-01T" + course.course_end_time);
-  return (
-    start.toLocaleString("en-US", {
-      hour: "numeric",
-      hour12: true,
-      minute: "numeric",
-    }) +
-    " - " +
-    end.toLocaleString("en-US", {
-      hour: "numeric",
-      hour12: true,
-      minute: "numeric",
-    })
-  );
-};
 
 /**
  * Render a class information.
