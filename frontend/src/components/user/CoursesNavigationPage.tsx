@@ -41,12 +41,10 @@ const CoursesNavigationPage = ({
   });
 
   const handleFetchResponse = (response) => {
-    console.log(response);
     setCourseState(response);
   };
 
   const handleRosterResponse = (roster: Roster) => {
-    console.log(roster);
     setRoster(roster);
   };
   useEffect(() => {
