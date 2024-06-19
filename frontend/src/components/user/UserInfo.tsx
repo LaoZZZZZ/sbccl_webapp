@@ -1,8 +1,10 @@
+export interface Auth {
+  username: string;
+  password: string;
+}
+
 interface UserInfo {
-  auth: {
-    username: string;
-    password: string;
-  };
+  auth: Auth;
 
   user: {
     username: string; // should hold the same value with email

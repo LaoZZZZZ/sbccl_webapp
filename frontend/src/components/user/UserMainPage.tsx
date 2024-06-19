@@ -5,6 +5,7 @@ import Registrations from "./RegistrationsPage.tsx";
 import StudentsPage from "./StudentsPage.tsx";
 import UserInfo from "./UserInfo.tsx";
 import CalendarDetailPage from "./CalendarDetailPage.tsx";
+import CoursesNavigationPage from "./CoursesNavigationPage.tsx";
 
 interface Props {
   userInfo: UserInfo;
@@ -16,6 +17,7 @@ const Page = {
   Students: 1,
   Registration: 2,
   Calendar: 3,
+  Rosters: 4,
 };
 
 const SwitchPage = (state, action) => {
@@ -39,6 +41,11 @@ const SwitchPage = (state, action) => {
       return {
         ...state,
         page: Page.Calendar,
+      };
+    case "go_to_rosters":
+      return {
+        ...state,
+        page: Page.Rosters,
       };
   }
 };
@@ -85,28 +92,32 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
                   Account Profile
                 </button>
               </li>
-              <li className="nav-item">
-                <button
-                  className="btn btn-borderless"
-                  onClick={() => {
-                    transitionPageState({ type: "go_to_students" });
-                  }}
-                  id="student"
-                >
-                  Students
-                </button>
-              </li>
-              <li className="nav-item">
-                <button
-                  className="btn btn-borderless"
-                  onClick={() => {
-                    transitionPageState({ type: "go_to_registration" });
-                  }}
-                  id="registration"
-                >
-                  Registration
-                </button>
-              </li>
+              {userInfo.user.member_type === "Parent" && (
+                <li className="nav-item">
+                  <button
+                    className="btn btn-borderless"
+                    onClick={() => {
+                      transitionPageState({ type: "go_to_students" });
+                    }}
+                    id="student"
+                  >
+                    Students
+                  </button>
+                </li>
+              )}
+              {userInfo.user.member_type === "Parent" && (
+                <li className="nav-item">
+                  <button
+                    className="btn btn-borderless"
+                    onClick={() => {
+                      transitionPageState({ type: "go_to_registration" });
+                    }}
+                    id="registration"
+                  >
+                    Registration
+                  </button>
+                </li>
+              )}
               <li className="nav-item">
                 <button
                   className="btn btn-borderless"
@@ -118,6 +129,19 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
                   Calendar
                 </button>
               </li>
+              {userInfo.user.member_type !== "Parent" && (
+                <li className="nav-item">
+                  <button
+                    className="btn btn-borderless"
+                    onClick={() => {
+                      transitionPageState({ type: "go_to_rosters" });
+                    }}
+                    id="calendar"
+                  >
+                    Rosters
+                  </button>
+                </li>
+              )}
               <li className="nav-item">
                 <button
                   className="btn btn-borderless fixed-right"
@@ -151,6 +175,11 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
       {state?.page === Page.Calendar && (
         <div className="pt-3 w-75 mx-auto">
           <CalendarDetailPage userAuth={userInfo.auth} />
+        </div>
+      )}
+      {state?.page === Page.Rosters && (
+        <div className="pt-3 w-75 mx-auto">
+          <CoursesNavigationPage userAuth={userInfo.auth} />
         </div>
       )}
     </div>

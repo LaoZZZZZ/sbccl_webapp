@@ -3,8 +3,8 @@ import { useState } from "react";
 import TotalCost from "./TotalCost.tsx";
 import { GetCoupon, CouponResponse, Coupon } from "./GetCoupon.tsx";
 import Alert from "./Alert.tsx";
-import { CourseInfo, ClassInformation } from "./CourseInfo.tsx";
-
+import { ClassInformation } from "../user/FetchCourses.tsx";
+import { CourseInfo } from "./CourseInfo.tsx";
 interface Props {
   user_auth: {};
   courses: ClassInformation[];
@@ -25,16 +25,6 @@ const findSelectedCourse = (courses, value) => {
     return selected_course[0];
   }
   return null;
-};
-
-const getShownName = (course: ClassInformation) => {
-  if (course.course_type === "E") {
-    return "Enrichment - " + course.name;
-  } else if (course.course_type === "L") {
-    return "Language - " + course.name;
-  } else {
-    return course.name;
-  }
 };
 
 const CourseSelection = ({
@@ -76,6 +66,7 @@ const CourseSelection = ({
     book_cost: selectedCourse !== null ? selectedCourse.book_cost : 0,
     course_description:
       selectedCourse !== null ? selectedCourse.course_description : "",
+    name: selected !== null ? selectedCourse.name : "",
   });
   const [waitForResponse, setWaitForResponse] = useState(false);
 
@@ -123,6 +114,7 @@ const CourseSelection = ({
               course_end_time: "NA",
               book_cost: 0,
               course_description: "",
+              name: "",
             });
             const selected_course = findSelectedCourse(courses, e.target.value);
             if (selected_course !== null) {
@@ -144,6 +136,7 @@ const CourseSelection = ({
                     ? selected_course.book_cost
                     : 0,
                 course_description: selected_course.course_description,
+                name: selected_course.name,
               });
               setSelected(true);
             }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import AddRegistration from "./AddRegistration.tsx";
-import fetchStudents from "./FetchStudents.tsx";
+import { fetchStudents } from "./FetchStudents.tsx";
 import fetchCourses from "./FetchCourses.tsx";
 import UserInfo from "./UserInfo.tsx";
 import fetchRegistrations, {
@@ -75,8 +75,11 @@ const Registrations = ({ userInfo }: Props) => {
       });
     }
     if (!courseState.fetched) {
-      fetchCourses(userInfo, (courses) => {
-        setCourseState(courses);
+      fetchCourses(userInfo.auth, (response) => {
+        setCourseState({
+          fetched: true,
+          value: response.courses,
+        });
       });
     }
 

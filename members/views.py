@@ -969,7 +969,7 @@ class MemberViewSet(ModelViewSet):
         """
         Returns a list of courses
 
-        Depending on the account type, it returns
+        Depending on the account type, it returns different set of courses
         """
         try:
             user = User.objects.get(username=request.user.username)
@@ -978,9 +978,7 @@ class MemberViewSet(ModelViewSet):
 
             # only board member can see all course.
             if matched_member.member_type != 'B':
-                courses = Course.objects.filter(school_year_start=start,
-                                                school_year_end=end,
-                                                course_status='A')
+                courses = Course.objects.filter(course_status='A')
             else:
                 courses = Course.objects.all()
             courses_json = []
