@@ -59,9 +59,21 @@ const fetchCourses = async (auth: Auth, callback) => {
   );
 
   if (response.status === 200) {
+    const courses = response.data.courses.map(JSON.parse);
+    courses.sort((a, b) => {
+      if (a.course_type < b.course_type) {
+        return -1;
+      } else if (a.course_type > b.course_type) {
+        return 1;
+      }
+      if (a.name < b.name) {
+        return -1;
+      }
+      return 1;
+    });
     callback({
       fetched: true,
-      courses: response.data.courses.map(JSON.parse),
+      courses: courses,
     });
     return;
   }
