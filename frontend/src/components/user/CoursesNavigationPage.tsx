@@ -41,7 +41,6 @@ const CoursesNavigationPage = ({
   });
 
   const handleFetchResponse = (response) => {
-    console.log(response);
     setCourseState(response);
   };
 
