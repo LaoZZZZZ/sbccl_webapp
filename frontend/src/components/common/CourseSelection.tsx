@@ -3,7 +3,7 @@ import { useState } from "react";
 import TotalCost from "./TotalCost.tsx";
 import { GetCoupon, CouponResponse, Coupon } from "./GetCoupon.tsx";
 import Alert from "./Alert.tsx";
-import { ClassInformation } from "../user/FetchCourses.tsx";
+import { ClassInformation, getShownName } from "../user/FetchCourses.tsx";
 import { CourseInfo } from "./CourseInfo.tsx";
 interface Props {
   user_auth: {};
@@ -66,7 +66,8 @@ const CourseSelection = ({
     book_cost: selectedCourse !== null ? selectedCourse.book_cost : 0,
     course_description:
       selectedCourse !== null ? selectedCourse.course_description : "",
-    name: selected !== null ? selectedCourse.name : "",
+    name: selectedCourse !== null ? selectedCourse.name : "",
+    id: selectedCourse !== null ? selectedCourse.id : 0,
   });
   const [waitForResponse, setWaitForResponse] = useState(false);
 
@@ -106,7 +107,7 @@ const CourseSelection = ({
             setClassInfo({
               enrollment: 0,
               size_limit: 0,
-              type: "",
+              course_type: "",
               cost: 0,
               classroom: "NA",
               teacher: "Unassigned",
@@ -115,6 +116,7 @@ const CourseSelection = ({
               book_cost: 0,
               course_description: "",
               name: "",
+              id: 0,
             });
             const selected_course = findSelectedCourse(courses, e.target.value);
             if (selected_course !== null) {
@@ -137,6 +139,7 @@ const CourseSelection = ({
                     : 0,
                 course_description: selected_course.course_description,
                 name: selected_course.name,
+                id: selected_course.id,
               });
               setSelected(true);
             }
@@ -170,7 +173,7 @@ const CourseSelection = ({
                   setOrderBook(false);
                 }
               }}
-              disabled={classInfo.type === "E"}
+              disabled={classInfo.course_type === "E"}
               checked={wantTextBook}
             />
             <label className="form-check-label">
