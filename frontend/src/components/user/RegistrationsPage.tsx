@@ -32,14 +32,6 @@ interface PageState {
   pageState: number;
 }
 
-const renderRegistration = (registration) => {
-  return (
-    registration["student"]["last_name"] +
-    " " +
-    registration["student"]["first_name"]
-  );
-};
-
 const Registrations = ({ userInfo }: Props) => {
   const [registrationState, setRegistrationState] = useState<ValueState>({
     fetched: false,
