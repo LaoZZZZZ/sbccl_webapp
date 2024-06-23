@@ -31,7 +31,7 @@ const CoursesNavigationPage = ({
   userAuth,
 }: CoursesNavigationPageProps): JSX.Element => {
   // TODO(luzhao): Fetch the school info from the backend.
-  const schoolYears = ["2024-2025", "2025-2026"];
+  const schoolYears = ["2024-2025"];
   const [selectedYear, setSelectedYear] = useState("");
   const [courseState, setCourseState] = useState<CourseList>({
     fetched: false,
