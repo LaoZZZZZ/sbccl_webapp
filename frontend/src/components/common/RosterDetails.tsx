@@ -19,11 +19,23 @@ export default function RosterDetails({ students, course }: Props) {
     "Phone",
   ];
 
+  const registrationStatus = new Map([
+    ["OnWaitingList", "bg-warning"],
+    ["Enrolled", "bg-white"],
+  ]);
+
   return (
     <div className="container text-center pb-2">
       <label>
         <strong>Roster</strong>
       </label>
+      {/* <div className="pb-2">
+        {registrationStatus.map((day_type) => (
+          <span className={"badge " + colors.get(day_type)}>
+            {legends.get(day_type)}
+          </span>
+        ))}
+      </div> */}
       <div className="table-responsive">
         <table className="table table-bordered table-hover table-striped">
           <caption>List of students</caption>
