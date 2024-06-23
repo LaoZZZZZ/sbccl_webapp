@@ -19,11 +19,23 @@ export default function RosterDetails({ students, course }: Props) {
     "Phone",
   ];
 
+  const registrationStatus = new Map([
+    ["OnWaitingList", "bg-warning"],
+    ["Enrolled", "bg-white"],
+  ]);
+
   return (
     <div className="container text-center pb-2">
       <label>
         <strong>Roster</strong>
       </label>
+      {/* <div className="pb-2">
+        {registrationStatus.map((day_type) => (
+          <span className={"badge " + colors.get(day_type)}>
+            {legends.get(day_type)}
+          </span>
+        ))}
+      </div> */}
       <div className="table-responsive">
         <table className="table table-bordered table-hover table-striped">
           <caption>List of students</caption>
@@ -37,14 +49,62 @@ export default function RosterDetails({ students, course }: Props) {
           <tbody>
             {students.map((student_info: RosterStudent) => (
               <tr>
-                <td>{student_info.last_name}</td>
-                <td>{student_info.first_name}</td>
-                <td>{student_info.chinese_name}</td>
-                <td>{student_info.gender}</td>
-                <td>{student_info.age}</td>
-                <td>{student_info.contact.parent}</td>
-                <td>{student_info.contact.email}</td>
-                <td>{student_info.contact.phone}</td>
+                <td
+                  className={
+                    student_info.on_waiting_list ? "bg-warning" : "bg-white"
+                  }
+                >
+                  {student_info.last_name}
+                </td>
+                <td
+                  className={
+                    student_info.on_waiting_list ? "bg-warning" : "bg-white"
+                  }
+                >
+                  {student_info.first_name}
+                </td>
+                <td
+                  className={
+                    student_info.on_waiting_list ? "bg-warning" : "bg-white"
+                  }
+                >
+                  {student_info.chinese_name}
+                </td>
+                <td
+                  className={
+                    student_info.on_waiting_list ? "bg-warning" : "bg-white"
+                  }
+                >
+                  {student_info.gender}
+                </td>
+                <td
+                  className={
+                    student_info.on_waiting_list ? "bg-warning" : "bg-white"
+                  }
+                >
+                  {student_info.age}
+                </td>
+                <td
+                  className={
+                    student_info.on_waiting_list ? "bg-warning" : "bg-white"
+                  }
+                >
+                  {student_info.contact.parent}
+                </td>
+                <td
+                  className={
+                    student_info.on_waiting_list ? "bg-warning" : "bg-white"
+                  }
+                >
+                  {student_info.contact.email}
+                </td>
+                <td
+                  className={
+                    student_info.on_waiting_list ? "bg-warning" : "bg-white"
+                  }
+                >
+                  {student_info.contact.phone}
+                </td>
               </tr>
             ))}
           </tbody>

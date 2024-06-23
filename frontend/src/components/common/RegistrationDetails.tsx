@@ -11,7 +11,7 @@ import { Student } from "../user/FetchStudents";
 
 // #region functions
 const renderRegistration = (student: Student) => {
-  return student.last_name + " " + student.last_name;
+  return student.first_name + " " + student.last_name;
 };
 // #endregion
 
