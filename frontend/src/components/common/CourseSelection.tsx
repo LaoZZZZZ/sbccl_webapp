@@ -3,7 +3,11 @@ import { useState } from "react";
 import TotalCost from "./TotalCost.tsx";
 import { GetCoupon, CouponResponse, Coupon } from "./GetCoupon.tsx";
 import Alert from "./Alert.tsx";
-import { ClassInformation, getShownName } from "../user/FetchCourses.tsx";
+import {
+  ClassInformation,
+  getShownName,
+  findSelectedCourse,
+} from "../user/FetchCourses.tsx";
 import { CourseInfo } from "./CourseInfo.tsx";
 interface Props {
   user_auth: {};
@@ -16,17 +20,6 @@ interface Props {
   setOrderBook: (orderBook: boolean) => {};
 }
 
-//
-const findSelectedCourse = (courses, value) => {
-  const selected_course = courses.filter((course) =>
-    value.endsWith(course.name)
-  );
-  if (selected_course.length === 1) {
-    return selected_course[0];
-  }
-  return null;
-};
-
 const CourseSelection = ({
   user_auth,
   courses,
@@ -38,17 +31,6 @@ const CourseSelection = ({
   setOrderBook,
 }: Props) => {
   const [wantTextBook, setWantTextBook] = useState(textbookOrdered);
-  courses.sort((a, b) => {
-    if (a.course_type < b.course_type) {
-      return -1;
-    } else if (a.course_type > b.course_type) {
-      return 1;
-    }
-    if (a.name < b.name) {
-      return -1;
-    }
-    return 1;
-  });
   const selectedCourse = findSelectedCourse(courses, defaultCourseSelection);
   const [selected, setSelected] = useState(selectedCourse !== null);
 

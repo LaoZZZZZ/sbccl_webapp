@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from "react";
 
 import { RosterStudent, FetchCourseRoster } from "./FetchStudents.tsx";
-import fetchCourses, { ClassInformation } from "./FetchCourses.tsx";
+import fetchCourses, {
+  ClassInformation,
+  findSelectedCourse,
+  getShownName,
+} from "./FetchCourses.tsx";
 import { Auth } from "./UserInfo.tsx";
 import RosterDetails from "../common/RosterDetails.tsx";
+import { CourseInfo } from "../common/CourseInfo.tsx";
 
 // #region component
 interface CoursesNavigationPageProps {
@@ -25,6 +30,9 @@ interface CourseList {
 const CoursesNavigationPage = ({
   userAuth,
 }: CoursesNavigationPageProps): JSX.Element => {
+  // TODO(luzhao): Fetch the school info from the backend.
+  const schoolYears = ["2024-2025", "2025-2026"];
+  const [selectedYear, setSelectedYear] = useState("");
   const [courseState, setCourseState] = useState<CourseList>({
     fetched: false,
     courses: [],
@@ -62,43 +70,83 @@ const CoursesNavigationPage = ({
 
   return (
     <div>
-      <div className="dropdown">
-        <button
-          className="btn btn-primary dropdown-toggle"
-          type="button"
-          id="dropdownMenuButton1"
-          data-bs-toggle="dropdown"
-          aria-expanded="false"
-        >
-          Courses
-        </button>
-        <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-          {courseState.fetched &&
-            courseState.courses.map((course: ClassInformation) => {
-              return (
-                <li>
-                  <button
-                    className="dropdown-item"
-                    onClick={() => {
-                      setSelectedCourse({ selected: true, course: course });
-                      setRoster({
-                        fetched: false,
-                        students: [],
-                      });
-                    }}
-                  >
-                    {course.name}
-                  </button>
-                </li>
-              );
-            })}
-        </ul>
-      </div>
+      <form className="pb-2">
+        <div className="form row">
+          <div className="col">
+            <label>
+              <strong>Select School year</strong>
+            </label>
+            <select
+              className="form-control"
+              id="selectYear"
+              onChange={(e) => {
+                if (selectedYear === e.target.value) {
+                  return;
+                }
+                setSelectedYear(e.target.value);
+                setCourseState({
+                  fetched: false,
+                  courses: [],
+                });
+              }}
+            >
+              {schoolYears.map((year) => {
+                return <option>{year}</option>;
+              })}
+            </select>
+          </div>
+          <div className="col">
+            <div>
+              <label>
+                <strong>Select course</strong>
+              </label>
+              <select
+                className="form-control"
+                id="selectCourse"
+                onChange={(e) => {
+                  if (
+                    selectedCourse.selected &&
+                    selectedCourse.course.name === e.target.value
+                  ) {
+                    return;
+                  }
+                  const new_selected = findSelectedCourse(
+                    courseState.courses,
+                    e.target.value
+                  );
+
+                  setSelectedCourse({ selected: true, course: new_selected });
+                  setRoster({
+                    fetched: false,
+                    students: [],
+                  });
+                }}
+              >
+                <option>Not Selected</option>
+                {courseState.fetched &&
+                  courseState.courses.map((course: ClassInformation) => {
+                    return <option>{getShownName(course)}</option>;
+                  })}
+              </select>
+            </div>
+          </div>
+        </div>
+      </form>
       {roster.fetched && selectedCourse.selected && (
-        <RosterDetails
-          students={roster.students}
-          course={selectedCourse.course}
-        />
+        <div className="pt-2">
+          <div className="container text-center pb-2">
+            <h1>{getShownName(selectedCourse.course)}</h1>
+          </div>
+          <hr className="pb-2" />
+
+          <CourseInfo classInfo={selectedCourse.course} />
+          <hr className="pb-2" />
+
+          <RosterDetails
+            students={roster.students}
+            course={selectedCourse.course}
+          />
+        </div>
       )}
     </div>
   );

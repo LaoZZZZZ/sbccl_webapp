@@ -16,6 +16,18 @@ export interface ClassInformation {
   id: number;
 }
 
+// Find course in courses that is suffix of the course name shown on the screen.
+// @courseName: It's the name shown on the screen, and might be different from the actual name
+export const findSelectedCourse = (courses, courseName) => {
+  const selected_course = courses.filter((course) =>
+    courseName.endsWith(course.name)
+  );
+  if (selected_course.length === 1) {
+    return selected_course[0];
+  }
+  return null;
+};
+
 export const extractCourseTime = (course: ClassInformation) => {
   var start = new Date("2024-10-01T" + course.course_start_time);
   var end = new Date("2024-10-01T" + course.course_end_time);
