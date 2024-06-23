@@ -37,14 +37,62 @@ export default function RosterDetails({ students, course }: Props) {
           <tbody>
             {students.map((student_info: RosterStudent) => (
               <tr>
-                <td>{student_info.last_name}</td>
-                <td>{student_info.first_name}</td>
-                <td>{student_info.chinese_name}</td>
-                <td>{student_info.gender}</td>
-                <td>{student_info.age}</td>
-                <td>{student_info.contact.parent}</td>
-                <td>{student_info.contact.email}</td>
-                <td>{student_info.contact.phone}</td>
+                <td
+                  className={
+                    student_info.on_waiting_list ? "bg-warning" : "bg-white"
+                  }
+                >
+                  {student_info.last_name}
+                </td>
+                <td
+                  className={
+                    student_info.on_waiting_list ? "bg-warning" : "bg-white"
+                  }
+                >
+                  {student_info.first_name}
+                </td>
+                <td
+                  className={
+                    student_info.on_waiting_list ? "bg-warning" : "bg-white"
+                  }
+                >
+                  {student_info.chinese_name}
+                </td>
+                <td
+                  className={
+                    student_info.on_waiting_list ? "bg-warning" : "bg-white"
+                  }
+                >
+                  {student_info.gender}
+                </td>
+                <td
+                  className={
+                    student_info.on_waiting_list ? "bg-warning" : "bg-white"
+                  }
+                >
+                  {student_info.age}
+                </td>
+                <td
+                  className={
+                    student_info.on_waiting_list ? "bg-warning" : "bg-white"
+                  }
+                >
+                  {student_info.contact.parent}
+                </td>
+                <td
+                  className={
+                    student_info.on_waiting_list ? "bg-warning" : "bg-white"
+                  }
+                >
+                  {student_info.contact.email}
+                </td>
+                <td
+                  className={
+                    student_info.on_waiting_list ? "bg-warning" : "bg-white"
+                  }
+                >
+                  {student_info.contact.phone}
+                </td>
               </tr>
             ))}
           </tbody>

@@ -240,13 +240,15 @@ class MemberViewSet(ModelViewSet):
             data = StudentSerializer(student).data
             data['age'] = StudentSerializer.calculateAge(student.date_of_birth)
             del data['date_of_birth']
-            # TODO: replace dob with age for privacy.
             p_user =  student.parent_id.user_id
             data['contact'] = JSONRenderer().render({
                 'parent': ' '.join([p_user.first_name, p_user.last_name]),
                 'email': p_user.email,
                 'phone': student.parent_id.phone_number
             })
+            # Retrive the registration status
+            reg = Registration.objects.get(course=course, student=student)
+            data['on_waiting_list'] = reg.on_waiting_list
             all_students.append(JSONRenderer().render(data))
         return all_students
 

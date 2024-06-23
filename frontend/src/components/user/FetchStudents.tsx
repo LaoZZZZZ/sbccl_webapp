@@ -28,6 +28,7 @@ export interface RosterStudent {
   chinese_name: string;
   age: number;
   contact: Contact;
+  on_waiting_list: boolean;
 }
 
 export const fetchStudents = async (user_info, callback) => {
