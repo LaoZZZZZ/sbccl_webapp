@@ -7,6 +7,21 @@ interface Props {
   course: ClassInformation;
 }
 
+const onWaitingList = [true, false];
+const legends = new Map([
+  [true, "OnWaitingList"],
+  [false, "Enrolled"],
+]);
+
+const colors = new Map([
+  [true, "bg-warning"],
+  [false, "bg-success"],
+]);
+
+const getBackgroundColor = (student: RosterStudent) => {
+  return colors.get(student.on_waiting_list);
+};
+
 export default function RosterDetails({ students, course }: Props) {
   const table_columns_names = [
     "Last Name",
@@ -19,23 +34,18 @@ export default function RosterDetails({ students, course }: Props) {
     "Phone",
   ];
 
-  const registrationStatus = new Map([
-    ["OnWaitingList", "bg-warning"],
-    ["Enrolled", "bg-white"],
-  ]);
-
   return (
     <div className="container text-center pb-2">
       <label>
         <strong>Roster</strong>
       </label>
-      {/* <div className="pb-2">
-        {registrationStatus.map((day_type) => (
-          <span className={"badge " + colors.get(day_type)}>
-            {legends.get(day_type)}
+      <div className="pb-2">
+        {onWaitingList.map((status: boolean) => (
+          <span className={"badge " + colors.get(status)}>
+            {legends.get(status)}
           </span>
         ))}
-      </div> */}
+      </div>
       <div className="table-responsive">
         <table className="table table-bordered table-hover table-striped">
           <caption>List of students</caption>
@@ -49,60 +59,28 @@ export default function RosterDetails({ students, course }: Props) {
           <tbody>
             {students.map((student_info: RosterStudent) => (
               <tr>
-                <td
-                  className={
-                    student_info.on_waiting_list ? "bg-warning" : "bg-white"
-                  }
-                >
+                <td className={getBackgroundColor(student_info)}>
                   {student_info.last_name}
                 </td>
-                <td
-                  className={
-                    student_info.on_waiting_list ? "bg-warning" : "bg-white"
-                  }
-                >
+                <td className={getBackgroundColor(student_info)}>
                   {student_info.first_name}
                 </td>
-                <td
-                  className={
-                    student_info.on_waiting_list ? "bg-warning" : "bg-white"
-                  }
-                >
+                <td className={getBackgroundColor(student_info)}>
                   {student_info.chinese_name}
                 </td>
-                <td
-                  className={
-                    student_info.on_waiting_list ? "bg-warning" : "bg-white"
-                  }
-                >
+                <td className={getBackgroundColor(student_info)}>
                   {student_info.gender}
                 </td>
-                <td
-                  className={
-                    student_info.on_waiting_list ? "bg-warning" : "bg-white"
-                  }
-                >
+                <td className={getBackgroundColor(student_info)}>
                   {student_info.age}
                 </td>
-                <td
-                  className={
-                    student_info.on_waiting_list ? "bg-warning" : "bg-white"
-                  }
-                >
+                <td className={getBackgroundColor(student_info)}>
                   {student_info.contact.parent}
                 </td>
-                <td
-                  className={
-                    student_info.on_waiting_list ? "bg-warning" : "bg-white"
-                  }
-                >
+                <td className={getBackgroundColor(student_info)}>
                   {student_info.contact.email}
                 </td>
-                <td
-                  className={
-                    student_info.on_waiting_list ? "bg-warning" : "bg-white"
-                  }
-                >
+                <td className={getBackgroundColor(student_info)}>
                   {student_info.contact.phone}
                 </td>
               </tr>
