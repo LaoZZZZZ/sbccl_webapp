@@ -20,10 +20,10 @@ export default function RosterDetails({ students, course }: Props) {
   ];
 
   return (
-    <div>
-      <div className="container text-center pb-2">
-        <h1>{getShownName(course)}</h1>
-      </div>
+    <div className="container text-center pb-2">
+      <label>
+        <strong>Roster</strong>
+      </label>
       <div className="table-responsive">
         <table className="table table-bordered table-hover table-striped">
           <caption>List of students</caption>
