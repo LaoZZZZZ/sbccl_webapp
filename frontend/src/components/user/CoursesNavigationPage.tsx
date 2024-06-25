@@ -9,6 +9,7 @@ import fetchCourses, {
 import { Auth } from "./UserInfo.tsx";
 import RosterDetails from "../common/RosterDetails.tsx";
 import { CourseInfo } from "../common/CourseInfo.tsx";
+import Volunteers from "../common/Volunteers.tsx";
 
 // #region component
 interface CoursesNavigationPageProps {
@@ -24,6 +25,12 @@ interface CourseList {
   fetched: boolean;
   courses: ClassInformation[];
 }
+
+const ActiveTab = {
+  ClassInformation: 0,
+  Roster: 1,
+  TeachingAssistant: 2,
+};
 /**
  *
  */
@@ -38,6 +45,7 @@ const CoursesNavigationPage = ({
     courses: [],
   });
 
+  const [activePage, setActivePage] = useState(ActiveTab.ClassInformation);
   const [roster, setRoster] = useState<Roster>({
     fetched: false,
     students: [],
@@ -104,6 +112,13 @@ const CoursesNavigationPage = ({
                 className="form-control"
                 id="selectCourse"
                 onChange={(e) => {
+                  if (e.target.value === "Not Selected") {
+                    setSelectedCourse({
+                      selected: false,
+                      course: {},
+                    });
+                    return;
+                  }
                   if (
                     selectedCourse.selected &&
                     selectedCourse.course.name === e.target.value
@@ -130,24 +145,66 @@ const CoursesNavigationPage = ({
               </select>
             </div>
           </div>
+          {selectedCourse.selected && (
+            <div className="btn-group pt-2">
+              <input
+                className={
+                  "btn btn-outline-primary mr-3" +
+                  (activePage === ActiveTab.ClassInformation ? " active" : "")
+                }
+                type="button"
+                value="Class Information"
+                onClick={() => {
+                  setActivePage(ActiveTab.ClassInformation);
+                }}
+              />
+              <input
+                className={
+                  "btn btn-outline-primary mr-3" +
+                  (activePage === ActiveTab.Roster ? " active" : "")
+                }
+                type="button"
+                value="Roster"
+                onClick={() => {
+                  setActivePage(ActiveTab.Roster);
+                }}
+              />
+              <input
+                className={
+                  "btn btn-outline-primary mr-3" +
+                  (activePage === ActiveTab.TeachingAssistant ? " active" : "")
+                }
+                type="button"
+                value="Teaching Assistants"
+                onClick={() => {
+                  setActivePage(ActiveTab.TeachingAssistant);
+                }}
+              />
+            </div>
+          )}
         </div>
       </form>
-      {roster.fetched && selectedCourse.selected && (
+      <hr className="pb-2" />
+
+      {/* {selectedCourse.selected && (
         <div className="pt-2">
           <div className="container text-center pb-2">
             <h1>{getShownName(selectedCourse.course)}</h1>
           </div>
           <hr className="pb-2" />
-
-          <CourseInfo classInfo={selectedCourse.course} />
-          <hr className="pb-2" />
-
-          <RosterDetails
-            students={roster.students}
-            course={selectedCourse.course}
-          />
         </div>
+      )} */}
+      {selectedCourse.selected && activePage === ActiveTab.ClassInformation && (
+        <CourseInfo classInfo={selectedCourse.course} />
       )}
+      {selectedCourse.selected && activePage === ActiveTab.Roster && (
+        <RosterDetails
+          students={roster.students}
+          course={selectedCourse.course}
+        />
+      )}
+      {selectedCourse.selected &&
+        activePage === ActiveTab.TeachingAssistant && <Volunteers />}
     </div>
   );
 };
