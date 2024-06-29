@@ -1703,6 +1703,85 @@ class MemberViewSetTest(APITestCase):
         self.assertTrue('age' in student)
 
 
+    def test_fetch_volunteers_per_class(self):
+         # Add class first
+        exist_user = self.create_user('test_name', 'david@gmail.com')
+        self.create_member(exist_user, sign_up_status='V',
+                           verification_code="12345-1231", member_type='B')
+        
+        course_json = {
+            'name': "B1A",
+            'course_description': 'Morning session for grade 1 class.',
+            'course_type': "L",
+            'course_status': 'A',
+            'size_limit': 20,
+            'cost': 500,
+            'classroom': 'N101',
+            'course_start_time': '10:00:00',
+            'course_end_time': '11:50:00'
+        }
+
+        self.client.force_authenticate(user=exist_user)
+        response = self.client.put('/rest_api/members/upsert-course/',
+                                   data=course_json, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        persisted_course = Course.objects.get(name="B1A")
+        
+        # Add a volunteer
+        volunteer = self.create_user('volunteer', 'volunteer@gmail.com')
+        self.create_member(volunteer, sign_up_status='V',
+                           verification_code="12345-1231", member_type='V')
+        user = User.objects.get(username='volunteer')
+        volunteer_member = Member.objects.get(user_id=user)
+        self.assertEqual(volunteer_member.sign_up_status, 'V')
+        self.assertEqual(volunteer_member.member_type, 'V')
+
+        v_assignment = InstructorAssignment()
+        v_assignment.course = persisted_course
+        v_assignment.instructor = volunteer_member
+        v_assignment.school_year_start = datetime.date(year=2023, month=9, day=1)
+        v_assignment.school_year_end = datetime.date(year=2024, month=6, day=23)
+        v_assignment.assigned_date = datetime.date.today()
+        v_assignment.last_update_date=datetime.date.today()
+        v_assignment.expiration_date = datetime.datetime.today() + datetime.timedelta(days=2)
+        v_assignment.last_update_person="Test"
+        v_assignment.save()
+
+        # Add a teacher
+        teacher_account = self.create_user('teacher', 'teacher@gmail.com')
+        self.create_member(teacher_account, sign_up_status='V',
+                           verification_code="12345-1231", member_type='T')
+        user = User.objects.get(username='teacher')
+        teacher_member = Member.objects.get(user_id=user)
+        self.assertEqual(teacher_member.sign_up_status, 'V')
+        self.assertEqual(teacher_member.member_type, 'T')
+
+        
+        instructor = InstructorAssignment()
+        instructor.course = persisted_course
+        instructor.instructor = teacher_member
+        instructor.school_year_start = datetime.date(year=2023, month=9, day=1)
+        instructor.school_year_end = datetime.date(year=2024, month=6, day=23)
+        instructor.assigned_date = datetime.date.today()
+        instructor.last_update_date=datetime.date.today()
+        instructor.expiration_date = datetime.datetime.today() + datetime.timedelta(days=2)
+        instructor.last_update_person="Test"
+        instructor.save()
+
+        # fetch volunteers for the course
+        self.client.force_authenticate(user=volunteer)
+        response = self.client.get(
+            '/rest_api/members/{course_id}/list-volunteers-per-class/'.format(course_id=persisted_course.id),
+            format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue('volunteers' in response.data)
+        self.assertEqual(len(response.data['volunteers']), 1)
+        fetched_volunteer = json.loads(response.data['volunteers'][0])
+        self.assertTrue('last_name' in fetched_volunteer)
+        self.assertTrue('first_name' in fetched_volunteer)
+        self.assertTrue('email' in fetched_volunteer)
+
+
     def test__get_coupon_details_succeed(self):
         code = 'early_bird'
         self.createCoupon(code, 'PA', expiration_date=datetime.date.today())

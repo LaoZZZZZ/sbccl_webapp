@@ -122,19 +122,19 @@ class MemberViewSet(ModelViewSet):
     def __generate_unsuccessful_response(self, error_msg, status):
         return Response({'detail': error_msg}, status=status)
 
-    def __generate_user_info__(self, user, member):
-        balance = self.__calculate_balance__(member)
-        return {
+    def __generate_user_info__(self, user, member, basic=False):
+        user_info = {
             'username': user.username,
             'email': user.email,
             'first_name': user.first_name,
             'last_name': user.last_name,
-            'phone_number': member.phone_number,
-            'member_type': member.getMemberType(),
-            'last_login': user.last_login.date() if user.last_login else '',
-            'date_joined': user.date_joined.date(),
-            'balance': '${amount}'.format(amount=self.__calculate_balance__(member))
+            'phone_number': member.phone_number
         }
+        if not basic:
+            user_info['last_login'] = user.last_login.date() if user.last_login else ''
+            user_info['date_joined'] = user.date_joined.date()
+            user_info['balance'] = '${amount}'.format(amount=self.__calculate_balance__(member))
+        return user_info
 
     def __get_teacher_infomation__(self, teacher_account):
         info = UserSerializer(teacher_account.user_id).data
@@ -251,6 +251,20 @@ class MemberViewSet(ModelViewSet):
             data['on_waiting_list'] = reg.on_waiting_list
             all_students.append(JSONRenderer().render(data))
         return all_students
+
+    def __get_volunteers_per_course__(self, course : Course):
+        """
+        Find all TAs for the course
+        """
+        all_tas = []
+        for ta in course.instructor.all():
+            # only care about the instructor with volunteer member type.
+            if ta.member_type == 'V':
+                all_tas.append(JSONRenderer().render(
+                    self.__generate_user_info__(user=ta.user_id, member=ta, basic=True)))
+        return all_tas
+
+
 
     def __fetch_coupon__(self, user, coupon_code, registration=None):
         """
@@ -722,6 +736,44 @@ class MemberViewSet(ModelViewSet):
                     "You don't have access to the roster of this class!", status.HTTP_403_FORBIDDEN)
             content = {
                 'students': self.__get_students_per_course__(persisted_class)
+            }
+            return Response(data=content, status=status.HTTP_200_OK)
+        except (User.DoesNotExist, Member.DoesNotExist) as e:
+            return self.__generate_unsuccessful_response(
+                'There is no user registered with - ' + request.user,
+                status.HTTP_404_NOT_FOUND)
+        except (Course.DoesNotExist) as e:
+            return self.__generate_unsuccessful_response(
+                'There is no such class with id = ' + pk,
+                status.HTTP_404_NOT_FOUND)
+
+    @action(methods=['GET'], detail=True, url_path='list-volunteers-per-class',
+            name='Get all volunteers for a class',
+            authentication_classes=[SessionAuthentication, BasicAuthentication],
+            permission_classes=[permissions.IsAuthenticated])
+    def list_volunteers(self, request, pk=None):
+        """
+          Fetch all volunteers for this class. Mostly teaching assistant.
+        """
+        try:
+            user = User.objects.get(username=request.user)
+            matched_member = models.Member.objects.get(user_id=user)
+            if matched_member.member_type == 'P':
+                return self.__generate_unsuccessful_response(
+                    "Parent account has no access to volunteers in a class!", status.HTTP_403_FORBIDDEN)
+            persisted_class = Course.objects.get(id=pk)
+            # Teacher can only see the volunteers of their own classes
+            if matched_member.member_type == 'T':
+                found = False
+                for instructor in persisted_class.instructor.all():
+                    if instructor.user_id == user:
+                        found = True
+                        break
+                if not found:
+                    return self.__generate_unsuccessful_response(
+                        "You don't have no access to volunteers in a class!", status.HTTP_403_FORBIDDEN)
+            content = {
+                'volunteers': self.__get_volunteers_per_course__(persisted_class)
             }
             return Response(data=content, status=status.HTTP_200_OK)
         except (User.DoesNotExist, Member.DoesNotExist) as e:
