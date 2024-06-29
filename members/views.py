@@ -131,11 +131,12 @@ class MemberViewSet(ModelViewSet):
             'phone_number': member.phone_number
         }
         if not basic:
-            user_info['member_type']: member.getMemberType()
+            user_info['member_type'] = member.getMemberType()
             if user.last_login:
                 user_info['last_login'] = user.last_login.date()
             user_info['date_joined'] = user.date_joined.date()
             user_info['balance'] = '${amount}'.format(amount=self.__calculate_balance__(member))
+        print(user_info)
         return user_info
 
     def __get_teacher_infomation__(self, teacher_account):
