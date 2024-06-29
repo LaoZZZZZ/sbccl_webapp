@@ -1,5 +1,12 @@
 import axios from "axios";
 
+export interface UserDetails {
+  last_name: string;
+  first_name: string;
+  user_name: string;
+  email: string;
+}
+
 const fetchAccountDetails = async (auth, callback) => {
   await axios
     .get(
