@@ -19,7 +19,6 @@ interface CoursesNavigationPageProps {
 interface Roster {
   fetched: boolean;
   students: RosterStudent[];
-  tas: [];
 }
 
 interface CourseList {
@@ -50,7 +49,6 @@ const CoursesNavigationPage = ({
   const [roster, setRoster] = useState<Roster>({
     fetched: false,
     students: [],
-    tas: [],
   });
 
   const [selectedCourse, setSelectedCourse] = useState({
