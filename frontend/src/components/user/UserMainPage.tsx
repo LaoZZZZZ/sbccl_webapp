@@ -3,12 +3,12 @@ import AccountDetail from "./AccountDetailPage.tsx";
 import Logout from "./Logout.tsx";
 import Registrations from "./RegistrationsPage.tsx";
 import StudentsPage from "./StudentsPage.tsx";
-import UserInfo from "./UserInfo.tsx";
+import { AccountInfo } from "./UserInfo.tsx";
 import CalendarDetailPage from "./CalendarDetailPage.tsx";
 import CoursesNavigationPage from "./CoursesNavigationPage.tsx";
 
 interface Props {
-  userInfo: UserInfo;
+  userInfo: AccountInfo;
   logOutCallback: () => {};
 }
 

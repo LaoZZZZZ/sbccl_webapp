@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 
+import { AccountInfo, UserDetails } from "./UserInfo.tsx";
 import fetchAccountDetails from "./FetchAccountDetails.tsx";
 interface Props {
-  userInfo: {};
+  userInfo: AccountInfo;
 }
 
 interface UserState {
   fetched: boolean;
-  value: {};
+  value: UserDetails;
 }
 
 const AccountDetail = ({ userInfo }: Props) => {

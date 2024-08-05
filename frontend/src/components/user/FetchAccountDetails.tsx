@@ -5,6 +5,10 @@ export interface UserDetails {
   first_name: string;
   user_name: string;
   email: string;
+  phone_number: string;
+  member_type: string;
+  date_joined: string;
+  last_login: string;
 }
 
 const fetchAccountDetails = async (auth, callback) => {
