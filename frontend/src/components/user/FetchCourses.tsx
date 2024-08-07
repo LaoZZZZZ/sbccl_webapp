@@ -29,6 +29,7 @@ export const findSelectedCourse = (courses, courseName) => {
 };
 
 export const extractCourseTime = (course: ClassInformation) => {
+  // A random date to form a valid Date instance.
   var start = new Date("2024-10-01T" + course.course_start_time);
   var end = new Date("2024-10-01T" + course.course_end_time);
   return (
