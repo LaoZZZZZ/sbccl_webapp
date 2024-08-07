@@ -1834,8 +1834,8 @@ class MemberViewSetTest(APITestCase):
         day.event = "School start"
         day.date = datetime.date.today()
         day.day_type = 'SD'
-        day.school_year_end = day.date.year
-        day.school_year_start = day.date.year - 1
+        day.school_year_end = day.date.year + 1
+        day.school_year_start = day.date.year
         day.creation_date = datetime.date.today()
         day.last_update_date = datetime.datetime.today()
         day.last_update_person = 'test'
