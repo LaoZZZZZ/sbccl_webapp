@@ -136,7 +136,6 @@ class MemberViewSet(ModelViewSet):
                 user_info['last_login'] = user.last_login.date()
             user_info['date_joined'] = user.date_joined.date()
             user_info['balance'] = '${amount}'.format(amount=self.__calculate_balance__(member))
-        print(user_info)
         return user_info
 
     def __get_teacher_infomation__(self, teacher_account):

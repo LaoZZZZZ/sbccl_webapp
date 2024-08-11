@@ -67,6 +67,10 @@ class Member(models.Model):
     ]
     member_type = models.CharField(max_length=1, choices=MEMBER_TYPE, null=True)
 
+    # The lastest date that the user signed the CCL terms. This is required for
+    # annual registration.
+    term_signed_date = models.DateField(null=True)
+
     def __str__(self):
         return 'User Id: {user_id}\n Member type: {member_type}'.format(
             user_id=self.user_id, member_type=self.member_type)
@@ -85,7 +89,6 @@ class Member(models.Model):
 
 # A user might have multiple students. User must add each student
 # explicit to their user profile.
-
 class Student(models.Model):
     parent_id = models.ForeignKey('members.Member', on_delete=models.CASCADE)
     first_name = models.CharField(max_length=255)
