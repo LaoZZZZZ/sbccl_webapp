@@ -37,7 +37,7 @@ class UserSerializer(serializers.ModelSerializer):
 class MemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = Member
-        fields = ('user_id', 'phone_number', 'sign_up_status', 'member_type')
+        fields = ('user_id', 'phone_number', 'sign_up_status', 'member_type', 'term_signed_date')
 
 class StudentSerializer(serializers.ModelSerializer):
     class Meta:

@@ -3,7 +3,7 @@ from .models import CouponUsageRecord, Member, Registration, Student, Course, Pa
 from django.contrib.auth.models import User
 
 class MemberAdmin(admin.ModelAdmin):
-    list_display = ('user_id', 'phone_number',  'member_type', 'sign_up_status')
+    list_display = ('user_id', 'phone_number',  'member_type', 'sign_up_status', 'term_signed_date')
     search_fields = ['user_id__email', 'user_id__first_name', 'user_id__last_name',
                      'phone_number', 'member_type', 'sign_up_status']
 
