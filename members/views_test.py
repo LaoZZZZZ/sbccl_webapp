@@ -24,7 +24,8 @@ class MemberViewSetTest(APITestCase):
             member_type=member_type,
             sign_up_status=sign_up_status,
             phone_number=123451335,
-            verification_code=verification_code
+            verification_code=verification_code,
+            term_signed_date=datetime.date.today()
         )
         member.save()
         return member
@@ -1863,4 +1864,15 @@ class MemberViewSetTest(APITestCase):
         self.assertEqual(fetched_dates['school_year_start'], day.school_year_start)
         self.assertEqual(fetched_dates['school_year_end'], day.school_year_end)
 
+    def test_sign_temrs(self):
+        exist_user = self.create_user('test_name', 'david@gmail.com')
+        self.create_member(exist_user)
+        self.client.force_authenticate(user=exist_user)
         
+        response = self.client.put('/rest_api/members/sign-terms/',format='json')
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+
+        response = self.client.get('/rest_api/members/account-details/',format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue('account_details' in response.data)
+        self.assertTrue('term_signed_date' in response.data['account_details'])
