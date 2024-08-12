@@ -122,7 +122,7 @@ class MemberViewSet(ModelViewSet):
     def __generate_unsuccessful_response(self, error_msg, status):
         return Response({'detail': error_msg}, status=status)
 
-    def __generate_user_info__(self, user, member, basic=False):
+    def __generate_user_info__(self, user, member : Member, basic=False):
         user_info = {
             'username': user.username,
             'email': user.email,
@@ -136,6 +136,8 @@ class MemberViewSet(ModelViewSet):
                 user_info['last_login'] = user.last_login.date()
             user_info['date_joined'] = user.date_joined.date()
             user_info['balance'] = '${amount}'.format(amount=self.__calculate_balance__(member))
+            if member.term_signed_date:
+                user_info['term_signed_date'] = member.term_signed_date
         return user_info
 
     def __get_teacher_infomation__(self, teacher_account):
@@ -485,6 +487,20 @@ class MemberViewSet(ModelViewSet):
                 'account_details': self.__generate_user_info__(user, matched_member)
             }
             return Response(content, status=status.HTTP_200_OK)
+        except (User.DoesNotExist, models.Member.DoesNotExist) as e:
+            return self.__generate_unsuccessful_response("No user is found", status.HTTP_404_NOT_FOUND)
+    
+    @action(methods=['PUT'], detail=False, url_path='sign-terms', name='Sign CCL agreements',
+            authentication_classes=[SessionAuthentication, BasicAuthentication],
+            permission_classes=[permissions.IsAuthenticated])
+    def sign_terms(self, request):
+        try:
+            matched_member = models.Member.objects.get(user_id=request.user)
+            matched_member.term_signed_date = datetime.date.today()
+            if matched_member.sign_up_status == 'S':
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
+            matched_member.save()
+            return Response(status=status.HTTP_202_ACCEPTED)
         except (User.DoesNotExist, models.Member.DoesNotExist) as e:
             return self.__generate_unsuccessful_response("No user is found", status.HTTP_404_NOT_FOUND)
 
