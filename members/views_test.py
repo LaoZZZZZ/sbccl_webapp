@@ -951,7 +951,7 @@ class MemberViewSetTest(APITestCase):
                             data=payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
     
-    def test_add_registe_nonexisting_student_fail(self):
+    def test_register_nonexisting_student_fail(self):
         board_user = self.create_user('test_name', 'david@gmail.com')
         self.create_member(board_user, sign_up_status='V',
                            verification_code="12345-1231", member_type='B')
