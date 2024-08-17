@@ -18,14 +18,14 @@ class CouponUtils(object):
     def IsValid(coupon : Coupon):
         return coupon.expiration_date >= datetime.date.today()
 
-    def applyCoupons(original_amount : float, coupons : list[Coupon]):
+    def applyCoupons(original_amount : float, coupons : list[(Coupon, datetime.date)]):
         """
           calculate the actual amount based on the coupons.
           Amount type of coupon will be applied first. 
         """
         amount : float = original_amount
-        for c in coupons:
-            if not CouponUtils.IsValid(c):
+        for (c, used_date) in coupons:
+            if c.expiration_date < used_date:
                 continue
             if c.type == 'A':
                 amount -= c.dollar_amount
