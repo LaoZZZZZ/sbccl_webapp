@@ -453,6 +453,9 @@ class MemberViewSet(ModelViewSet):
                 'user': self.__generate_user_info__(user, matched_member),
                 'auth': str(request.auth)
             }
+            if request.session.test_cookie_worked():
+                request.session.delete_test_cookie()
+            request.session.set_test_cookie()
             return Response(content, status=status.HTTP_202_ACCEPTED)
         except User.DoesNotExist: 
             return self.__generate_unsuccessful_response(
