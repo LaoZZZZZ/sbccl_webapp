@@ -13,8 +13,9 @@ class CouponUtilsTest(unittest.TestCase):
         self.assertFalse(CouponUtils.IsValid(coupon))
 
     def test_applyCoupons(self):
+        apply_date = datetime.date.today()
         coupon = Coupon(type='A', dollar_amount=50, code='early_bird')
-        coupon.expiration_date = datetime.date.today()
+        coupon.expiration_date = apply_date
 
         # Both percentage and expired coupon are skipped for the calculation.
         percentage_coupon = Coupon(type='P', percentage=50, code='early_bird')
@@ -24,13 +25,24 @@ class CouponUtilsTest(unittest.TestCase):
         expired_coupon.expiration_date = datetime.date.today() - datetime.timedelta(days=1)
 
         original_amount = 100
-        self.assertEqual(CouponUtils.applyCoupons(original_amount, [coupon, expired_coupon, percentage_coupon]),
-                        100 - 50)
+        self.assertEqual(
+            CouponUtils.applyCoupons(
+                original_amount,
+                [(coupon, apply_date), (expired_coupon, apply_date), (percentage_coupon, apply_date)]),
+                100 - 50)
         
+        # The coupon is expired based on the current time. But the coupon application happen before
+        # its expiration, hence the application should still go through.
+        print(expired_coupon, expired_coupon.expiration_date - datetime.timedelta(days=1))
+        self.assertEqual(
+            CouponUtils.applyCoupons(
+                original_amount,
+                [(expired_coupon, expired_coupon.expiration_date - datetime.timedelta(days=1))]),
+                100 - 50)
         # make sure negative balance is not generated.
         original_amount = 0
-        self.assertEqual(CouponUtils.applyCoupons(original_amount, [coupon, expired_coupon, percentage_coupon]),
-                         0)
+        self.assertEqual(
+            CouponUtils.applyCoupons(original_amount, [(coupon, apply_date)]), 0)
         
     def test_canBeUsed(self):
         coupon = Coupon(type='A', dollar_amount=50, code='early_bird', application_rule='PA')

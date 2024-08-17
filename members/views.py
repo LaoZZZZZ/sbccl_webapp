@@ -147,6 +147,8 @@ class MemberViewSet(ModelViewSet):
 
     def __generate_registration_info__(self, registration : Registration):
         payment = Payment.objects.filter(registration_code=registration)
+        # Payment entry is generated upon registration. If there is no payment record,
+        # it means the registration is free.
         if len(payment) == 1:
             payment_data = PaymentSerializer(payment[0]).data
         else:
@@ -172,8 +174,9 @@ class MemberViewSet(ModelViewSet):
             })
 
     def __calculate_registration_due__(self, registration : Registration):
+        coupon_usages = CouponUsageRecord.objects.filter(registration=registration)
         return CouponUtils.applyCoupons(registration.course.cost  + (registration.course.book_cost if registration.textbook_ordered else 0),
-                                        registration.coupons.all())
+                                        [(u.coupon, u.used_date) for u in coupon_usages])
 
     def __calculate_balance__(self, member):
         students = Student.objects.filter(parent_id=member)
@@ -942,6 +945,7 @@ class MemberViewSet(ModelViewSet):
                 if len(request.data['coupons']) > 1:
                     return self.__generate_unsuccessful_response(
                         "Only one coupon can be accepted at a time!", status.HTTP_400_BAD_REQUEST)
+                # A new coupon is applied in this request, record the coupon usage
                 if not isinstance(request.data['coupons'][0], int):
                     coupon = self.__fetch_coupon__(request.user, request.data['coupons'][0], matched_registration)
                     self.__record_coupon_usage__(coupon, matched_registration, member)
