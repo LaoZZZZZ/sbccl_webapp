@@ -1059,7 +1059,6 @@ class MemberViewSet(ModelViewSet):
             for c in courses:
                 # should only show course that is taught by the teacher
                 if matched_member.member_type == 'T' and not self.__course_taught_by_teacher__(matched_member, c):
-                    print(c)
                     continue
                 course_data = CourseSerializer(c).data
                 course_data['enrollment'] = c.students.count()
