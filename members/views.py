@@ -1058,6 +1058,7 @@ class MemberViewSet(ModelViewSet):
             # extract enrollment
             for c in courses:
                 # should only show course that is taught by the teacher
+                # TODO(lu): For eacher, they should only be able to see roster and teacher information for active course.
                 if matched_member.member_type == 'T' and not self.__course_taught_by_teacher__(matched_member, c):
                     continue
                 course_data = CourseSerializer(c).data
@@ -1068,7 +1069,6 @@ class MemberViewSet(ModelViewSet):
                     for teacher in instructors.all():
                         teachers.append(teacher.user_id.last_name + ' ' + teacher.user_id.first_name)
                     course_data['teacher'] = ','.join(teachers)
-                print(course_data)
                 courses_json.append(JSONRenderer().render(course_data))
             content = {
                 'courses': courses_json
