@@ -462,6 +462,9 @@ class MemberViewSet(ModelViewSet):
             return self.__generate_unsuccessful_response(
                 '{username} does not exist'.format(username=request.user.username),
                 status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return self.__generate_unsuccessful_response('Encountered unexpected login error',
+                                                         status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
     @action(methods=['PUT'], detail=True, url_path='logout', name='log out user',
