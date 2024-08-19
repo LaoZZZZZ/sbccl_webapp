@@ -82,7 +82,7 @@ class MemberViewSet(ModelViewSet):
     def __course_taught_by_teacher__(self, teacher: Member, course: Course):
         found = False
         for teacher in course.instructor.all():
-            found = teacher.user_id == teacher.user_id.id
+            found = (teacher.user_id == teacher.user_id)
             if found:
                 break
         return found
@@ -1053,8 +1053,6 @@ class MemberViewSet(ModelViewSet):
         try:
             user = User.objects.get(username=request.user.username)
             matched_member = Member.objects.get(user_id=user)
-            [start, end] = self.__find_current_school_year()
-
             # only board member can see all course.
             if matched_member.member_type != 'B':
                 courses = Course.objects.filter(course_status='A')
@@ -1064,6 +1062,7 @@ class MemberViewSet(ModelViewSet):
             # extract enrollment
             for c in courses:
                 # should only show course that is taught by the teacher
+                # TODO(lu): For eacher, they should only be able to see roster and teacher information for active course.
                 if matched_member.member_type == 'T' and not self.__course_taught_by_teacher__(matched_member, c):
                     continue
                 course_data = CourseSerializer(c).data
