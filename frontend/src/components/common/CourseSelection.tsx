@@ -18,6 +18,7 @@ interface Props {
   setCourseSelection: (course: ClassInformation) => {};
   populateCouponCode: (code: string) => {};
   setOrderBook: (orderBook: boolean) => {};
+  disableCourseDropDown?: boolean;
 }
 
 const CourseSelection = ({
@@ -29,6 +30,7 @@ const CourseSelection = ({
   setCourseSelection,
   populateCouponCode,
   setOrderBook,
+  disableCourseDropDown,
 }: Props) => {
   const [wantTextBook, setWantTextBook] = useState(textbookOrdered);
   const selectedCourse = findSelectedCourse(courses, defaultCourseSelection);
@@ -84,6 +86,7 @@ const CourseSelection = ({
         <select
           className="form-control"
           id="selectCourse"
+          disabled={disableCourseDropDown}
           onChange={(e) => {
             setSelected(false);
             setClassInfo({
