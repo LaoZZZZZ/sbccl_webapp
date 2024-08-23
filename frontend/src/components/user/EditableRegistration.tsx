@@ -256,7 +256,7 @@ const EditableRegistration = ({
             <input
               className="btn btn-warning mr-3"
               type="button"
-              value="Delete"
+              value="Withdraw"
               onClick={() => {
                 setRemoveRegistration(true);
               }}
