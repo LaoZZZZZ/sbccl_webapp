@@ -9,6 +9,18 @@ import {
   findSelectedCourse,
 } from "../user/FetchCourses.tsx";
 import { CourseInfo } from "./CourseInfo.tsx";
+
+// Checks if a full course should show on the dropdown.
+const shouldShowFullCcourse = (course: ClassInformation) => {
+  if (process.env.REACT_APP_COURSE_EXCHANGE_CUTOFF_DATE == null) {
+    return true;
+  }
+  return (
+    new Date(process.env.REACT_APP_COURSE_EXCHANGE_CUTOFF_DATE) >= new Date() ||
+    course.enrollment < course.size_limit
+  );
+};
+
 interface Props {
   user_auth: {};
   courses: ClassInformation[];
@@ -36,6 +48,7 @@ const CourseSelection = ({
   const selectedCourse = findSelectedCourse(courses, defaultCourseSelection);
   const [selected, setSelected] = useState(selectedCourse !== null);
 
+  // Hold the information of selected class. Initial values are set to null/0 if there is solection
   const [classInfo, setClassInfo] = useState<ClassInformation>({
     enrollment: selectedCourse !== null ? selectedCourse.enrollment : 0,
     size_limit: selectedCourse !== null ? selectedCourse.size_limit : 0,
@@ -133,7 +146,10 @@ const CourseSelection = ({
           <option>{defaultCourseSelection}</option>
           {courses
             .filter((course) => {
-              return course.name !== defaultCourseSelection;
+              return (
+                course.name !== defaultCourseSelection &&
+                shouldShowFullCcourse(course)
+              );
             })
             .map((course) => {
               return <option>{getShownName(course)}</option>;
