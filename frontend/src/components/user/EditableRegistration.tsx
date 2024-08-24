@@ -195,8 +195,6 @@ const EditableRegistration = ({
               }}
               textbookOrdered={registration["textbook_ordered"]}
               existingCoupon={coupons}
-              // TODO(lu): Set a date
-              disableCourseDropDown={true}
             />
           </div>
           <div className="form-group pb-2 mb-2">
