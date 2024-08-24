@@ -14,8 +14,8 @@ const legends = new Map([
 ]);
 
 const colors = new Map([
-  [true, "bg-warning"],
-  [false, "bg-success"],
+  [true, "text-warning"],
+  [false, "text-success"],
 ]);
 
 const getBackgroundColor = (student: RosterStudent) => {
