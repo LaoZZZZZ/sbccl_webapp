@@ -6,6 +6,30 @@ import StudentsPage from "./StudentsPage.tsx";
 import { AccountInfo } from "./UserInfo.tsx";
 import CalendarDetailPage from "./CalendarDetailPage.tsx";
 import CoursesNavigationPage from "./CoursesNavigationPage.tsx";
+import Terms from "../common/Terms.tsx";
+
+// Parent needs to sign the terms every year before Aug 24th.
+const needToSignTerms = (userInfo: AccountInfo) => {
+  // Board member does not need to sign the form.
+  if (userInfo.user.member_type === "B") {
+    return false;
+  }
+  if (userInfo.user.term_signed_date == null) {
+    return true;
+  }
+
+  const previousSignDate = new Date(userInfo.user.term_signed_date);
+  let nextSignYear = new Date("Aug 24th, 2024 23:59:59");
+  nextSignYear.setFullYear(new Date().getFullYear());
+  if (process.env.REACT_APP_COURSE_EXCHANGE_CUTOFF_DATE !== null) {
+    nextSignYear = new Date(process.env.REACT_APP_COURSE_EXCHANGE_CUTOFF_DATE);
+  }
+  return (
+    Math.round(
+      (nextSignYear.getTime() - previousSignDate.getTime()) / (1000 * 3600 * 24)
+    ) >= 365
+  );
+};
 
 interface Props {
   userInfo: AccountInfo;
@@ -18,10 +42,18 @@ const Page = {
   Registration: 2,
   Calendar: 3,
   Rosters: 4,
+  // If the user has not signed the terms for this year, direct the user to the term
+  // sign page.
+  Terms: 5,
 };
 
 const SwitchPage = (state, action) => {
   switch (action.type) {
+    case "go_to_terms":
+      return {
+        ...state,
+        page: Page.Terms,
+      };
     case "go_to_students":
       return {
         ...state,
@@ -58,7 +90,7 @@ const SwitchPage = (state, action) => {
 const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
   const INITIAL_PAGE = {
     /* Default on account detail page*/
-    page: Page.AccountDetail,
+    page: needToSignTerms(userInfo) ? Page.Terms : Page.AccountDetail,
   };
   const [state, transitionPageState] = useReducer(SwitchPage, INITIAL_PAGE);
   return (
@@ -85,7 +117,11 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
                 <button
                   className="btn btn-borderless"
                   onClick={() => {
-                    transitionPageState({ type: "go_to_account" });
+                    if (needToSignTerms(userInfo)) {
+                      transitionPageState({ type: "go_to_terms" });
+                    } else {
+                      transitionPageState({ type: "go_to_account" });
+                    }
                   }}
                   id="accountPage"
                 >
@@ -97,7 +133,11 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
                   <button
                     className="btn btn-borderless"
                     onClick={() => {
-                      transitionPageState({ type: "go_to_students" });
+                      if (needToSignTerms(userInfo)) {
+                        transitionPageState({ type: "go_to_terms" });
+                      } else {
+                        transitionPageState({ type: "go_to_students" });
+                      }
                     }}
                     id="student"
                   >
@@ -110,7 +150,11 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
                   <button
                     className="btn btn-borderless"
                     onClick={() => {
-                      transitionPageState({ type: "go_to_registration" });
+                      if (needToSignTerms(userInfo)) {
+                        transitionPageState({ type: "go_to_terms" });
+                      } else {
+                        transitionPageState({ type: "go_to_registration" });
+                      }
                     }}
                     id="registration"
                   >
@@ -122,7 +166,11 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
                 <button
                   className="btn btn-borderless"
                   onClick={() => {
-                    transitionPageState({ type: "go_to_calendar" });
+                    if (needToSignTerms(userInfo)) {
+                      transitionPageState({ type: "go_to_terms" });
+                    } else {
+                      transitionPageState({ type: "go_to_calendar" });
+                    }
                   }}
                   id="calendar"
                 >
@@ -180,6 +228,22 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
       {state?.page === Page.Rosters && (
         <div className="pt-3 w-75 mx-auto">
           <CoursesNavigationPage userAuth={userInfo.auth} />
+        </div>
+      )}
+      {state?.page === Page.Terms && (
+        <div className="pt-3 w-75 mx-auto">
+          <Terms
+            userInfo={userInfo}
+            callback={() => {
+              // Term is signed successfully.
+              userInfo.user.term_signed_date = new Date();
+              transitionPageState({ type: "go_to_account" });
+            }}
+            // Logout the user if
+            failureCallback={function () {
+              Logout(userInfo, logOutCallback);
+            }}
+          />
         </div>
       )}
     </div>

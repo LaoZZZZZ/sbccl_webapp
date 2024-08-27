@@ -12,6 +12,7 @@ export interface UserDetails {
   phone_number: string;
   last_login: Date;
   date_joined: Date;
+  term_signed_date: Date;
 }
 
 export interface AccountInfo {
