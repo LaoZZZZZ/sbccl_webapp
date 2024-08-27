@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import RemoveStudents from "./RemoveStudentsPage.tsx";
 import AddStudents from "./AddStudentsPage.tsx";
 import { fetchStudents } from "./FetchStudents.tsx";
-import UserInfo from "./UserInfo.tsx";
+import { AccountInfo } from "./UserInfo.tsx";
 
 interface Props {
-  userInfo: UserInfo;
+  userInfo: AccountInfo;
 }
 
 const Page = {
