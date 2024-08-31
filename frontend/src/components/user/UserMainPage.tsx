@@ -273,11 +273,6 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
           <NoficiationPage userInfo={userInfo} />
         </div>
       )}
-      {/* {state?.page === Page.Notification && (
-        <div className="pt-3 w-75 mx-auto">
-          <EmailPage />
-        </div>
-      )} */}
     </div>
   );
 };
