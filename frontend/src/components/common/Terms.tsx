@@ -17,7 +17,7 @@ export default function Terms({ userInfo, callback, failureCallback }: Props) {
         (CCL)
       </h2>
       <form className="form-label form-control">
-        <div className="mx-auto">
+        <div data-bs-spy="scroll" className="mx-auto">
           <ol className="list-group list-group-numbered ">
             <li className="list-group-item fs-4">
               Responsiblity

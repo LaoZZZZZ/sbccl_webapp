@@ -7,7 +7,8 @@ import { AccountInfo } from "./UserInfo.tsx";
 import CalendarDetailPage from "./CalendarDetailPage.tsx";
 import CoursesNavigationPage from "./CoursesNavigationPage.tsx";
 import Terms from "../common/Terms.tsx";
-
+import NoficiationPage from "../common/NoficiationPage.tsx";
+import EmailPage from "../common/EmailPage.tsx";
 // Parent needs to sign the terms every year before Aug 24th.
 const needToSignTerms = (userInfo: AccountInfo) => {
   // Board member does not need to sign the form.
@@ -45,6 +46,7 @@ const Page = {
   // If the user has not signed the terms for this year, direct the user to the term
   // sign page.
   Terms: 5,
+  Notification: 6,
 };
 
 const SwitchPage = (state, action) => {
@@ -78,6 +80,11 @@ const SwitchPage = (state, action) => {
       return {
         ...state,
         page: Page.Rosters,
+      };
+    case "go_to_notification":
+      return {
+        ...state,
+        page: Page.Notification,
       };
   }
 };
@@ -192,6 +199,21 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
               )}
               <li className="nav-item">
                 <button
+                  className="btn btn-borderless"
+                  onClick={() => {
+                    if (needToSignTerms(userInfo)) {
+                      transitionPageState({ type: "go_to_terms" });
+                    } else {
+                      transitionPageState({ type: "go_to_notification" });
+                    }
+                  }}
+                  id="Notification"
+                >
+                  Notification
+                </button>
+              </li>
+              <li className="nav-item">
+                <button
                   className="btn btn-borderless fixed-right"
                   onClick={() => {
                     Logout(userInfo, logOutCallback);
@@ -246,6 +268,16 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
           />
         </div>
       )}
+      {state?.page === Page.Notification && (
+        <div className="pt-3 w-75 mx-auto">
+          <NoficiationPage userInfo={userInfo} />
+        </div>
+      )}
+      {/* {state?.page === Page.Notification && (
+        <div className="pt-3 w-75 mx-auto">
+          <EmailPage />
+        </div>
+      )} */}
     </div>
   );
 };
