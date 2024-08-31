@@ -197,21 +197,24 @@ const UserMainPage = ({ userInfo, logOutCallback }: Props) => {
                   </button>
                 </li>
               )}
-              <li className="nav-item">
-                <button
-                  className="btn btn-borderless"
-                  onClick={() => {
-                    if (needToSignTerms(userInfo)) {
-                      transitionPageState({ type: "go_to_terms" });
-                    } else {
-                      transitionPageState({ type: "go_to_notification" });
-                    }
-                  }}
-                  id="Notification"
-                >
-                  Notification
-                </button>
-              </li>
+              {(userInfo.user.member_type === "Board Member" ||
+                userInfo.user.member_type === "Teacher") && (
+                <li className="nav-item">
+                  <button
+                    className="btn btn-borderless"
+                    onClick={() => {
+                      if (needToSignTerms(userInfo)) {
+                        transitionPageState({ type: "go_to_terms" });
+                      } else {
+                        transitionPageState({ type: "go_to_notification" });
+                      }
+                    }}
+                    id="Notification"
+                  >
+                    Notification
+                  </button>
+                </li>
+              )}
               <li className="nav-item">
                 <button
                   className="btn btn-borderless fixed-right"
