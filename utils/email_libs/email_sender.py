@@ -18,6 +18,8 @@ class EmailSender(object):
             server.login(self.sender_email, self.password)
             server.sendmail(self.sender_email, dest_email, message)
 
+    def SendGroupEmails(self, dest_emails, subject, body, cced, bcced):
+        pass
 
 if __name__ == '__main__':
     message = "Subject: Hi there This message is sent from sbccl."

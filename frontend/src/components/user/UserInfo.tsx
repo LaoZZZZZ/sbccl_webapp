@@ -8,6 +8,11 @@ export interface UserDetails {
   email: string;
   last_name: string;
   first_name: string;
+  // possible value
+  // 1. Parent
+  // 2. Board Member
+  // 3. Teacher
+  // 4. Volunteer
   member_type: string;
   phone_number: string;
   last_login: Date;

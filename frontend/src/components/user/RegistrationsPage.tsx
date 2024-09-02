@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import AddRegistration from "./AddRegistration.tsx";
 import { fetchStudents } from "./FetchStudents.tsx";
-import fetchCourses from "./FetchCourses.tsx";
-import UserInfo from "./UserInfo.tsx";
+import { fetchCourses } from "./FetchCourses.tsx";
+import { UserInfo } from "./UserInfo.tsx";
 import fetchRegistrations, {
   RegistrationBundle,
 } from "../common/FetchRegistrations.tsx";

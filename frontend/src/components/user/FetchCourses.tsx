@@ -16,6 +16,10 @@ export interface ClassInformation {
   id: number;
 }
 
+export interface CourseList {
+  fetched: boolean;
+  courses: ClassInformation[];
+}
 // Find course in courses that is suffix of the course name shown on the screen.
 // @courseName: It's the name shown on the screen, and might be different from the actual name
 export const findSelectedCourse = (courses, courseName) => {
@@ -57,7 +61,7 @@ export const getShownName = (course: ClassInformation) => {
   }
 };
 
-const fetchCourses = async (auth: Auth, callback) => {
+export const fetchCourses = async (auth: Auth, callback) => {
   const response = await axios.get(
     process.env.REACT_APP_BE_URL_PREFIX + "/rest_api/members/list-courses",
     {
@@ -93,5 +97,3 @@ const fetchCourses = async (auth: Auth, callback) => {
 
   callback({ fetched: true, value: [] });
 };
-
-export default fetchCourses;

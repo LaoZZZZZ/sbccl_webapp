@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from "react";
 
 import { RosterStudent, FetchCourseRoster } from "./FetchStudents.tsx";
-import fetchCourses, {
-  ClassInformation,
-  findSelectedCourse,
-  getShownName,
-} from "./FetchCourses.tsx";
+import { fetchCourses, CourseList } from "./FetchCourses.tsx";
 import { Auth } from "./UserInfo.tsx";
 import RosterDetails from "../common/RosterDetails.tsx";
 import { CourseInfo } from "../common/CourseInfo.tsx";
 import Volunteers from "../common/Volunteers.tsx";
+import CourseDropList from "../common/CourseDropList.tsx";
 
 // #region component
 interface CoursesNavigationPageProps {
@@ -19,11 +16,6 @@ interface CoursesNavigationPageProps {
 interface Roster {
   fetched: boolean;
   students: RosterStudent[];
-}
-
-interface CourseList {
-  fetched: boolean;
-  courses: ClassInformation[];
 }
 
 const ActiveTab = {
@@ -104,46 +96,23 @@ const CoursesNavigationPage = ({
             </select>
           </div>
           <div className="col">
-            <div>
-              <label>
-                <strong>Select course</strong>
-              </label>
-              <select
-                className="form-control"
-                id="selectCourse"
-                onChange={(e) => {
-                  if (e.target.value === "Not Selected") {
-                    setSelectedCourse({
-                      selected: false,
-                      course: {},
-                    });
-                    return;
-                  }
-                  if (
-                    selectedCourse.selected &&
-                    selectedCourse.course.name === e.target.value
-                  ) {
-                    return;
-                  }
-                  const new_selected = findSelectedCourse(
-                    courseState.courses,
-                    e.target.value
-                  );
-
-                  setSelectedCourse({ selected: true, course: new_selected });
+            <CourseDropList
+              courses={courseState.fetched ? courseState.courses : []}
+              retrieveCourseCallback={(selected) => {
+                if (selected == null) {
+                  setSelectedCourse({
+                    selected: false,
+                    course: {},
+                  });
+                } else {
+                  setSelectedCourse({ selected: true, course: selected });
                   setRoster({
                     fetched: false,
                     students: [],
                   });
-                }}
-              >
-                <option>Not Selected</option>
-                {courseState.fetched &&
-                  courseState.courses.map((course: ClassInformation) => {
-                    return <option>{getShownName(course)}</option>;
-                  })}
-              </select>
-            </div>
+                }
+              }}
+            />
           </div>
           {selectedCourse.selected && (
             <div className="btn-group pt-2">
