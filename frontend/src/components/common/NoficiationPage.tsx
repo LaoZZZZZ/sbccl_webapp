@@ -34,12 +34,13 @@ const addBroadcastGroups = (userInfo: AccountInfo) => {
     {
       name: "All Parents",
     } as ClassInformation,
-    {
-      name: "All Teachers",
-    } as ClassInformation,
-    {
-      name: "All Teaching Assistants",
-    } as ClassInformation,
+    // TODO(luke): Bring these use cases back once the backend supports it.
+    // {
+    //   name: "All Teachers",
+    // } as ClassInformation,
+    // {
+    //   name: "All Teaching Assistants",
+    // } as ClassInformation,
   ];
 };
 
@@ -55,10 +56,11 @@ const getBroadcastEvent = (event) => {
   }
   return BroadCastEvent.None;
 };
+
 export default function NoficiationPage({ userInfo }: Props) {
   const [message, setMessage] = useState<Notification>({
     broadcast: BroadCastEvent.None,
-    receipient: -1,
+    recipient: -1,
     subject: "",
     body: "",
   });
@@ -113,7 +115,7 @@ export default function NoficiationPage({ userInfo }: Props) {
                 setMessage({
                   ...message,
                   broadcast: BroadCastEvent.None,
-                  receipient: selected.id,
+                  recipient: selected.id,
                 });
               }
             }

@@ -9,6 +9,8 @@ from django.template import loader
 from django.utils.html import strip_tags
 import pytz
 from rest_framework.viewsets import ModelViewSet
+
+from .notification_utils import NotificationUtils
 from .serializers import StudentSerializer, UserSerializer, MemberSerializer, CourseSerializer, PaymentSerializer, RegistrationSerializer, CouponSerializer, DropoutSerializer, SchoolCalendarSerializer
 from .models import Course, Member, Student, Registration, Dropout, Payment, InstructorAssignment, Coupon, CouponUsageRecord, SchoolCalendar
 from rest_framework.decorators import action
@@ -22,8 +24,11 @@ from members import models
 import utils.validators.request_validator
 from .coupon_utils import CouponUtils
 from .balance_utils import BalanceUtils
+from .calender_utils import find_current_school_year
 import uuid
 import json
+
+from members import calender_utils
 
 # REST APIs
 class MemberViewSet(ModelViewSet):
@@ -64,16 +69,6 @@ class MemberViewSet(ModelViewSet):
     # find the registration year
     def __find_registration_year(self, persisted_course : Course):
         return (persisted_course.school_year_start, persisted_course.school_year_end)
-
-    # Find the current active shcool year.
-    def __find_current_school_year(self):
-        current_year = datetime.date.today().year
-        current_month = datetime.date.today().month
-        # For next academic year.
-        if current_month >= 7:
-            return (current_year, current_year + 1)
-        else:
-            return (current_year - 1, current_year)
 
     # send email to board member about book ordering updates.
     def __email_for_textbook(self, registration: Registration):
@@ -319,7 +314,7 @@ class MemberViewSet(ModelViewSet):
         subject = 'Class Registration confirmation'
         plain_message = strip_tags(html_message)
         send_mail(subject, plain_message, from_email=None, recipient_list=[user.email],
-                    html_message=html_message)
+                  html_message=html_message)
        
 
 
@@ -1169,7 +1164,7 @@ class MemberViewSet(ModelViewSet):
     permission_classes=[permissions.IsAuthenticated])
     def get_calendar(self, request):  
         try:
-            start_year, end_year = self.__find_current_school_year()
+            start_year, end_year = calender_utils.find_current_school_year()
             school_dates = SchoolCalendar.objects.filter(school_year_start = start_year,
                                                          school_year_end = end_year)
             # check if the next year's calendar is available
@@ -1198,7 +1193,7 @@ class MemberViewSet(ModelViewSet):
             matched_member = Member.objects.get(user_id=user)
             payments = Payment.objects.filter(user=matched_member)
             
-            start_year, end_year = self.__find_current_school_year()
+            start_year, end_year = calender_utils.find_current_school_year()
             next_year_start = start_year + 1
             serialized_payments = []
             for payment in payments.all():
@@ -1212,4 +1207,23 @@ class MemberViewSet(ModelViewSet):
             return self.__generate_unsuccessful_response(str(e), status.HTTP_400_BAD_REQUEST)
         except SchoolCalendar.DoesNotExist as e:
             return self.__generate_unsuccessful_response("Could not find valid !", status.HTTP_404_NOT_FOUND)
-    
+            
+
+    @action(methods=['PUT'], detail=False, url_path='send-notification', name='Send notification to a group',
+    authentication_classes=[SessionAuthentication, BasicAuthentication],
+    permission_classes=[permissions.IsAuthenticated])   
+    def send_notification(self, request):
+        try:
+            user = User.objects.get(username=request.user.username)
+            matched_member = Member.objects.get(user_id=user)
+            if matched_member.member_type not in ('B', 'T'):
+                raise PermissionError("No notification functionality can be found!")
+            if 'message' not in request.data:
+                raise ValidationError("No message is provided in the notification request!")
+            NotificationUtils.notify(user, request.data['message'])
+            return Response(status=status.HTTP_201_CREATED)
+        except ValueError as e:
+            return self.__generate_unsuccessful_response(str(e), status.HTTP_400_BAD_REQUEST)
+        except (PermissionError, User.DoesNotExist, Member.DoesNotExist) as e:
+            # convert permission error to NOT_FOUND
+            return self.__generate_unsuccessful_response(str(e), status.HTTP_404_NOT_FOUND)

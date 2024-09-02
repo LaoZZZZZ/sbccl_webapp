@@ -3,7 +3,7 @@ import { Auth } from "../user/UserInfo";
 
 export enum BroadCastEvent {
   None = "None",
-  AllParent = "Allparent",
+  AllParent = "AllParent",
   AllTeacher = "AllTeacher",
   AllTeachingAssistant = "AllTeachingAssistant",
 }
@@ -12,7 +12,7 @@ export interface Notification {
   // If true, it's a broadcast message to all people
   broadcast: BroadCastEvent;
   // Id of the notification receiver, receipient is not used if all is true.
-  receipient: number;
+  recipient: number;
   subject: string;
   body: string;
 }
