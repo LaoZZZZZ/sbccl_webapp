@@ -57,7 +57,7 @@ const getBroadcastEvent = (event) => {
   return BroadCastEvent.None;
 };
 
-export default function NoficiationPage({ userInfo }: Props) {
+export function NoficiationPage({ userInfo }: Props) {
   const [message, setMessage] = useState<Notification>({
     broadcast: BroadCastEvent.None,
     recipient: -1,

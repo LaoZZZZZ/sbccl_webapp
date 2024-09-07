@@ -7,8 +7,7 @@ import { AccountInfo } from "./UserInfo.tsx";
 import CalendarDetailPage from "./CalendarDetailPage.tsx";
 import CoursesNavigationPage from "./CoursesNavigationPage.tsx";
 import Terms from "../common/Terms.tsx";
-import NoficiationPage from "../common/NoficiationPage.tsx";
-import EmailPage from "../common/EmailPage.tsx";
+import { NoficiationPage } from "../common/NoficiationPage.tsx";
 // Parent needs to sign the terms every year before Aug 24th.
 const needToSignTerms = (userInfo: AccountInfo) => {
   // Board member does not need to sign the form.
