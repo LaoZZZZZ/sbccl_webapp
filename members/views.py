@@ -1266,7 +1266,6 @@ class MemberViewSet(ModelViewSet):
                     continue
                 user = serialized.create(serialized.validated_data)
                 user.save()
-            except Member.DoesNotExist as e:
                 member = Member.objects.create(
                     user_id=user,
                     sign_up_status='V',
