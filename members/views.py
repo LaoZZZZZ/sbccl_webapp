@@ -1227,3 +1227,85 @@ class MemberViewSet(ModelViewSet):
         except (PermissionError, User.DoesNotExist, Member.DoesNotExist) as e:
             # convert permission error to NOT_FOUND
             return self.__generate_unsuccessful_response(str(e), status.HTTP_404_NOT_FOUND)
+        
+    @action(methods=['PUT'], detail=False, url_path='batch-add-teachers',
+            name='Create teachers accounts from the provided data',
+            authentication_classes=[SessionAuthentication, BasicAuthentication],
+            permission_classes=[permissions.IsAuthenticated])
+    def AddTeacher(self, request):
+        """
+         The request should contain a list of teacher's information:
+         1. name: in the format of first name + ' ' + last name
+         2. email
+         3. phone_number
+         4. course_name
+         5. school_year [optional]. Default to current year if not provided.
+        """
+        teachers = request.data['teachers']
+        for teacher in teachers:
+            if not teacher['email']:
+                continue
+            name = teacher['name'].split()
+            if len(name) != 2:
+                continue
+            try:
+                user = User.objects.get(username=teacher['email'])
+                # only create a teacher's account if it does not exist
+                member = Member.objects.get(user_id=user)                    
+            except User.DoesNotExist as e:
+                user_info = {
+                        'username': teacher['email'],
+                        'first_name': name[0],
+                        'last_name': name[1],
+                        'email': teacher['email'],
+                        'password': 'Sbccl@2024'
+                }
+                serialized = UserSerializer(data=user_info)
+                if not serialized.is_valid():
+                    print("invalid user data provided: ", user_info)
+                    continue
+                user = serialized.create(serialized.validated_data)
+                user.save()
+            except Member.DoesNotExist as e:
+                member = Member.objects.create(
+                    user_id=user,
+                    sign_up_status='V',
+                    verification_code='created',
+                    member_type='T')
+                member.phone_number = teacher['phone_number']
+                member.save()
+
+                print('member created: ', member)
+
+            if 'class' in teacher:
+                start, end = calender_utils.find_current_school_year()
+                if 'school_year' in teacher:
+                    start, end = teacher['schoo_year'].split('-')
+                courses = Course.objects.filter(name=teacher['class'], school_year_start=start,
+                                                school_year_end=end)
+                print(courses, start, end)
+                for c in courses:
+                    if 'classroom' in teacher and c.classroom != teacher['classroom']:
+                        c.classroom = teacher['classroom']
+                        c.save()
+                    instructor = InstructorAssignment.objects.filter(course=c, instructor=member)
+                    if not instructor:
+                        instructor = InstructorAssignment()
+                        instructor.course = c
+                        instructor.instructor = member
+                        instructor.expiration_date = datetime.datetime(end, 7, 1)
+                        instructor.school_year_start = datetime.datetime(start, 9, 1)
+                        instructor.school_year_end = datetime.datetime(end, 6, 28)
+                        instructor.assigned_date = datetime.datetime.today()
+                        instructor.last_update_date = datetime.datetime.today()
+                        instructor.last_update_person = 'Lu Zhao'
+                        instructor.save()
+
+        return Response(status=status.HTTP_201_CREATED)
+
+
+    @action(methods=['PUT'], detail=False, url_path='batch-add-registrations', name='Send notification to a group',
+    authentication_classes=[SessionAuthentication, BasicAuthentication],
+    permission_classes=[permissions.IsAuthenticated])
+    def batch_add_registrations(self, request):
+        pass
