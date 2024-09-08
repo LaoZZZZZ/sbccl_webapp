@@ -1285,6 +1285,9 @@ class MemberViewSet(ModelViewSet):
                                                 school_year_end=end)
                 print(courses, start, end)
                 for c in courses:
+                    if 'classroom' in teacher and c.classroom != teacher['classroom']:
+                        c.classroom = teacher['classroom']
+                        c.save()
                     instructor = InstructorAssignment.objects.filter(course=c, instructor=member)
                     if not instructor:
                         instructor = InstructorAssignment()
