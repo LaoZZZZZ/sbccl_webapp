@@ -1249,7 +1249,9 @@ class MemberViewSet(ModelViewSet):
             if len(name) != 2:
                 continue
             try:
+                print('adding: ', teacher)
                 user = User.objects.get(username=teacher['email'])
+                print(user.email, user.date_joined)
                 # only create a teacher's account if it does not exist
                 member = Member.objects.get(user_id=user)                    
             except User.DoesNotExist as e:
@@ -1266,6 +1268,14 @@ class MemberViewSet(ModelViewSet):
                     continue
                 user = serialized.create(serialized.validated_data)
                 user.save()
+                member = Member.objects.create(
+                    user_id=user,
+                    sign_up_status='V',
+                    verification_code='created',
+                    member_type='T')
+                member.phone_number = teacher['phone_number']
+                member.save()
+            except Member.DoesNotExist as e:
                 member = Member.objects.create(
                     user_id=user,
                     sign_up_status='V',
