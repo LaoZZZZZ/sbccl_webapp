@@ -35,12 +35,12 @@ class NotificationUtils(object):
         if 'broadcast' in request:
             if request['recipient'] != -1 and request['broadcast'] != 'None':
                 raise ValueError("Invalid request: can not accpet more than one recipients!")
-            match request['broadcast']:
-                case 'AllParent':
-                    return NotificationUtils.__get_all_parents()
+            if request['broadcast'] == 'AllParent':
+                return NotificationUtils.__get_all_parents()
+            else:
                 # Does not support yet.
-                case ('AllTeacher', 'AllTeachingAssistant'):
-                    return []
+                print("Unsupported notification mode %s".format(request['broadcast']))
+                return []
         if 'recipient' not in request or request['recipient'] == -1:
             raise ValueError("Invalid request: No recipient is specified!")
         return NotificationUtils.__get_all_parent_per_class(request['recipient'])
