@@ -1243,54 +1243,60 @@ class MemberViewSet(ModelViewSet):
         """
         teachers = request.data['teachers']
         for teacher in teachers:
-            print("adding teacher: ", teacher)
             if not teacher['email']:
                 continue
             name = teacher['name'].split()
             if len(name) != 2:
                 continue
-            user = User.objects.filter(username=teacher['email'])
-            # only create a teacher's account if it does not exist
-            if not user:
+            try:
+                user = User.objects.get(username=teacher['email'])
+                # only create a teacher's account if it does not exist
+                member = Member.objects.get(user_id=user)                    
+            except User.DoesNotExist as e:
                 user_info = {
-                    'username': teacher['email'],
-                    'first_name': name[0],
-                    'last_name': name[1],
-                    'email': teacher['email'],
-                    'password': 'Sbccl@2024'
+                        'username': teacher['email'],
+                        'first_name': name[0],
+                        'last_name': name[1],
+                        'email': teacher['email'],
+                        'password': 'Sbccl@2024'
                 }
                 serialized = UserSerializer(data=user_info)
                 if not serialized.is_valid():
                     print("invalid user data provided: ", user_info)
                     continue
-                new_user = serialized.create(serialized.validated_data)
-                new_user.save()
-
+                user = serialized.create(serialized.validated_data)
+                user.save()
+            except Member.DoesNotExist as e:
                 member = Member.objects.create(
-                    user_id=new_user,
+                    user_id=user,
                     sign_up_status='V',
                     verification_code='created',
                     member_type='T')
                 member.phone_number = teacher['phone_number']
                 member.save()
-                
+
+                print('member created: ', member)
+
             if 'class' in teacher:
                 start, end = calender_utils.find_current_school_year()
                 if 'school_year' in teacher:
                     start, end = teacher['schoo_year'].split('-')
                 courses = Course.objects.filter(name=teacher['class'], school_year_start=start,
                                                 school_year_end=end)
+                print(courses, start, end)
                 for c in courses:
-                    instrctor = InstructorAssignment()
-                    instrctor.course = c
-                    instrctor.instructor = member
-                    instrctor.expiration_date = datetime.datetime(end, 7, 1)
-                    instrctor.school_year_start = datetime.datetime(start, 9, 1)
-                    instrctor.school_year_end = datetime.datetime(end, 6, 28)
-                    instrctor.assigned_date = datetime.datetime.today()
-                    instrctor.last_update_date = datetime.datetime.today()
-                    instrctor.last_update_person = 'Lu Zhao'
-                    instrctor.save()
+                    instructor = InstructorAssignment.objects.filter(course=c, instructor=member)
+                    if not instructor:
+                        instructor = InstructorAssignment()
+                        instructor.course = c
+                        instructor.instructor = member
+                        instructor.expiration_date = datetime.datetime(end, 7, 1)
+                        instructor.school_year_start = datetime.datetime(start, 9, 1)
+                        instructor.school_year_end = datetime.datetime(end, 6, 28)
+                        instructor.assigned_date = datetime.datetime.today()
+                        instructor.last_update_date = datetime.datetime.today()
+                        instructor.last_update_person = 'Lu Zhao'
+                        instructor.save()
 
         return Response(status=status.HTTP_201_CREATED)
 
