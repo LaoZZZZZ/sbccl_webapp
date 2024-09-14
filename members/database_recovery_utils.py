@@ -14,8 +14,6 @@ def load_csv(filename):
 
 def parse_registration_page(registration_detail_file, language_roster_file):
     # need to handle language and enrichment class separately as 
-    language_registrations = []
-    enrichment_registrations = []
     with open(language_roster_file, newline='') as language:
         reader = csv.DictReader(language)
         temp_map = dict()
@@ -43,21 +41,28 @@ def parse_registration_page(registration_detail_file, language_roster_file):
                         matched_student.append(row)
                         continue
                     # It's a language class.
-                    if len(row['class']) <= 3 and matched_student[0]['class'] != row['class']:
-                        print("mismatched class for a student: ", row, matched_student)
-                    elif len(row['class']) > 3: # enrichment class
+
+                    if len(row['class']) > 3: # enrichment class
                         matched_student.append(row)
                         total_registration += 1
                     else:
+                        if len(row['class']) <= 3 and matched_student[0]['class'] != row['class']:
+                            print("mismatched class for a student: ", row, matched_student)
                         matched_student[0]['registration_code'] = row['registration_code']
                         matched_student[0]['registration_date'] = row['registration_date']
-                        matched_student[0]['status'] = row['status']
+                        matched_student[0]['status'] = 'Enrolled'
                         matched_student[0]['balance'] = row['balance']
                         matched_student[0]['book_order'] = row['book_order']
                 else:
                     print("new registration:", row)
                     new_registrations += 1
-        print(len(temp_map), total_registration, language_registration, new_registrations)
+        result = []
+        for k, v in temp_map.items():
+            regs = []
+            for s, r in v.items():
+                regs += r
+            result.append({'email': k, 'registrations': regs})
+        return result
 
 
 
@@ -68,6 +73,13 @@ def call_add_teacher_api(url, data):
     resp = requests.put(url, data=json.dumps(teachers), headers=headers, auth=HTTPBasicAuth('luzhao1986@gmail.com', 'Sandy@2013'))
     print(resp)
 
+def call_add_registration_api(url, data):
+    headers = {'Content-type': 'application/json', 'Accept': 'application/json, text/plain, */*'}
+
+    registrations = {'registrations': data}
+    resp = requests.put(url, data=json.dumps(registrations), headers=headers, auth=HTTPBasicAuth('luzhao1986@gmail.com', 'Sandy@2013'))
+    print(resp)
+
 if __name__ == '__main__':
     url = 'http://prod.api.sbcclny.com/rest_api/members/batch-add-teachers/'
     dev_url = 'http://localhost:8000/rest_api/members/batch-add-teachers/'
@@ -75,4 +87,8 @@ if __name__ == '__main__':
     # call_add_teacher_api(url, load_csv(filename))
     language_roster_file = '/Users/luzhao/Downloads/student_language_registration.csv'
     raw_roster_file = '/Users/luzhao/Downloads/recovered_registration.csv'
-    parse_registration_page(raw_roster_file, language_roster_file)
+    registration_data = parse_registration_page(raw_roster_file, language_roster_file)
+
+    url = 'http://prod.api.sbcclny.com/rest_api/members/batch-add-registrations/'
+    dev_url = 'http://localhost:8000/rest_api/members/batch-add-registrations/'
+    call_add_registration_api(dev_url, registration_data)
