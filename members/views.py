@@ -1330,6 +1330,10 @@ class MemberViewSet(ModelViewSet):
         """
         registrations = request.data['registrations']
         print("Adding registrations: ", len(registrations))
+        total_added_registration = 0
+        total_added_member = 0
+        total_added_student = 0
+        total_added_language_registration = 0
         start, end = calender_utils.find_current_school_year()
         for per_account_reg in registrations:
             if not 'email' in per_account_reg:
@@ -1350,6 +1354,7 @@ class MemberViewSet(ModelViewSet):
                     continue
                 user = serialized.create(serialized.validated_data)
                 user.save()
+                total_added_member += 1
                 member = Member.objects.create(
                     user_id=user,
                     sign_up_status='V',
@@ -1357,6 +1362,7 @@ class MemberViewSet(ModelViewSet):
                     member_type='P')
                 member.phone_number = ""
                 member.save()
+                total_added_member += 1
             else:
                 user = user[0]
             # only create a teacher's account if it does not exist
@@ -1401,6 +1407,7 @@ class MemberViewSet(ModelViewSet):
                         student = serializer.create(serializer.validated_data)
                         student.parent_id = member
                         student.save()
+                        total_added_student += 1
                     else:
                         student = student[0]
                     for r in regs:
@@ -1408,7 +1415,6 @@ class MemberViewSet(ModelViewSet):
                             course = Course.objects.filter(name=r['class'])
                             if not course:
                                 continue
-                            print('look for registration for student', student, r['class'])
                             persist_reg = Registration.objects.filter(student=student,
                                                                       course=course[0])
                             # find used coupon.
@@ -1416,7 +1422,6 @@ class MemberViewSet(ModelViewSet):
                             print('Find registration for ', persist_reg)
                             if not persist_reg:
                                 course = course[0]
-                                print("creating registration")
                                 reg_data = Registration.objects.create(
                                     registration_code = 'xxx-xxx' if not 'registration_code' in r else r['registration_code'],
                                     last_update_date = datetime.datetime.today(),
@@ -1430,12 +1435,13 @@ class MemberViewSet(ModelViewSet):
                                     school_year_end = datetime.date(end, 7, 1)
                                 )
                                 reg_data.save()
-                                print("registration saved!")
+                                total_added_registration += 1
                                 if not 'balance' in r:
                                     continue
                                 balance = int(r['balance'])
                                 # It's a language registration. 
                                 if balance > 0:
+                                    total_added_language_registration += 1
                                     book_order = r['book_order'] == 'Order'
                                     original_cost = course.cost + (course.book_cost if book_order else 0)
                                     # Coupon is applied
@@ -1453,5 +1459,13 @@ class MemberViewSet(ModelViewSet):
                 except Exception as e:
                     print(e)
                     return self.__generate_unsuccessful_response(e, status=status.HTTP_400_BAD_REQUEST)
-
-        return Response(status=status.HTTP_201_CREATED)
+        msg = 'Total added members: {member}. Total added students: {student}. Total added registration: {registrations}. Total added language: {language}'.format(
+            member = total_added_member,
+            student = total_added_student,
+            registrations = total_added_registration,
+            language = total_added_language_registration
+        )
+        content = {
+            'message': msg
+        }
+        return Response(msg, status=status.HTTP_201_CREATED)
