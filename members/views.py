@@ -1468,4 +1468,4 @@ class MemberViewSet(ModelViewSet):
         content = {
             'message': msg
         }
-        return Response(msg, status=status.HTTP_201_CREATED)
+        return Response(content, status=status.HTTP_201_CREATED)
