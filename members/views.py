@@ -1387,7 +1387,7 @@ class MemberViewSet(ModelViewSet):
                         date_join = datetime.datetime.today()
                         for r in regs:
                             if 'registration_date' in r and r['registration_date'].strip() != '':
-                                date_join = min(date_join, datetime.datetime.strptime(r['registration_date']))
+                                date_join = min(date_join, datetime.datetime.strptime(r['registration_date'], '%Y-%m-%d'))
                         
                         student = {
                             'parent_id': member,
