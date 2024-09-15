@@ -1449,12 +1449,14 @@ class MemberViewSet(ModelViewSet):
                                     if original_cost >= balance:
                                         try:
                                             coupon = Coupon.objects.get(dollar_amount=original_cost - balance)
-                                            self.__record_coupon_usage__(coupon, reg_data, member, r['registration_date'])
+                                            self.__record_coupon_usage__(coupon, reg_data, member,
+                                                                         datetime.datetime.today if 'registration_date' not in r else r['registration_date'])
                                         except Coupon.DoesNotExist as e:
                                             print("Could not find a coupon for the registration!")
                                             continue
                                     # Create payment.
-                                    self.__set_up_payment__(reg_data, member, r['registration_date'])
+                                    self.__set_up_payment__(reg_data, member,
+                                                            datetime.datetime.today if 'registration_date' not in r else r['registration_date'])
                         except Exception as e:
                             return self.__generate_unsuccessful_response(
                                 str(e) + 'for registration: ' + str(r), status=status.HTTP_400_BAD_REQUEST)
