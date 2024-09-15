@@ -1447,13 +1447,13 @@ class MemberViewSet(ModelViewSet):
                                     original_cost = course.cost + (course.book_cost if book_order else 0)
                                     # Coupon is applied
                                     if original_cost >= balance:
-                                        try:
-                                            coupon = Coupon.objects.get(dollar_amount=original_cost - balance)
+                                        
+                                        coupon = Coupon.objects.filter(dollar_amount=original_cost - balance)
+                                        if not coupon:
+                                            print("Could not find a coupon for the registration!")
+                                        else:
                                             self.__record_coupon_usage__(coupon, reg_data, member,
                                                                          datetime.datetime.today if 'registration_date' not in r else r['registration_date'])
-                                        except Coupon.DoesNotExist as e:
-                                            print("Could not find a coupon for the registration!")
-                                            continue
                                     # Create payment.
                                     self.__set_up_payment__(reg_data, member,
                                                             datetime.datetime.today if 'registration_date' not in r else r['registration_date'])

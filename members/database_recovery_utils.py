@@ -27,7 +27,7 @@ def parse_registration_page(registration_detail_file, language_roster_file):
             temp_map.setdefault(row['email'].strip().lower(), {})
             parent_account = temp_map.get(row['email'].strip().lower(), {})
             parent_account.setdefault(row['student'].lower().strip(), [])
-            student_reg = parent_account.get(row['student'].lower().strip(), [])
+            student_reg = parent_account.get(row['student'].strip().lower(), [])
             student_reg.append(row)
             total_registration += 1
             language_registration += 1
@@ -35,26 +35,28 @@ def parse_registration_page(registration_detail_file, language_roster_file):
             raw_reader = csv.DictReader(raw_registration)
             for row in raw_reader:
                 if row['email'].strip().lower() in temp_map:
+
                     matched_student = temp_map[row['email'].strip().lower()].get(row['student'].lower().strip(), [])
                     if not matched_student:
-                        print("Extra registration: ", row)
+                        print("Extra student: ", row)
                         matched_student.append(row)
                         continue
                     # It's a language class.
-
-                    if len(row['class']) > 3: # enrichment class
+                    if len(row['class']) > 4: # enrichment class
                         matched_student.append(row)
                         total_registration += 1
                     else:
-                        if len(row['class']) <= 3 and matched_student[0]['class'] != row['class']:
-                            print("mismatched class for a student: ", row, matched_student)
+                        if row['student'] == 'Menghan Tang':
+                            print(row, matched_student[0])
+                        # if len(row['class']) <= 3 and matched_student[0]['class'] != row['class']:
+                        #     print("mismatched class for a student: ", row, matched_student)
                         matched_student[0]['registration_code'] = row['registration_code']
                         matched_student[0]['registration_date'] = row['registration_date']
                         matched_student[0]['status'] = 'Enrolled'
                         matched_student[0]['balance'] = row['balance']
                         matched_student[0]['book_order'] = row['book_order']
                 else:
-                    print("new registration:", row)
+                    print("new account:", row)
                     new_registrations += 1
         result = []
         for k, v in temp_map.items():
