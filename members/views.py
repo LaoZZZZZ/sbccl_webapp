@@ -1456,10 +1456,11 @@ class MemberViewSet(ModelViewSet):
                                     # Create payment.
                                     self.__set_up_payment__(reg_data, member, r['registration_date'])
                         except Exception as e:
-                            print(e)
-                            continue
+                            return self.__generate_unsuccessful_response(
+                                str(e) + 'for registration: ' + r, status=status.HTTP_400_BAD_REQUEST)
                 except Exception as e:
-                    return self.__generate_unsuccessful_response(str(e), status=status.HTTP_400_BAD_REQUEST)
+                    return self.__generate_unsuccessful_response(
+                        str(e), status=status.HTTP_400_BAD_REQUEST)
         msg = 'Total added members: {member}. Total added students: {student}. Total added registration: {registrations}. Total added language: {language}'.format(
             member = total_added_member,
             student = total_added_student,
