@@ -1386,8 +1386,8 @@ class MemberViewSet(ModelViewSet):
                     if not student:
                         date_join = datetime.datetime.today()
                         for r in regs:
-                            if 'registration_date' in r:
-                                date_join = min(date_join, datetime.datetime.strptime(r['registration_date'], '%Y-%m-%d'))
+                            if 'registration_date' in r and r['registration_dat'].strip() != '':
+                                date_join = min(date_join, datetime.datetime.strptime(r['registration_date']))
                         
                         student = {
                             'parent_id': member,
@@ -1457,7 +1457,7 @@ class MemberViewSet(ModelViewSet):
                                     self.__set_up_payment__(reg_data, member, r['registration_date'])
                         except Exception as e:
                             return self.__generate_unsuccessful_response(
-                                str(e) + 'for registration: ' + r, status=status.HTTP_400_BAD_REQUEST)
+                                str(e) + 'for registration: ' + json.dump(r), status=status.HTTP_400_BAD_REQUEST)
                 except Exception as e:
                     return self.__generate_unsuccessful_response(
                         str(e), status=status.HTTP_400_BAD_REQUEST)
