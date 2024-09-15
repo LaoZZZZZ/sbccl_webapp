@@ -1426,7 +1426,7 @@ class MemberViewSet(ModelViewSet):
                                 reg_data = Registration.objects.create(
                                     registration_code = 'xxx-xxx' if not 'registration_code' in r else r['registration_code'],
                                     last_update_date = datetime.datetime.today(),
-                                    registration_date = datetime.datetime.today if 'registration_date' not in r else r['registration_date'],
+                                    registration_date = datetime.datetime.today() if 'registration_date' not in r else r['registration_date'],
                                     on_waiting_list = ('status' in r and r['status'] != 'Enrolled'),
                                     student = student,
                                     course = course,
@@ -1458,7 +1458,7 @@ class MemberViewSet(ModelViewSet):
                                                             datetime.datetime.today if 'registration_date' not in r else r['registration_date'])
                         except Exception as e:
                             return self.__generate_unsuccessful_response(
-                                str(e) + 'for registration: ' + str(r), status=status.HTTP_400_BAD_REQUEST)
+                                str(e) + ' for registration: ' + str(r), status=status.HTTP_400_BAD_REQUEST)
                 except Exception as e:
                     return self.__generate_unsuccessful_response(
                         str(e), status=status.HTTP_400_BAD_REQUEST)
