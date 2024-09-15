@@ -1457,7 +1457,7 @@ class MemberViewSet(ModelViewSet):
                                     self.__set_up_payment__(reg_data, member, r['registration_date'])
                         except Exception as e:
                             return self.__generate_unsuccessful_response(
-                                str(e) + 'for registration: ' + json.dump(r), status=status.HTTP_400_BAD_REQUEST)
+                                str(e) + 'for registration: ' + str(r), status=status.HTTP_400_BAD_REQUEST)
                 except Exception as e:
                     return self.__generate_unsuccessful_response(
                         str(e), status=status.HTTP_400_BAD_REQUEST)
