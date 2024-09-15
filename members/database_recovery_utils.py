@@ -35,26 +35,40 @@ def parse_registration_page(registration_detail_file, language_roster_file):
             raw_reader = csv.DictReader(raw_registration)
             for row in raw_reader:
                 if row['email'].strip().lower() in temp_map:
-
-                    matched_student = temp_map[row['email'].strip().lower()].get(row['student'].lower().strip(), [])
-                    if not matched_student:
+                    per_account_regs = temp_map[row['email'].strip().lower()]
+                    matched_student_regs = per_account_regs.get(row['student'].lower().strip(), [])
+                    if not matched_student_regs:
                         print("Extra student: ", row)
-                        matched_student.append(row)
+                        matched_student_regs.append(row)
                         continue
                     # It's a language class.
-                    if len(row['class']) > 4: # enrichment class
-                        matched_student.append(row)
+                    if len(row['class'].strip()) > 4: # enrichment class
+                        matched_student_regs.append(row)
                         total_registration += 1
                     else:
-                        if row['student'] == 'Menghan Tang':
-                            print(row, matched_student[0])
+
                         # if len(row['class']) <= 3 and matched_student[0]['class'] != row['class']:
                         #     print("mismatched class for a student: ", row, matched_student)
-                        matched_student[0]['registration_code'] = row['registration_code']
-                        matched_student[0]['registration_date'] = row['registration_date']
-                        matched_student[0]['status'] = 'Enrolled'
-                        matched_student[0]['balance'] = row['balance']
-                        matched_student[0]['book_order'] = row['book_order']
+                        matched_reg = None
+                        for r in matched_student_regs:
+                            if r['class'].strip() == row['class'].strip():
+                                matched_reg = r
+                                break
+                            elif r['class'].strip()[:2] == row['class'].strip()[:2]:
+                                # it's a class re-assignment
+                                matched_reg = r
+                                break
+                            else:
+                                # totally different registration
+                                continue
+                        if matched_reg:
+                            matched_reg['registration_code'] = row['registration_code'].strip()
+                            matched_reg['registration_date'] = row['registration_date'].strip()
+                            matched_reg['status'] = 'Enrolled'
+                            matched_reg['balance'] = row['balance'].strip()
+                            matched_reg['book_order'] = row['book_order'].strip()
+                        else:
+                            print('omitted registration:', matched_student_regs)
                 else:
                     print("new account:", row)
                     new_registrations += 1
@@ -93,4 +107,4 @@ if __name__ == '__main__':
 
     url = 'http://prod.api.sbcclny.com/rest_api/members/batch-add-registrations/'
     dev_url = 'http://localhost:8000/rest_api/members/batch-add-registrations/'
-    call_add_registration_api(url, registration_data)
+    call_add_registration_api(dev_url, registration_data)
