@@ -1437,25 +1437,27 @@ class MemberViewSet(ModelViewSet):
                                 )
                                 reg_data.save()
                                 total_added_registration += 1
-                                if not 'balance' in r:
-                                    continue
-                                balance = int(r['balance'])
-                                # It's a language registration. 
-                                if balance > 0:
-                                    total_added_language_registration += 1
-                                    book_order = r['book_order'] == 'Order'
-                                    original_cost = course.cost + (course.book_cost if book_order else 0)
-                                    # Coupon is applied
-                                    if original_cost >= balance:
-                                        coupon = Coupon.objects.filter(dollar_amount=original_cost - balance)
-                                        if not coupon:
-                                            print("Could not find a coupon for the registration!")
-                                        else:
-                                            self.__record_coupon_usage__(coupon[0], reg_data, member,
-                                                                         datetime.datetime.today if 'registration_date' not in r else r['registration_date'])
-                                    # Create payment.
-                                    self.__set_up_payment__(reg_data, member,
-                                                            datetime.datetime.today if 'registration_date' not in r else r['registration_date'])
+                            else:
+                                reg_data= persist_reg[0]
+                            if not 'balance' in r:
+                                continue
+                            balance = int(r['balance'])
+                            # It's a language registration. 
+                            if balance > 0:
+                                total_added_language_registration += 1
+                                book_order = (r['book_order'] == 'Ordered')
+                                original_cost = course.cost + (course.book_cost if book_order else 0)
+                                # Coupon is applied
+                                if original_cost >= balance:
+                                    coupon = Coupon.objects.filter(dollar_amount=original_cost - balance)
+                                    if not coupon:
+                                        print("Could not find a coupon for the registration!")
+                                    else:
+                                        self.__record_coupon_usage__(coupon[0], reg_data, member,
+                                                                     datetime.datetime.today if 'registration_date' not in r else r['registration_date'])
+                                # Create payment.
+                                self.__set_up_payment__(reg_data, member,
+                                                        datetime.datetime.today if 'registration_date' not in r else r['registration_date'])
                         except Exception as e:
                             return self.__generate_unsuccessful_response(
                                 str(e) + ' for registration: ' + str(r), status=status.HTTP_400_BAD_REQUEST)
