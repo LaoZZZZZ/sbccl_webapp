@@ -1463,6 +1463,7 @@ class MemberViewSet(ModelViewSet):
                                         student.date_of_birth = datetime.date(2018, 12, 1)
                                     student.save()    
                             if not 'balance' in r:
+                                total_added_language_registration += 1
                                 continue
                             balance = int(r['balance'])
                             # It's a language registration. 
