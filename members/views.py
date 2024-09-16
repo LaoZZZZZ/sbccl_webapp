@@ -295,10 +295,7 @@ class MemberViewSet(ModelViewSet):
         coupon_usage = CouponUsageRecord.objects.filter(registration = registration)
         if coupon_usage:
             for used_coupon in coupon_usage:
-                if used_coupon.coupon.code != coupon.code:
-                    used_coupon.delete()
-                else:
-                    return
+                used_coupon.delete()
         coupon_usage = CouponUsageRecord()
         if not apply_date:
             coupon_usage.used_date = datetime.date.today()
