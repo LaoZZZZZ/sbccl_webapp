@@ -1416,13 +1416,13 @@ class MemberViewSet(ModelViewSet):
                             course = Course.objects.filter(name=r['class'])
                             if not course:
                                 continue
+                            course = course[0]
                             persist_reg = Registration.objects.filter(student=student,
-                                                                      course=course[0])
+                                                                      course=course)
                             # find used coupon.
                             #####
                             print('Find registration for ', persist_reg)
                             if not persist_reg:
-                                course = course[0]
                                 reg_data = Registration.objects.create(
                                     registration_code = 'xxx-xxx' if not 'registration_code' in r else r['registration_code'],
                                     last_update_date = datetime.datetime.today(),
@@ -1445,9 +1445,13 @@ class MemberViewSet(ModelViewSet):
                             # It's a language registration. 
                             if balance > 0:
                                 total_added_language_registration += 1
+                                if not 'book_order' in r:
+                                    continue
                                 book_order = (r['book_order'] == 'Ordered')
                                 original_cost = course.cost + (course.book_cost if book_order else 0)
                                 # Coupon is applied
+                                print('{original_cost} vs {balance}'.format(original_cost=original_cost,
+                                                                            balance=balance))
                                 if original_cost >= balance:
                                     coupon = Coupon.objects.filter(dollar_amount=original_cost - balance)
                                     if not coupon:
