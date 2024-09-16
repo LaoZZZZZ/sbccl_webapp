@@ -1457,8 +1457,10 @@ class MemberViewSet(ModelViewSet):
                                 reg_data= persist_reg[0]
                                 print('updating age')
                                 if 'age' in r:
-                                    print('age: ', r['age'])
-                                    student.date_of_birth = datetime.date(datetime.datetime.today().year - int(r['age']), 12, 1)
+                                    if r['age']:
+                                        student.date_of_birth = datetime.date(datetime.datetime.today().year - int(r['age']), 12, 1)
+                                    else:
+                                        student.date_of_birth = datetime.date(2018, 12, 1)
                                     student.save()    
                             if not 'balance' in r:
                                 continue
