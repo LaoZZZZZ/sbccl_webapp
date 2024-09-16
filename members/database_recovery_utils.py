@@ -24,8 +24,9 @@ def parse_registration_page(registration_detail_file, language_roster_file):
         for row in reader:
             if row['email'] == '':
                 continue
-            temp_map.setdefault(row['email'].strip().lower(), {})
-            parent_account = temp_map.get(row['email'].strip().lower(), {})
+            email = row['email'].strip().lower().split(',')[0]
+            temp_map.setdefault(email, {})
+            parent_account = temp_map.get(email, {})
             parent_account.setdefault(row['student'].lower().strip(), [])
             student_reg = parent_account.get(row['student'].strip().lower(), [])
             student_reg.append(row)
@@ -101,10 +102,10 @@ if __name__ == '__main__':
     dev_url = 'http://localhost:8000/rest_api/members/batch-add-teachers/'
     filename = '/Users/luzhao/Downloads/teacher_information.csv'
     # call_add_teacher_api(url, load_csv(filename))
-    language_roster_file = '/Users/luzhao/Downloads/student_language_registration.csv'
+    language_roster_file = '/Users/luzhao/Downloads/language_student_registration_latest.csv'
     raw_roster_file = '/Users/luzhao/Downloads/recovered_registration.csv'
     registration_data = parse_registration_page(raw_roster_file, language_roster_file)
 
     url = 'http://prod.api.sbcclny.com/rest_api/members/batch-add-registrations/'
     dev_url = 'http://localhost:8000/rest_api/members/batch-add-registrations/'
-    call_add_registration_api(url, registration_data)
+    call_add_registration_api(dev_url, registration_data)

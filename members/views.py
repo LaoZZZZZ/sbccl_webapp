@@ -1339,6 +1339,7 @@ class MemberViewSet(ModelViewSet):
         total_added_member = 0
         total_added_student = 0
         total_added_language_registration = 0
+        total_updated_member = 0
         start, end = calender_utils.find_current_school_year()
         for per_account_reg in registrations:
             if not 'email' in per_account_reg:
@@ -1369,9 +1370,21 @@ class MemberViewSet(ModelViewSet):
                 member.save()
                 total_added_member += 1
             else:
+                print('find user: ', user, per_account_reg)
                 user = user[0]
-            # only create a teacher's account if it does not exist
-            member = Member.objects.get(user_id=user)
+                if 'father' in per_account_reg['registrations'][0] and per_account_reg['registrations'][0]['father']:
+                    names = per_account_reg['registrations'][0]['father'].split()
+                    user.first_name, user.last_name = names[0], names[-1]
+                elif 'mother' in per_account_reg['registrations'][0] and per_account_reg['registrations'][0]['mother']:
+                    names = per_account_reg['registrations'][0]['mother'].split()
+                    user.first_name, user.last_name = names[0], names[-1]                    
+                user.save()
+                # only create a teacher's account if it does not exist
+                member = Member.objects.get(user_id=user)
+                if 'phone' in per_account_reg['registrations'][0]:
+                    member.phone_number = per_account_reg['registrations'][0]['phone']
+                member.save()
+                total_updated_member += 1
             per_student_registration = {}                   
             for registration in per_account_reg['registrations']:
                 if registration['email'] != email:
@@ -1426,7 +1439,6 @@ class MemberViewSet(ModelViewSet):
                                                                       course=course)
                             # find used coupon.
                             #####
-                            print('Find registration for ', persist_reg)
                             if not persist_reg:
                                 reg_data = Registration.objects.create(
                                     registration_code = 'xxx-xxx' if not 'registration_code' in r else r['registration_code'],
@@ -1455,9 +1467,7 @@ class MemberViewSet(ModelViewSet):
                                 book_order = (r['book_order'] == 'Ordered')
                                 original_cost = course.cost + (course.book_cost if book_order else 0)
                                 # Coupon is applied
-                                print('{original_cost} vs {balance}'.format(original_cost=original_cost,
-                                                                            balance=balance))
-                                if original_cost >= balance:
+                                if original_cost > balance:
                                     coupon = Coupon.objects.filter(dollar_amount=original_cost - balance)
                                     if not coupon:
                                         print("Could not find a coupon for the registration!")
@@ -1473,8 +1483,9 @@ class MemberViewSet(ModelViewSet):
                 except Exception as e:
                     return self.__generate_unsuccessful_response(
                         str(e), status=status.HTTP_400_BAD_REQUEST)
-        msg = 'Total added members: {member}. Total added students: {student}. Total added registration: {registrations}. Total added language: {language}'.format(
+        msg = 'Total added members: {member}. total updated member {updated_member}. Total added students: {student}. Total added registration: {registrations}. Total added language: {language}'.format(
             member = total_added_member,
+            updated_member = total_updated_member,
             student = total_added_student,
             registrations = total_added_registration,
             language = total_added_language_registration
