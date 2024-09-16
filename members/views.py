@@ -1370,7 +1370,6 @@ class MemberViewSet(ModelViewSet):
                 member.save()
                 total_added_member += 1
             else:
-                print('find user: ', user, per_account_reg)
                 user = user[0]
                 if 'father' in per_account_reg['registrations'][0] and per_account_reg['registrations'][0]['father']:
                     names = per_account_reg['registrations'][0]['father'].split()
@@ -1456,6 +1455,11 @@ class MemberViewSet(ModelViewSet):
                                 total_added_registration += 1
                             else:
                                 reg_data= persist_reg[0]
+                                print('updating age')
+                                if 'age' in r:
+                                    print('age: ', r['age'])
+                                    student.date_of_birth = datetime.date(datetime.datetime.today().year - int(r['age']), 12, 1)
+                                    student.save()    
                             if not 'balance' in r:
                                 continue
                             balance = int(r['balance'])
