@@ -1341,155 +1341,163 @@ class MemberViewSet(ModelViewSet):
         total_added_language_registration = 0
         total_updated_member = 0
         start, end = calender_utils.find_current_school_year()
+        current = 1
         for per_account_reg in registrations:
-            if not 'email' in per_account_reg:
-                continue
-            email = per_account_reg['email']
-            user = User.objects.filter(username=email)
-            if not user:
-                user_info = {
-                        'username': email,
-                        'first_name': "xx",
-                        'last_name': "xx",
-                        'email': email,
-                        'password': 'Sbccl@2024'
-                }
-                serialized = UserSerializer(data=user_info)
-                if not serialized.is_valid():
-                    print("invalid user data provided: ", user_info)
+            print(current)
+            current += 1
+            print(per_account_reg['email'])
+            try:
+                if not 'email' in per_account_reg:
+                    print("skip missing email entry")
                     continue
-                user = serialized.create(serialized.validated_data)
-                user.save()
-                total_added_member += 1
-                member = Member.objects.create(
-                    user_id=user,
-                    sign_up_status='V',
-                    verification_code='created',
-                    member_type='P')
-                member.phone_number = ""
-                member.save()
-                total_added_member += 1
-            else:
-                user = user[0]
-                if 'father' in per_account_reg['registrations'][0] and per_account_reg['registrations'][0]['father']:
-                    names = per_account_reg['registrations'][0]['father'].split()
-                    user.first_name, user.last_name = names[0], names[-1]
-                elif 'mother' in per_account_reg['registrations'][0] and per_account_reg['registrations'][0]['mother']:
-                    names = per_account_reg['registrations'][0]['mother'].split()
-                    user.first_name, user.last_name = names[0], names[-1]                    
-                user.save()
-                # only create a teacher's account if it does not exist
-                member = Member.objects.get(user_id=user)
-                if 'phone' in per_account_reg['registrations'][0]:
-                    member.phone_number = per_account_reg['registrations'][0]['phone']
-                member.save()
-                total_updated_member += 1
-            per_student_registration = {}                   
-            for registration in per_account_reg['registrations']:
-                if registration['email'] != email:
-                    continue
-
-                student_name = registration['student']
-                if student_name in per_student_registration:
-                    per_student_registration[student_name].append(registration)
+                email = per_account_reg['email']
+                user = User.objects.filter(username=email)
+                if not user:
+                    user_info = {
+                            'username': email,
+                            'first_name': "xx",
+                            'last_name': "xx",
+                            'email': email,
+                            'password': 'Sbccl@2024'
+                    }
+                    serialized = UserSerializer(data=user_info)
+                    if not serialized.is_valid():
+                        print("invalid user data provided: ", user_info)
+                        continue
+                    user = serialized.create(serialized.validated_data)
+                    user.save()
+                    total_added_member += 1
+                    member = Member.objects.create(
+                        user_id=user,
+                        sign_up_status='V',
+                        verification_code='created',
+                        member_type='P')
+                    member.phone_number = ""
+                    member.save()
+                    total_added_member += 1
                 else:
-                    per_student_registration[student_name] = [registration]
-            for student_name, regs in per_student_registration.items():
-                try:
-                    first_name, last_name = student_name.split()
-                    student = Student.objects.filter(parent_id=member,
-                                                     first_name=first_name,
-                                                     last_name=last_name)
-                    if not student:
-                        date_join = datetime.datetime.today()
-                        for r in regs:
-                            if 'registration_date' in r and r['registration_date'].strip() != '':
-                                date_join = min(date_join, datetime.datetime.strptime(r['registration_date'], '%Y-%m-%d'))
-                        
-                        student = {
-                            'parent_id': member,
-                            'first_name': first_name,
-                            'last_name': last_name,
-                            'gender': 'U',
-                            'date_of_birth': '2019-12-01',
-                            # 'chinese_name': 'xxx',
-                            'joined_date': '2024-06-11',
-                            # 'middle_name': ''
-                        }
-                        serializer = StudentSerializer(data=student)
-                        if not serializer.is_valid():
-                            print('Student invalid!', student)
-                            return self.__generate_unsuccessful_response(
-                                "Failed to serialize student: {student}".format(student),
-                                                       status.HTTP_400_BAD_REQUEST)
-                        student = serializer.create(serializer.validated_data)
-                        student.parent_id = member
-                        student.save()
-                        total_added_student += 1
+                    user = user[0]
+                    if 'father' in per_account_reg['registrations'][0] and per_account_reg['registrations'][0]['father']:
+                        names = per_account_reg['registrations'][0]['father'].split()
+                        user.first_name, user.last_name = names[0], names[-1]
+                    elif 'mother' in per_account_reg['registrations'][0] and per_account_reg['registrations'][0]['mother']:
+                        names = per_account_reg['registrations'][0]['mother'].split()
+                        user.first_name, user.last_name = names[0], names[-1]                    
+                    user.save()
+                    # only create a teacher's account if it does not exist
+                    member = Member.objects.get(user_id=user)
+                    if 'phone' in per_account_reg['registrations'][0]:
+                        member.phone_number = per_account_reg['registrations'][0]['phone']
+                    member.save()
+                    total_updated_member += 1
+                per_student_registration = {}                   
+                for registration in per_account_reg['registrations']:
+                    if registration['email'].lower() != email.lower():
+                        continue
+
+                    student_name = registration['student']
+                    if student_name in per_student_registration:
+                        per_student_registration[student_name].append(registration)
                     else:
-                        student = student[0]
-                    for r in regs:
-                        try:
-                            course = Course.objects.filter(name=r['class'])
-                            if not course:
-                                continue
-                            course = course[0]
-                            persist_reg = Registration.objects.filter(student=student,
-                                                                      course=course)
-                            # find used coupon.
-                            #####
-                            if not persist_reg:
-                                reg_data = Registration.objects.create(
-                                    registration_code = 'xxx-xxx' if not 'registration_code' in r else r['registration_code'],
-                                    last_update_date = datetime.datetime.today(),
-                                    registration_date = datetime.datetime.today() if 'registration_date' not in r else r['registration_date'],
-                                    on_waiting_list = ('status' in r and r['status'] != 'Enrolled'),
-                                    student = student,
-                                    course = course,
-                                    textbook_ordered = ('book_order' in r and r['book_order'] == 'Ordered'),
-                                    expiration_date = datetime.date(end, 7, 1),
-                                    school_year_start = datetime.date(start, 9, 1),
-                                    school_year_end = datetime.date(end, 7, 1)
-                                )
-                                reg_data.save()
-                                total_added_registration += 1
-                            else:
-                                reg_data= persist_reg[0]
-                                print('updating age')
-                                if 'age' in r:
-                                    if r['age']:
-                                        student.date_of_birth = datetime.date(datetime.datetime.today().year - int(r['age']), 12, 1)
-                                    else:
-                                        student.date_of_birth = datetime.date(2018, 12, 1)
-                                    student.save()    
-                            if not 'balance' in r:
-                                total_added_language_registration += 1
-                                continue
-                            balance = int(r['balance'])
-                            # It's a language registration. 
-                            if balance > 0:
-                                total_added_language_registration += 1
-                                if not 'book_order' in r:
+                        per_student_registration[student_name] = [registration]
+                for student_name, regs in per_student_registration.items():
+                    try:
+                        first_name, last_name = student_name.split()
+                        student = Student.objects.filter(parent_id=member,
+                                                         first_name=first_name,
+                                                         last_name=last_name)
+                        if not student:
+                            date_join = datetime.datetime.today()
+                            for r in regs:
+                                if 'registration_date' in r and r['registration_date'].strip() != '':
+                                    date_join = min(date_join, datetime.datetime.strptime(r['registration_date'], '%Y-%m-%d'))
+                            
+                            student = {
+                                'parent_id': member,
+                                'first_name': first_name,
+                                'last_name': last_name,
+                                'gender': 'U',
+                                'date_of_birth': '2019-12-01',
+                                # 'chinese_name': 'xxx',
+                                'joined_date': '2024-06-11',
+                                # 'middle_name': ''
+                            }
+                            serializer = StudentSerializer(data=student)
+                            if not serializer.is_valid():
+                                print('Student invalid!', student)
+                                return self.__generate_unsuccessful_response(
+                                    "Failed to serialize student: {student}".format(student),
+                                                        status.HTTP_400_BAD_REQUEST)
+                            student = serializer.create(serializer.validated_data)
+                            student.parent_id = member
+                            student.save()
+                            total_added_student += 1
+                        else:
+                            student = student[0]
+                        for r in regs:
+                            try:
+                                course = Course.objects.filter(name=r['class'])
+                                if not course:
                                     continue
-                                book_order = (r['book_order'] == 'Ordered')
-                                original_cost = course.cost + (course.book_cost if book_order else 0)
-                                # Coupon is applied
-                                if original_cost > balance:
-                                    coupon = Coupon.objects.filter(dollar_amount=original_cost - balance)
-                                    if not coupon:
-                                        print("Could not find a coupon for the registration!")
-                                    else:
-                                        self.__record_coupon_usage__(coupon[0], reg_data, member,
-                                                                     datetime.datetime.today if 'registration_date' not in r else r['registration_date'])
-                                # Create payment.
-                                self.__set_up_payment__(reg_data, member,
-                                                        datetime.datetime.today if 'registration_date' not in r else r['registration_date'])
-                        except Exception as e:
-                            return self.__generate_unsuccessful_response(
-                                str(e) + ' for registration: ' + str(r), status=status.HTTP_400_BAD_REQUEST)
-                except Exception as e:
-                    return self.__generate_unsuccessful_response(
-                        str(e), status=status.HTTP_400_BAD_REQUEST)
+                                course = course[0]
+                                persist_reg = Registration.objects.filter(student=student,
+                                                                        course=course)
+                                # find used coupon.
+                                #####
+                                if not persist_reg:
+                                    reg_data = Registration.objects.create(
+                                        registration_code = 'xxx-xxx' if not 'registration_code' in r else r['registration_code'],
+                                        last_update_date = datetime.datetime.today(),
+                                        registration_date = datetime.datetime.today() if 'registration_date' not in r else r['registration_date'],
+                                        on_waiting_list = ('status' in r and r['status'] != 'Enrolled'),
+                                        student = student,
+                                        course = course,
+                                        textbook_ordered = ('book_order' in r and r['book_order'] == 'Ordered'),
+                                        expiration_date = datetime.date(end, 7, 1),
+                                        school_year_start = datetime.date(start, 9, 1),
+                                        school_year_end = datetime.date(end, 7, 1)
+                                    )
+                                    reg_data.save()
+                                    total_added_registration += 1
+                                else:
+                                    reg_data= persist_reg[0]
+                                    if 'age' in r:
+                                        if r['age']:
+                                            student.date_of_birth = datetime.date(datetime.datetime.today().year - int(r['age']), 12, 1)
+                                        else:
+                                            student.date_of_birth = datetime.date(2018, 12, 1)
+                                        student.save()    
+                                if not 'balance' in r:
+                                    total_added_language_registration += 1
+                                    continue
+                                balance = int(r['balance'])
+                                # It's a language registration. 
+                                if balance > 0:
+                                    total_added_language_registration += 1
+                                    if not 'book_order' in r:
+                                        continue
+                                    book_order = (r['book_order'] == 'Ordered')
+                                    original_cost = course.cost + (course.book_cost if book_order else 0)
+                                    # Coupon is applied
+                                    if original_cost > balance:
+                                        coupon = Coupon.objects.filter(dollar_amount=original_cost - balance)
+                                        if not coupon:
+                                            print("Could not find a coupon for the registration!")
+                                        else:
+                                            self.__record_coupon_usage__(coupon[0], reg_data, member,
+                                                                        datetime.datetime.today if 'registration_date' not in r else r['registration_date'])
+                                    # Create payment.
+                                    self.__set_up_payment__(reg_data, member,
+                                                            datetime.datetime.today if 'registration_date' not in r else r['registration_date'])
+                            except Exception as e:
+                                return self.__generate_unsuccessful_response(
+                                    str(e) + ' for registration: ' + str(r), status=status.HTTP_400_BAD_REQUEST)
+                    except Exception as e:
+                        return self.__generate_unsuccessful_response(
+                            str(e) + " " + student_name, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                return self.__generate_unsuccessful_response(
+                            str(e) + " " + student_name, status=status.HTTP_400_BAD_REQUEST)
         msg = 'Total added members: {member}. total updated member {updated_member}. Total added students: {student}. Total added registration: {registrations}. Total added language: {language}'.format(
             member = total_added_member,
             updated_member = total_updated_member,

@@ -74,14 +74,46 @@ def parse_registration_page(registration_detail_file, language_roster_file):
                     print("new account:", row)
                     new_registrations += 1
         result = []
+        total_registrations = 0
         for k, v in temp_map.items():
             regs = []
             for s, r in v.items():
                 regs += r
             result.append({'email': k, 'registrations': regs})
+            total_registrations += len(regs)
+            if k == 'orient03@gmail.com':
+                print(v)
+        print("total registration:", total_registrations, language_registration)
         return result
 
-
+def check_recovered_registration(registration_detail_file):
+    with open(registration_detail_file, newline='') as raw_registration:
+        raw_reader = csv.DictReader(raw_registration)
+        for row in raw_reader:
+            if row['email'] == '':
+                print(row)
+                continue
+            if len(row['student'].split()) != 2:
+                print(row)
+                continue
+            if row['class'] == '':
+                print(row)
+                continue
+            if row['registration_code'] == '':
+                print(row)
+                continue
+            if row['registration_date'] == '':
+                print(row)
+                continue
+            if not row['status'] in ('Enrolled', 'On Waiting List', 'withdraw'):
+                print(row)
+                continue
+            if row['balance'] == '':
+                print(row)
+                continue
+            if not row['book_order'] in ('NA', 'Ordered', 'NotOrdered'):
+                print(row)
+                continue
 
 def call_add_teacher_api(url, data):
     headers = {'Content-type': 'application/json', 'Accept': 'application/json, text/plain, */*'}
@@ -102,10 +134,11 @@ if __name__ == '__main__':
     dev_url = 'http://localhost:8000/rest_api/members/batch-add-teachers/'
     filename = '/Users/luzhao/Downloads/teacher_information.csv'
     # call_add_teacher_api(url, load_csv(filename))
-    language_roster_file = '/Users/luzhao/Downloads/language_student_registration_latest.csv'
+    language_roster_file = '/Users/luzhao/Downloads/language_student_registration_2024-09-16.csv'
     raw_roster_file = '/Users/luzhao/Downloads/recovered_registration.csv'
     registration_data = parse_registration_page(raw_roster_file, language_roster_file)
 
     url = 'http://prod.api.sbcclny.com/rest_api/members/batch-add-registrations/'
     dev_url = 'http://localhost:8000/rest_api/members/batch-add-registrations/'
-    call_add_registration_api(url, registration_data)
+    call_add_registration_api(dev_url, registration_data)
+    # check_recovered_registration(raw_roster_file)
