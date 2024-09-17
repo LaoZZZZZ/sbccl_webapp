@@ -140,5 +140,5 @@ if __name__ == '__main__':
 
     url = 'http://prod.api.sbcclny.com/rest_api/members/batch-add-registrations/'
     dev_url = 'http://localhost:8000/rest_api/members/batch-add-registrations/'
-    call_add_registration_api(dev_url, registration_data)
+    call_add_registration_api(url, registration_data)
     # check_recovered_registration(raw_roster_file)

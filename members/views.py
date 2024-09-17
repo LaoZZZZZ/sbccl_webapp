@@ -1438,10 +1438,13 @@ class MemberViewSet(ModelViewSet):
                             try:
                                 course = Course.objects.filter(name=r['class'])
                                 if not course:
+                                    return self.__generate_unsuccessful_response(
+                                        "No class is found: {class}".format(name=r['class']),
+                                        status.HTTP_400_BAD_REQUEST)
                                     continue
                                 course = course[0]
                                 persist_reg = Registration.objects.filter(student=student,
-                                                                        course=course)
+                                                                          course=course)
                                 # find used coupon.
                                 #####
                                 if not persist_reg:
