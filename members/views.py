@@ -1474,6 +1474,12 @@ class MemberViewSet(ModelViewSet):
                                     if 'chinese_name' in r and r['chinese_name'].strip():
                                             changed = True
                                             student.chinese_name = r['chinese_name'].strip()
+                                    if 'gender' in r and r['gender'].strip():
+                                        changed = True
+                                        if r['gender'].strip().lower() == 'female':
+                                            student.gender = 'F'
+                                        elif r['gender'].strip().lower() == 'male':
+                                            student.gender = 'M'
                                     if changed:
                                         student.save()    
                                 if not 'balance' in r:
