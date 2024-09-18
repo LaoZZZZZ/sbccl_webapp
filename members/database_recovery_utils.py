@@ -44,6 +44,7 @@ def parse_registration_page(registration_detail_file, language_roster_file):
                         continue
                     # It's a language class.
                     if len(row['class'].strip()) > 4: # enrichment class
+                        row['class'] = row['class'].strip()
                         matched_student_regs.append(row)
                         total_registration += 1
                     else:
@@ -52,7 +53,8 @@ def parse_registration_page(registration_detail_file, language_roster_file):
                         #     print("mismatched class for a student: ", row, matched_student)
                         matched_reg = None
                         for r in matched_student_regs:
-                            if r['class'].strip() == row['class'].strip():
+                            r['class'] = r['class'].strip()
+                            if r['class'] == row['class'].strip():
                                 matched_reg = r
                                 break
                             elif r['class'].strip()[:2] == row['class'].strip()[:2]:

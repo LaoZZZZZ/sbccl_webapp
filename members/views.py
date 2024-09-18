@@ -1464,11 +1464,17 @@ class MemberViewSet(ModelViewSet):
                                     total_added_registration += 1
                                 else:
                                     reg_data= persist_reg[0]
+                                    changed = False
                                     if 'age' in r:
                                         if r['age']:
+                                            changed = True
                                             student.date_of_birth = datetime.date(datetime.datetime.today().year - int(r['age']), 12, 1)
                                         else:
                                             student.date_of_birth = datetime.date(2018, 12, 1)
+                                    if 'chinese_name' in r and r['chinese_name'].strip():
+                                            changed = True
+                                            student.chinese_name = r['chinese_name'].strip()
+                                    if changed:
                                         student.save()    
                                 if not 'balance' in r:
                                     total_added_language_registration += 1
