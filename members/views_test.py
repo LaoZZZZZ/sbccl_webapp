@@ -415,7 +415,9 @@ class MemberViewSetTest(APITestCase):
             'cost': 500,
             'classroom': 'N402',
             'course_start_time': '10:00:00',
-            'course_end_time': '11:50:00'
+            'course_end_time': '11:50:00',
+            'school_year_start': 2023,
+            'school_year_end': 2024
         }
 
         self.client.force_authenticate(user=exist_user)
@@ -423,7 +425,8 @@ class MemberViewSetTest(APITestCase):
                                    data=course_json, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        response = self.client.get('/rest_api/members/list-courses/', format='json')
+        response = self.client.get('/rest_api/members/list-courses/?school_start=2023&school_end=2024',
+                                   format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['courses']), 1)
         import json
@@ -432,6 +435,34 @@ class MemberViewSetTest(APITestCase):
         self.assertTrue('id' in obtained_course)
         self.assertEqual(obtained_course['course_start_time'], '10:00:00')
         self.assertEqual(obtained_course['course_end_time'], '11:50:00')
+
+        # Add a teacher.
+        teacher_user = self.create_user('teacher', 'teacher@gmail.com')
+        teacher_member = self.create_member(teacher_user, sign_up_status='V',
+                           verification_code="12345-1231", member_type='T')
+        self.client.force_authenticate(user=teacher_user)
+        response = self.client.get('/rest_api/members/list-courses/?school_start=2023&school_end=2024',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['courses']), 0)
+
+        course = Course.objects.get(name='B1A')        
+        # Add assignment, the teacher should be able to see the course
+        assignment = InstructorAssignment(
+            course = course,
+            instructor = teacher_member,
+            expiration_date = datetime.datetime(2024, 7, 1),
+            school_year_start = datetime.datetime(2023, 9, 1),
+            school_year_end = datetime.datetime(2024, 6, 28),
+            assigned_date = datetime.datetime.today(),
+            last_update_date = datetime.datetime.today(),
+            last_update_person = 'Lu Zhao'
+        )
+        assignment.save()
+        response = self.client.get('/rest_api/members/list-courses/?school_start=2023&school_end=2024',
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['courses']), 1)
 
     def test_add_registration_course_succeed(self):
         # Add class first
