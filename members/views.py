@@ -76,8 +76,8 @@ class MemberViewSet(ModelViewSet):
 
     def __course_taught_by_teacher__(self, teacher: Member, course: Course):
         found = False
-        for teacher in course.instructor.all():
-            found = (teacher.user_id == teacher.user_id)
+        for t in course.instructor.all():
+            found = (t.user_id == teacher.user_id)
             if found:
                 break
         return found
