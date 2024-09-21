@@ -1051,20 +1051,27 @@ class MemberViewSet(ModelViewSet):
     @action(methods=['GET'], detail=False, url_path='list-courses', name='list all courses',
         authentication_classes=[SessionAuthentication, BasicAuthentication],
         permission_classes=[permissions.IsAuthenticated])
-    def list_courses(self, request):
+    def list_courses(self, request, school_start = None, school_end = None):
         """
         Returns a list of courses
 
         Depending on the account type, it returns different set of courses
         """
         try:
+            start = request.GET.get('school_start', None)
+            end = request.GET.get('school_end', None)
+            if not start or not end:
+                self.__generate_unsuccessful_response("Missing school year!",
+                                                      status=status.HTTP_400_BAD_REQUEST)
             user = User.objects.get(username=request.user.username)
             matched_member = Member.objects.get(user_id=user)
+            if not matched_member.member_type in ('B', 'T'):
+                return self.__generate_unsuccessful_response("The {user} does not have permission to access the courses list!",
+                                                             status=status.HTTP_403_FORBIDDEN)
             # only board member can see all course.
-            if matched_member.member_type != 'B':
-                courses = Course.objects.filter(course_status='A')
-            else:
-                courses = Course.objects.all()
+            courses = Course.objects.filter(course_status='A',
+                                            school_year_start=start,
+                                            school_year_end=end)
             courses_json = []
             # extract enrollment
             for c in courses:
