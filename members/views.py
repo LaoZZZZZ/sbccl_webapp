@@ -982,6 +982,7 @@ class MemberViewSet(ModelViewSet):
             old_course = matched_registration.course
             matched_registration.course = new_course
             matched_registration.last_update_date = datetime.datetime.today()
+            matched_registration.on_waiting_list = new_course.size_limit >= new_course.students.count()
             matched_registration.save()
             self.__set_up_payment__(matched_registration, member)
             user = User.objects.get(username=request.user)
