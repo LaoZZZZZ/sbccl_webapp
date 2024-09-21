@@ -25,7 +25,7 @@ class Coupon(models.Model):
 
     # Only valid if the type=P. Valid value is between 0 - 100
     # NOTE: percentage type coupon is not supported yet. Don't USE it.
-    percentage = models.FloatField(null=True)
+    percentage = models.FloatField(null=True, default=False)
     expiration_date = models.DateField(null=False)
     creation_date = models.DateField(null=False)
     creator = models.CharField(null=False)
@@ -68,7 +68,8 @@ class Member(models.Model):
     member_type = models.CharField(max_length=1, choices=MEMBER_TYPE, null=True)
 
     # The lastest date that the user signed the CCL terms. This is required for
-    # annual registration.
+    # annual registration. Null means the user never sign the term. Every year before
+    # school starts, user muse agree to 
     term_signed_date = models.DateField(null=True)
 
     def __str__(self):
@@ -93,7 +94,7 @@ class Student(models.Model):
     parent_id = models.ForeignKey('members.Member', on_delete=models.CASCADE)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
-    middle_name = models.CharField(max_length=255, null=True)
+    middle_name = models.CharField(max_length=255, null=True, default=False)
     GENDER_INFO = [
         ('M', 'Male'),
         ('F', 'Female'),
@@ -101,8 +102,8 @@ class Student(models.Model):
     gender = models.CharField(max_length=1, choices=GENDER_INFO)
     date_of_birth = models.DateField(null=True)
     # include both first and last name.
-    chinese_name = models.CharField(max_length=255, null=True)
-    joined_date = models.DateField(null=True)
+    chinese_name = models.CharField(max_length=255, null=True, default=False)
+    joined_date = models.DateField(null=True, default=False)
     
     def __str__(self):
         return 'First name: {first_name}\n Last name: {last_name}'.format(
@@ -132,7 +133,7 @@ class InstructorAssignment(models.Model):
 class Course(models.Model):
     name = models.CharField(max_length=255)
     students = models.ManyToManyField(Student, through="Registration")
-    course_description = models.CharField(max_length=1024)
+    course_description = models.CharField(max_length=1024, default=False)
     COURSE_TYPE = [
         ('L', 'Language'),
         ('E', 'Enrichment')
@@ -163,7 +164,7 @@ class Course(models.Model):
     course_start_time = models.TimeField(null=True)
     course_end_time = models.TimeField(null=True)
     # The cost of the textbook.
-    book_cost = models.FloatField(null=True)
+    book_cost = models.FloatField(null=True, default=0)
     school_year_start = models.IntegerField(null=False, default=2024)
     school_year_end = models.IntegerField(null=False, default=2025)
     available_date = models.DateField(null=True)
