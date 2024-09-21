@@ -61,19 +61,26 @@ export const getShownName = (course: ClassInformation) => {
   }
 };
 
-export const fetchCourses = async (auth: Auth, callback) => {
-  const response = await axios.get(
-    process.env.REACT_APP_BE_URL_PREFIX + "/rest_api/members/list-courses",
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      auth: {
-        username: auth.username,
-        password: auth.password,
-      },
-    }
-  );
+export const fetchCourses = async (
+  auth: Auth,
+  school_start,
+  school_end,
+  callback
+) => {
+  var url = "/rest_api/members/list-courses/";
+  if (school_start > 0 && school_end > 0) {
+    url = url + `?school_start=${school_start}&school_end=${school_end}`;
+  }
+
+  const response = await axios.get(process.env.REACT_APP_BE_URL_PREFIX + url, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    auth: {
+      username: auth.username,
+      password: auth.password,
+    },
+  });
 
   if (response.status === 200) {
     const courses = response.data.courses.map(JSON.parse);
