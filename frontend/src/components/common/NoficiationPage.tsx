@@ -81,7 +81,7 @@ export function NoficiationPage({ userInfo }: Props) {
 
   useEffect(() => {
     if (!courseState.fetched) {
-      fetchCourses(userInfo.auth, (response: CourseList) => {
+      fetchCourses(userInfo.auth, -1, -1, (response: CourseList) => {
         setCourseState({
           fetched: response.fetched,
           courses: addBroadcastGroups(userInfo).concat(response.courses),

@@ -1061,8 +1061,7 @@ class MemberViewSet(ModelViewSet):
             start = request.GET.get('school_start', None)
             end = request.GET.get('school_end', None)
             if not start or not end:
-                self.__generate_unsuccessful_response("Missing school year!",
-                                                      status=status.HTTP_400_BAD_REQUEST)
+                start, end = calender_utils.find_current_school_year()
             user = User.objects.get(username=request.user.username)
             matched_member = Member.objects.get(user_id=user)
             if not matched_member.member_type in ('B', 'T'):

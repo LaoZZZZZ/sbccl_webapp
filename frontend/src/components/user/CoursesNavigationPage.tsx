@@ -31,7 +31,7 @@ const CoursesNavigationPage = ({
 }: CoursesNavigationPageProps): JSX.Element => {
   // TODO(luzhao): Fetch the school info from the backend.
   const schoolYears = ["2024-2025"];
-  const [selectedYear, setSelectedYear] = useState("");
+  const [selectedYear, setSelectedYear] = useState("2024-2025");
   const [courseState, setCourseState] = useState<CourseList>({
     fetched: false,
     courses: [],
@@ -56,8 +56,14 @@ const CoursesNavigationPage = ({
     setRoster(roster);
   };
   useEffect(() => {
-    if (!courseState.fetched) {
-      fetchCourses(userAuth, handleFetchResponse);
+    if (selectedYear.length > 0 && !courseState.fetched) {
+      const school_year = selectedYear.split("-");
+      fetchCourses(
+        userAuth,
+        school_year[0],
+        school_year[1],
+        handleFetchResponse
+      );
     }
     if (selectedCourse.selected && !roster.fetched) {
       FetchCourseRoster(
