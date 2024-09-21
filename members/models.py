@@ -25,7 +25,7 @@ class Coupon(models.Model):
 
     # Only valid if the type=P. Valid value is between 0 - 100
     # NOTE: percentage type coupon is not supported yet. Don't USE it.
-    percentage = models.FloatField(null=True, default=False)
+    percentage = models.FloatField(null=True, blank=True)
     expiration_date = models.DateField(null=False)
     creation_date = models.DateField(null=False)
     creator = models.CharField(null=False)
@@ -57,7 +57,7 @@ class Member(models.Model):
         ('V', 'Verified')
     ]
     sign_up_status = models.CharField(max_length=1, choices=SIGN_UP_STATUS, null=True)
-    verification_code = models.CharField(max_length=255, null=True)
+    verification_code = models.CharField(max_length=255, null=True, blank=True)
 
     MEMBER_TYPE = [
         ('P', 'Parent'),
@@ -94,7 +94,7 @@ class Student(models.Model):
     parent_id = models.ForeignKey('members.Member', on_delete=models.CASCADE)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
-    middle_name = models.CharField(max_length=255, null=True, default=False)
+    middle_name = models.CharField(max_length=255, null=True, blank=True)
     GENDER_INFO = [
         ('M', 'Male'),
         ('F', 'Female'),
@@ -102,8 +102,8 @@ class Student(models.Model):
     gender = models.CharField(max_length=1, choices=GENDER_INFO)
     date_of_birth = models.DateField(null=True)
     # include both first and last name.
-    chinese_name = models.CharField(max_length=255, null=True, default=False)
-    joined_date = models.DateField(null=True, default=False)
+    chinese_name = models.CharField(max_length=255, null=True, blank=True)
+    joined_date = models.DateField(null=True, blank=True)
     
     def __str__(self):
         return 'First name: {first_name}\n Last name: {last_name}'.format(
@@ -133,7 +133,7 @@ class InstructorAssignment(models.Model):
 class Course(models.Model):
     name = models.CharField(max_length=255)
     students = models.ManyToManyField(Student, through="Registration")
-    course_description = models.CharField(max_length=1024, default=False)
+    course_description = models.CharField(max_length=1024, blank=True)
     COURSE_TYPE = [
         ('L', 'Language'),
         ('E', 'Enrichment')
