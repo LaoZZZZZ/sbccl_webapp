@@ -1853,7 +1853,7 @@ class MemberViewSetTest(APITestCase):
 
 
     def test_fetch_volunteers_per_class(self):
-         # Add class first
+        # Add class first
         exist_user = self.create_user('test_name', 'david@gmail.com')
         self.create_member(exist_user, sign_up_status='V',
                            verification_code="12345-1231", member_type='B')

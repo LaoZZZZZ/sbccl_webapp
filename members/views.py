@@ -783,7 +783,7 @@ class MemberViewSet(ModelViewSet):
             permission_classes=[permissions.IsAuthenticated])
     def list_volunteers(self, request, pk=None):
         """
-          Fetch all volunteers for this class. Mostly teaching assistant.
+          Fetch all volunteers for this class. Mostly teaching assistants.
         """
         try:
             user = User.objects.get(username=request.user)
