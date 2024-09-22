@@ -67,12 +67,13 @@ export const fetchCourses = async (
   school_end,
   callback
 ) => {
-  var url = "/rest_api/members/list-courses/";
+  var url =
+    process.env.REACT_APP_BE_URL_PREFIX + "/rest_api/members/list-courses/";
   if (school_start > 0 && school_end > 0) {
     url = url + `?school_start=${school_start}&school_end=${school_end}`;
   }
 
-  const response = await axios.get(process.env.REACT_APP_BE_URL_PREFIX + url, {
+  const response = await axios.get(url, {
     headers: {
       "Content-Type": "application/json",
     },

@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 
 import { RosterStudent, FetchCourseRoster } from "./FetchStudents.tsx";
 import { fetchCourses, CourseList } from "./FetchCourses.tsx";
-import { Auth } from "./UserInfo.tsx";
+import { Auth, UserDetails } from "./UserInfo.tsx";
 import RosterDetails from "../common/RosterDetails.tsx";
 import { CourseInfo } from "../common/CourseInfo.tsx";
 import Volunteers from "../common/Volunteers.tsx";
 import CourseDropList from "../common/CourseDropList.tsx";
+import { FetchVolunteers } from "../common/FetchVolunteers.tsx";
 
 // #region component
 interface CoursesNavigationPageProps {
@@ -16,6 +17,11 @@ interface CoursesNavigationPageProps {
 interface Roster {
   fetched: boolean;
   students: RosterStudent[];
+}
+
+interface Volunteers {
+  fetched: boolean;
+  volunteers: UserDetails[];
 }
 
 const ActiveTab = {
@@ -48,12 +54,20 @@ const CoursesNavigationPage = ({
     course: {},
   });
 
+  const [volunteers, setVolunteers] = useState<Volunteers>({
+    fetched: false,
+    volunteers: [],
+  });
+
   const handleFetchResponse = (response) => {
     setCourseState(response);
   };
 
   const handleRosterResponse = (roster: Roster) => {
     setRoster(roster);
+  };
+  const handleVolunteersResponse = (volunteers: Volunteers) => {
+    setVolunteers(volunteers);
   };
   useEffect(() => {
     if (selectedYear.length > 0 && !courseState.fetched) {
@@ -65,12 +79,21 @@ const CoursesNavigationPage = ({
         handleFetchResponse
       );
     }
-    if (selectedCourse.selected && !roster.fetched) {
-      FetchCourseRoster(
-        userAuth,
-        selectedCourse.course.id,
-        handleRosterResponse
-      );
+    if (selectedCourse.selected) {
+      if (!roster.fetched) {
+        FetchCourseRoster(
+          userAuth,
+          selectedCourse.course.id,
+          handleRosterResponse
+        );
+      }
+      if (!volunteers.fetched) {
+        FetchVolunteers(
+          userAuth,
+          selectedCourse.course.id,
+          handleVolunteersResponse
+        );
+      }
     }
   }, [courseState, roster, selectedCourse]);
 
@@ -115,6 +138,10 @@ const CoursesNavigationPage = ({
                   setRoster({
                     fetched: false,
                     students: [],
+                  });
+                  setVolunteers({
+                    fetched: false,
+                    volunteers: [],
                   });
                 }
               }}
@@ -179,7 +206,10 @@ const CoursesNavigationPage = ({
         />
       )}
       {selectedCourse.selected &&
-        activePage === ActiveTab.TeachingAssistant && <Volunteers />}
+        volunteers.fetched &&
+        activePage === ActiveTab.TeachingAssistant && (
+          <Volunteers volunteers={volunteers.volunteers} />
+        )}
     </div>
   );
 };
