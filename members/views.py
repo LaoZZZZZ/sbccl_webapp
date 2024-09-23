@@ -678,6 +678,43 @@ class MemberViewSet(ModelViewSet):
         except User.DoesNotExist:
             return self.__generate_unsuccessful_response("No user is found!", status.HTTP_404_NOT_FOUND)
 
+    @action(methods=['PUT'], detail=False, url_path='update-student', name='Update an existing student',
+            authentication_classes=[SessionAuthentication, BasicAuthentication],
+            permission_classes=[permissions.IsAuthenticated])
+    def update_student(self, request):
+        try:
+            serializer = StudentSerializer(data=request.data)
+            if not serializer.is_valid():
+                return self.__generate_unsuccessful_response(
+                    JSONRenderer().render(serializer.errors), status.HTTP_400_BAD_REQUEST)
+            user = User.objects.get(username=request.user.username)
+            matched_member = Member.objects.get(user_id=user)
+            
+            existing_students = Student.objects.filter(parent_id=matched_member)
+            matched_student = None
+            updated_student_info = serializer.validated_data
+            for s in existing_students:
+                if s.first_name.upper() == updated_student_info['first_name'].upper() and s.last_name.upper() == updated_student_info['last_name'].upper():
+                    matched_student = s
+                    break
+            if not matched_student:
+                return self.__generate_unsuccessful_response(
+                    "The student does not exist!", status=status.HTTP_400_BAD_REQUEST)
+            if 'date_of_birth' in updated_student_info:
+                matched_student.date_of_birth = updated_student_info['date_of_birth']
+            if 'middle_name' in updated_student_info:
+                matched_student.middle_name = updated_student_info['middle_name']
+            if 'chinese_name' in updated_student_info:
+                matched_student.chinese_name = updated_student_info['chinese_name']
+            if 'gender' in updated_student_info:
+                matched_student.gender = updated_student_info['gender']
+            matched_student.save()
+            return Response(status=status.HTTP_202_ACCEPTED)
+        except User.DoesNotExist:
+            return self.__generate_unsuccessful_response("No user is found!", status.HTTP_404_NOT_FOUND)
+        except ValueError as e:
+            return self.__generate_unsuccessful_response("Invalid student information!",
+                                                         status=status.HTTP_400_BAD_REQUEST)
 
     @action(methods=['PUT'], detail=False, url_path='remove-student', name='Remove student from member',
             authentication_classes=[SessionAuthentication, BasicAuthentication],
