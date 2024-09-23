@@ -266,6 +266,51 @@ class MemberViewSetTest(APITestCase):
         response = self.client.get('/rest_api/members/fetch-students/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_update_student_succeed(self):
+        exist_user = self.create_user('test_name', 'david@gmail.com')
+        self.create_member(exist_user)
+
+        student_json = {
+            'first_name': 'david',
+            'last_name': 'chatty',
+            'date_of_birth': '2015-10-01',
+            'gender': 'M'
+        }
+        self.client.force_authenticate(user=exist_user)
+        response = self.client.put('/rest_api/members/add-student/',
+                                data=student_json, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        member = Member.objects.get(user_id=exist_user)
+        student = Student.objects.get(parent_id=member)
+        self.assertEqual(student.last_name, 'chatty')
+        self.assertEqual(student.first_name, 'david')
+        self.assertIsNotNone(student.joined_date)
+
+        response = self.client.put('/rest_api/members/add-student/',
+                                data=student_json, format='json')
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+
+        updated_student_json = {
+            'first_name': 'david',
+            'last_name': 'chatty',
+            'date_of_birth': '2014-10-01',
+            'gender': 'F',
+            'middle_name': 'xx'
+        }
+
+        response = self.client.put('/rest_api/members/update-student/',
+                                data=updated_student_json, format='json')
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+        # Fetch the students
+        response = self.client.get('/rest_api/members/fetch-students/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue('students' in response.data)
+        self.assertEqual(len(response.data['students']), 1)
+        fetched_student = json.loads(response.data['students'][0])
+        self.assertEqual(fetched_student['gender'], 'F')
+        self.assertEqual(fetched_student['date_of_birth'], '2014-10-01')
+        self.assertEqual(fetched_student['middle_name'], 'xx')
 
     def test_add_invalid_student_fail(self):
         exist_user = self.create_user('test_name', 'david@gmail.com')
