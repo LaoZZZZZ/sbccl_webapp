@@ -447,10 +447,13 @@ class MemberViewSetTest(APITestCase):
         self.assertEqual(persited_course.last_update_person, exist_user.username)
 
     def test_list_course_succeed(self):
+        from .calender_utils import find_current_school_year
+
         exist_user = self.create_user('test_name', 'david@gmail.com')
         self.create_member(exist_user, sign_up_status='V',
                            verification_code="12345-1231", member_type='B')
-        
+        start, end = find_current_school_year()
+        list_course_url = '/rest_api/members/list-courses/?school_start={start}&school_end={end}'.format(start=start, end=end)
         course_json = {
             'name': "B1A",
             'course_description': 'Morning session for grade 1 class.',
@@ -461,8 +464,8 @@ class MemberViewSetTest(APITestCase):
             'classroom': 'N402',
             'course_start_time': '10:00:00',
             'course_end_time': '11:50:00',
-            'school_year_start': 2023,
-            'school_year_end': 2024
+            'school_year_start': start,
+            'school_year_end': end
         }
 
         self.client.force_authenticate(user=exist_user)
@@ -470,7 +473,7 @@ class MemberViewSetTest(APITestCase):
                                    data=course_json, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        response = self.client.get('/rest_api/members/list-courses/?school_start=2023&school_end=2024',
+        response = self.client.get(list_course_url,
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['courses']), 1)
@@ -486,7 +489,7 @@ class MemberViewSetTest(APITestCase):
         teacher_member = self.create_member(teacher_user, sign_up_status='V',
                            verification_code="12345-1231", member_type='T')
         self.client.force_authenticate(user=teacher_user)
-        response = self.client.get('/rest_api/members/list-courses/?school_start=2023&school_end=2024',
+        response = self.client.get(list_course_url,
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['courses']), 0)
@@ -496,15 +499,15 @@ class MemberViewSetTest(APITestCase):
         assignment = InstructorAssignment(
             course = course,
             instructor = teacher_member,
-            expiration_date = datetime.datetime(2024, 7, 1),
-            school_year_start = datetime.datetime(2023, 9, 1),
-            school_year_end = datetime.datetime(2024, 6, 28),
+            expiration_date = datetime.datetime(end, 7, 1),
+            school_year_start = datetime.datetime(start, 9, 1),
+            school_year_end = datetime.datetime(end, 6, 28),
             assigned_date = datetime.datetime.today(),
             last_update_date = datetime.datetime.today(),
             last_update_person = 'Lu Zhao'
         )
         assignment.save()
-        response = self.client.get('/rest_api/members/list-courses/?school_start=2023&school_end=2024',
+        response = self.client.get(list_course_url,
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['courses']), 1)

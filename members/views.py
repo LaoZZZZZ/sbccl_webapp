@@ -1088,7 +1088,7 @@ class MemberViewSet(ModelViewSet):
     @action(methods=['GET'], detail=False, url_path='list-courses', name='list all courses',
         authentication_classes=[SessionAuthentication, BasicAuthentication],
         permission_classes=[permissions.IsAuthenticated])
-    def list_courses(self, request, school_start = None, school_end = None):
+    def list_courses(self, request):
         """
         Returns a list of courses
 
@@ -1097,14 +1097,12 @@ class MemberViewSet(ModelViewSet):
         try:
             start = request.GET.get('school_start', None)
             end = request.GET.get('school_end', None)
-            if not start or not end:
-                start, end = calender_utils.find_current_school_year()
+
             user = User.objects.get(username=request.user.username)
             matched_member = Member.objects.get(user_id=user)
-            if not matched_member.member_type in ('B', 'T'):
-                return self.__generate_unsuccessful_response("The {user} does not have permission to access the courses list!",
-                                                             status=status.HTTP_403_FORBIDDEN)
             # only board member can see all course.
+            if not start or not end or matched_member.member_type != 'B':
+                start, end = calender_utils.find_current_school_year()                
             courses = Course.objects.filter(course_status='A',
                                             school_year_start=start,
                                             school_year_end=end)
@@ -1113,7 +1111,7 @@ class MemberViewSet(ModelViewSet):
             for c in courses:
                 # should only show course that is taught by the teacher
                 # TODO(lu): For eacher, they should only be able to see roster and teacher information for active course.
-                if matched_member.member_type == 'T' and not self.__course_taught_by_teacher__(matched_member, c):
+                if matched_member.member_type in ('T', 'V') and not self.__course_taught_by_teacher__(matched_member, c):
                     continue
                 course_data = CourseSerializer(c).data
                 course_data['enrollment'] = c.students.count()

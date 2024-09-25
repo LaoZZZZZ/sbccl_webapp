@@ -85,7 +85,7 @@ export const fetchCourses = async (
 
   if (response.status === 200) {
     const courses = response.data.courses.map(JSON.parse);
-    courses.sort((a, b) => {
+    courses.sort((a: ClassInformation, b: ClassInformation) => {
       if (a.course_type < b.course_type) {
         return -1;
       } else if (a.course_type > b.course_type) {

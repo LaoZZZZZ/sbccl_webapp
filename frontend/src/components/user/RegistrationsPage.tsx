@@ -75,7 +75,7 @@ const Registrations = ({ userInfo }: Props) => {
       });
     }
     if (!courseState.fetched) {
-      fetchCourses(userInfo.auth, (response) => {
+      fetchCourses(userInfo.auth, -1, -1, (response) => {
         setCourseState({
           fetched: true,
           value: response.courses,
