@@ -33,12 +33,9 @@ class NotificationUtils(object):
         return member.member_type() in ('T', 'B')
     
     def parse_notification_request(request: dict):
-        if 'broadcast' in request:
+        if 'broadcast' in request and request['broadcast'] != 'None':
             if 'recipient' in request and request['recipient'] != -1:
-                if request['broadcast'] != 'None':
-                    raise ValueError("Invalid request: can not accpet more than one recipients!")
-                else:
-                    return NotificationUtils.__get_all_parent_per_class(request['recipient'])
+                raise ValueError("Invalid request: can not accpet more than one recipients!")
             else:
                 if request['broadcast'] == 'AllParent':
                     return NotificationUtils.__get_all_parents()
