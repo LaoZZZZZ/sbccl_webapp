@@ -21,6 +21,7 @@ class NotificationUtils(object):
     
     def __get_all_parent_per_class(course_id):
         course = Course.objects.get(id=course_id)
+        print('matched course:', course)
         all_parent_emails = set()
         for student in course.students.all():
             all_parent_emails.add(student.parent_id.user_id.email)
@@ -33,14 +34,18 @@ class NotificationUtils(object):
     
     def parse_notification_request(request: dict):
         if 'broadcast' in request:
-            if request['recipient'] != -1 and request['broadcast'] != 'None':
-                raise ValueError("Invalid request: can not accpet more than one recipients!")
-            if request['broadcast'] == 'AllParent':
-                return NotificationUtils.__get_all_parents()
+            if 'recipient' in request and request['recipient'] != -1:
+                if request['broadcast'] != 'None':
+                    raise ValueError("Invalid request: can not accpet more than one recipients!")
+                else:
+                    return NotificationUtils.__get_all_parent_per_class(request['recipient'])
             else:
-                # Does not support yet.
-                print("Unsupported notification mode %s".format(request['broadcast']))
-                return []
+                if request['broadcast'] == 'AllParent':
+                    return NotificationUtils.__get_all_parents()
+                else:
+                    # Does not support yet.
+                    print("Unsupported notification mode %s".format(request['broadcast']))
+                    return []
         if 'recipient' not in request or request['recipient'] == -1:
             raise ValueError("Invalid request: No recipient is specified!")
         return NotificationUtils.__get_all_parent_per_class(request['recipient'])
@@ -52,14 +57,17 @@ class NotificationUtils(object):
             raise ValueError("Invalid request: No subject is provided in the email!")
         body = message['body']
         if len(body) <=0:
-            raise ValueError("Invalid request: No email body is provided!") 
-        print(subject, body, list(all_receivers))
+            raise ValueError("Invalid request: No email body is provided!")
+        cced = set()
+        if 'cced' in message:
+            cced = set(message['cced'])
+        cced.add(sender.email) 
         
         email = EmailMessage(
             subject,
             body,
             from_email = "no-reply@sbcclny.com",
-            cc = [sender.email],
+            cc = list(cced),
             bcc = list(all_receivers),
             headers={"Message-ID": "Notification"},
         )
