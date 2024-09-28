@@ -35,12 +35,12 @@ const addBroadcastGroups = (userInfo: AccountInfo) => {
       name: "All Parents",
     } as ClassInformation,
     // TODO(luke): Bring these use cases back once the backend supports it.
-    // {
-    //   name: "All Teachers",
-    // } as ClassInformation,
-    // {
-    //   name: "All Teaching Assistants",
-    // } as ClassInformation,
+    {
+      name: "All Teachers",
+    } as ClassInformation,
+    {
+      name: "All Teaching Assistants",
+    } as ClassInformation,
   ];
 };
 
