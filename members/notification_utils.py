@@ -19,7 +19,7 @@ class NotificationUtils(object):
                 all_parent_emails.add(student.parent_id.user_id.email)
         return all_parent_emails
     
-    def __get_all_teachers():
+    def __get_all_instructor(member_type):
         start, end = find_current_school_year()
         active_courses = Course.objects.filter(course_type='L',
                                         course_status='A',
@@ -28,8 +28,10 @@ class NotificationUtils(object):
         all_teacher_emails = set()
         for c in active_courses:
            for instructor in c.instructor.all() :
-                all_teacher_emails.add(instructor.user_id.email)
+                if instructor.member_type == member_type:
+                    all_teacher_emails.add(instructor.user_id.email)
         return all_teacher_emails
+    
     
     def __get_all_parent_per_class(course_id):
         course = Course.objects.get(id=course_id)
@@ -52,7 +54,9 @@ class NotificationUtils(object):
                 if request['broadcast'] == 'AllParent':
                     return NotificationUtils.__get_all_parents()
                 elif request['broadcast'] == 'AllTeacher':
-                    return NotificationUtils.__get_all_teachers()
+                    return NotificationUtils.__get_all_instructor('T')
+                elif request['broadcast'] == 'AllTa':
+                    return NotificationUtils.__get_all_instructor('V')
                 else:
                     # Does not support yet.
                     raise ValueError("Unsupporte broadcast group: {op}".format(op = request['broadcast']))

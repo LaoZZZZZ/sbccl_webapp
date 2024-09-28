@@ -2108,7 +2108,7 @@ class MemberViewSetTest(APITestCase):
         # Can be either boradcast or a class id. Cannot be both
         notification_request = {
             'message': {
-                'broadcast': 'AllTeacher',
+                'broadcast': 'AllTa',
                 'subject': 'Test subject',
                 'body': 'Mesage body',
                 'cced': ['test1@hotmail.com'],
