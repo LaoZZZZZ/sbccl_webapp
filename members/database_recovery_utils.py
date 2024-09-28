@@ -134,13 +134,13 @@ def call_add_registration_api(url, data):
 if __name__ == '__main__':
     url = 'http://prod.api.sbcclny.com/rest_api/members/batch-add-teachers/'
     dev_url = 'http://localhost:8000/rest_api/members/batch-add-teachers/'
-    filename = '/Users/luzhao/Downloads/teacher_information.csv'
-    # call_add_teacher_api(url, load_csv(filename))
-    language_roster_file = '/Users/luzhao/Downloads/language_student_registration_2024-09-16.csv'
-    raw_roster_file = '/Users/luzhao/Downloads/recovered_registration.csv'
-    registration_data = parse_registration_page(raw_roster_file, language_roster_file)
+    filename = '/Users/luzhao/Downloads/enrichment_class_roster_for_admin_2024.csv'
+    call_add_teacher_api(url, load_csv(filename))
+    # language_roster_file = '/Users/luzhao/Downloads/language_student_registration_2024-09-16.csv'
+    # raw_roster_file = '/Users/luzhao/Downloads/recovered_registration.csv'
+    # registration_data = parse_registration_page(raw_roster_file, language_roster_file)
 
-    url = 'http://prod.api.sbcclny.com/rest_api/members/batch-add-registrations/'
-    dev_url = 'http://localhost:8000/rest_api/members/batch-add-registrations/'
-    call_add_registration_api(url, registration_data)
+    # url = 'http://prod.api.sbcclny.com/rest_api/members/batch-add-registrations/'
+    # dev_url = 'http://localhost:8000/rest_api/members/batch-add-registrations/'
+    # call_add_registration_api(url, registration_data)
     # check_recovered_registration(raw_roster_file)

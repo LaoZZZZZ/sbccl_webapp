@@ -2072,3 +2072,62 @@ class MemberViewSetTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue('account_details' in response.data)
         self.assertTrue('term_signed_date' in response.data['account_details'])
+    
+    def test_send_notification(self):
+        exist_user = self.create_user('test_name', 'david@gmail.com')
+        member = self.create_member(exist_user, sign_up_status='V',
+                           verification_code="12345-1231", member_type='B')
+        self.client.force_authenticate(user=exist_user)
+
+        notification_request = {
+            'message': {
+                'broadcast': 'AllParent',
+                'subject': 'Test subject',
+                'body': 'Mesage body',
+                'cced': ['test1@hotmail.com'],
+                'recipient': -1
+            }
+        }
+        response = self.client.put('/rest_api/members/send-notification/', data=notification_request,
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+
+        notification_request = {
+            'message': {
+                'broadcast': 'AllTeacher',
+                'subject': 'Test subject',
+                'body': 'Mesage body',
+                'cced': ['test1@hotmail.com'],
+                'recipient': -1
+            }
+        }
+        response = self.client.put('/rest_api/members/send-notification/', data=notification_request,
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+
+        # Can be either boradcast or a class id. Cannot be both
+        notification_request = {
+            'message': {
+                'broadcast': 'AllTa',
+                'subject': 'Test subject',
+                'body': 'Mesage body',
+                'cced': ['test1@hotmail.com'],
+                'recipient': 1
+            }
+        }
+        response = self.client.put('/rest_api/members/send-notification/', data=notification_request,
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        notification_request = {
+            'message': {
+                'broadcast': 'Invalid',
+                'subject': 'Test subject',
+                'body': 'Mesage body',
+                'cced': ['test1@hotmail.com'],
+                'recipient': -1
+            }
+        }
+        response = self.client.put('/rest_api/members/send-notification/', data=notification_request,
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

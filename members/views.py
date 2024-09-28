@@ -1274,7 +1274,7 @@ class MemberViewSet(ModelViewSet):
             if 'message' not in request.data:
                 raise ValidationError("No message is provided in the notification request!")
             NotificationUtils.notify(user, request.data['message'])
-            return Response(status=status.HTTP_201_CREATED)
+            return Response(status=status.HTTP_202_ACCEPTED)
         except ValueError as e:
             return self.__generate_unsuccessful_response(str(e), status.HTTP_400_BAD_REQUEST)
         except (PermissionError, User.DoesNotExist, Member.DoesNotExist) as e:
