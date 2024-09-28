@@ -19,6 +19,18 @@ class NotificationUtils(object):
                 all_parent_emails.add(student.parent_id.user_id.email)
         return all_parent_emails
     
+    def __get_all_teachers():
+        start, end = find_current_school_year()
+        active_courses = Course.objects.filter(course_type='L',
+                                        course_status='A',
+                                        school_year_start=start,
+                                        school_year_end=end)
+        all_teacher_emails = set()
+        for c in active_courses:
+            for student in c.students.all():
+                all_teacher_emails.add(student.parent_id.user_id.email)
+        return all_teacher_emails
+    
     def __get_all_parent_per_class(course_id):
         course = Course.objects.get(id=course_id)
         print('matched course:', course)
@@ -39,6 +51,8 @@ class NotificationUtils(object):
             else:
                 if request['broadcast'] == 'AllParent':
                     return NotificationUtils.__get_all_parents()
+                elif request['broadcast'] == 'AllTeacher':
+                    return NotificationUtils.__get_all_teachers()
                 else:
                     # Does not support yet.
                     print("Unsupported notification mode %s".format(request['broadcast']))
