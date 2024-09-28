@@ -5,7 +5,7 @@ export enum BroadCastEvent {
   None = "None",
   AllParent = "AllParent",
   AllTeacher = "AllTeacher",
-  AllTeachingAssistant = "AllTeachingAssistant",
+  AllTeachingAssistant = "AllTa",
 }
 
 export interface Notification {
