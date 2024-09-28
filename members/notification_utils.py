@@ -27,8 +27,8 @@ class NotificationUtils(object):
                                         school_year_end=end)
         all_teacher_emails = set()
         for c in active_courses:
-            for student in c.students.all():
-                all_teacher_emails.add(student.parent_id.user_id.email)
+           for instructor in c.instructor.all() :
+                all_teacher_emails.add(instructor.user_id.email)
         return all_teacher_emails
     
     def __get_all_parent_per_class(course_id):
@@ -55,8 +55,7 @@ class NotificationUtils(object):
                     return NotificationUtils.__get_all_teachers()
                 else:
                     # Does not support yet.
-                    print("Unsupported notification mode %s".format(request['broadcast']))
-                    return []
+                    raise ValueError("Unsupporte broadcast group: {op}".format(op = request['broadcast']))
         if 'recipient' not in request or request['recipient'] == -1:
             raise ValueError("Invalid request: No recipient is specified!")
         return NotificationUtils.__get_all_parent_per_class(request['recipient'])
