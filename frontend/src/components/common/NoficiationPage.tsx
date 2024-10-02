@@ -41,6 +41,12 @@ const addBroadcastGroups = (userInfo: AccountInfo) => {
     {
       name: "All Teaching Assistants",
     } as ClassInformation,
+    {
+      name: "All Language Teachers",
+    } as ClassInformation,
+    {
+      name: "All Enrichment Teachers",
+    } as ClassInformation,
   ];
 };
 
@@ -53,6 +59,12 @@ const getBroadcastEvent = (event) => {
   }
   if (event === "All Teaching Assistants") {
     return BroadCastEvent.AllTeachingAssistant;
+  }
+  if (event === "All Language Teachers") {
+    return BroadCastEvent.AllLanguageTeacher;
+  }
+  if (event === "All Enrichment Teachers") {
+    return BroadCastEvent.AllEnrichmentTeacher;
   }
   return BroadCastEvent.None;
 };
