@@ -19,12 +19,17 @@ class NotificationUtils(object):
                 all_parent_emails.add(student.parent_id.user_id.email)
         return all_parent_emails
     
-    def __get_all_instructor(member_type):
+    def __get_all_instructor(member_type, course_type = 'E'):
         start, end = find_current_school_year()
-        active_courses = Course.objects.filter(course_type='L',
-                                        course_status='A',
-                                        school_year_start=start,
-                                        school_year_end=end)
+        if course_type:
+            active_courses = Course.objects.filter(course_type=course_type,
+                                                   course_status='A',
+                                                   school_year_start=start,
+                                                   school_year_end=end)
+        else:
+            active_courses = Course.objects.filter(course_status='A',
+                                                   school_year_start=start,
+                                                   school_year_end=end)
         all_teacher_emails = set()
         for c in active_courses:
            for instructor in c.instructor.all() :
@@ -54,7 +59,11 @@ class NotificationUtils(object):
                 if request['broadcast'] == 'AllParent':
                     return NotificationUtils.__get_all_parents()
                 elif request['broadcast'] == 'AllTeacher':
-                    return NotificationUtils.__get_all_instructor('T')
+                    return NotificationUtils.__get_all_instructor('T', None)
+                elif request['broadcast'] == 'AllLanguageTeacher':
+                    return NotificationUtils.__get_all_instructor('T', 'L')
+                elif request['broadcast'] == 'AllEnrichmentTeacher':
+                    return NotificationUtils.__get_all_instructor('T', 'E')
                 elif request['broadcast'] == 'AllTa':
                     return NotificationUtils.__get_all_instructor('V')
                 else:
