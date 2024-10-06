@@ -1566,3 +1566,73 @@ class MemberViewSet(ModelViewSet):
             'message': msg
         }
         return Response(content, status=status.HTTP_201_CREATED)
+    
+    @action(methods=['PUT'], detail=False, url_path='batch-update-students',
+        name='Update student information',
+        authentication_classes=[SessionAuthentication, BasicAuthentication],
+        permission_classes=[permissions.IsAuthenticated])
+    def BatchUpdateStudents(self, request):
+        if not 'students' in request.data:
+            self.__generate_unsuccessful_response(
+                "No students are found in the payload", status=status.HTTP_400_BAD_REQUEST)
+        not_found_students = 0
+        duplicated_student = 0
+        num_invalid_rows = 0
+        updated_students = 0
+        total_processed_student = len(request.data['students'])
+        for s in request.data['students']:
+            name_parts = s['student_name'].split()
+            if len(name_parts) != 2:
+                num_invalid_rows += 1
+                continue
+            first_name = name_parts[0]
+            last_name = name_parts[1]
+            if not 'date_of_birth' in s or not s['date_of_birth']:
+                num_invalid_rows += 1
+                continue
+            date_of_birth = datetime.datetime.strptime(s['date_of_birth'], '%m/%d/%Y').date()
+            if not 'gender' in s:
+                num_invalid_rows += 1
+                continue
+            gender = 'M'
+            if s['gender'].lower() in ('male', 'M'):
+                gender = 'M'
+            else:
+                gender = 'F'
+            persisted_student = Student.objects.filter(last_name__iexact = last_name,
+                                                       first_name__iexact = first_name,
+                                                       gender__iexact = gender)
+            if not persisted_student:
+                not_found_students + 1
+                continue
+            if len(persisted_student) > 1:
+                duplicated_student += 1
+                continue
+            total_processed_student += 1
+            changed = False
+            if persisted_student[0].date_of_birth != date_of_birth:    
+                changed = True
+                persisted_student[0].date_of_birth = date_of_birth
+            if 'chinese_name' in s and s['chinese_name'].strip():
+                changed = True
+                persisted_student[0].chinese_name = s['chinese_name'].strip()
+            if changed:
+                persisted_student[0].save()
+                updated_students += 1
+        msg ='Total processed student: {total}. \n Duplicated_student: {duplicated_student}. \n Not found student: {not_found}. \n Updated student: {updated}'.format(
+                total = total_processed_student,
+                duplicated_student = duplicated_student,
+                not_found = not_found_students,
+                updated = updated_students
+            )
+        return Response(msg, status=status.HTTP_202_ACCEPTED)
+
+    @action(methods=['PUT'], detail=False, url_path='batch-add-payments',
+            name='Add payments records for existing registrations',
+            authentication_classes=[SessionAuthentication, BasicAuthentication],
+            permission_classes=[permissions.IsAuthenticated])
+    def AddPayments(self, request):
+        if 'payments' not in request:
+            self.__generate_unsuccessful_response("No payments are found in the payload",
+                                                  status=status.HTTP_400_BAD_REQUEST)
+        

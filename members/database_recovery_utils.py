@@ -2,7 +2,7 @@ import csv
 import json
 from requests.auth import HTTPBasicAuth
 import requests
-
+import sys, getopt
 
 def load_csv(filename):
     with open(filename, newline='')  as csvfile:
@@ -131,16 +131,37 @@ def call_add_registration_api(url, data):
     resp = requests.put(url, data=json.dumps(registrations), headers=headers, auth=HTTPBasicAuth('luzhao1986@gmail.com', 'Sandy@2013'))
     print(resp.json())
 
-if __name__ == '__main__':
-    url = 'http://prod.api.sbcclny.com/rest_api/members/batch-add-teachers/'
-    dev_url = 'http://localhost:8000/rest_api/members/batch-add-teachers/'
-    filename = '/Users/luzhao/Downloads/enrichment_class_roster_for_admin_2024.csv'
-    call_add_teacher_api(url, load_csv(filename))
-    # language_roster_file = '/Users/luzhao/Downloads/language_student_registration_2024-09-16.csv'
-    # raw_roster_file = '/Users/luzhao/Downloads/recovered_registration.csv'
-    # registration_data = parse_registration_page(raw_roster_file, language_roster_file)
+def call_update_students_api(url, data):
+    headers = {'Content-type': 'application/json', 'Accept': 'application/json, text/plain, */*'}
 
-    # url = 'http://prod.api.sbcclny.com/rest_api/members/batch-add-registrations/'
-    # dev_url = 'http://localhost:8000/rest_api/members/batch-add-registrations/'
-    # call_add_registration_api(url, registration_data)
-    # check_recovered_registration(raw_roster_file)
+    registrations = {'students': data}
+    resp = requests.put(url, data=json.dumps(registrations), headers=headers, auth=HTTPBasicAuth('luzhao1986@gmail.com', 'Sandy@2013'))
+    print(resp.json())
+
+if __name__ == '__main__':
+    api_url = ''
+    input_file = ''
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hi:u:o", ["url", "input_file"])
+        for o, a in opts:
+            if o in ('-u', '--url'):
+                api_url = a                 
+            elif o in ('-i', '--input_file'):
+                input_file = a
+    except getopt.GetoptError as e:
+        print("Failed to parse provided parameters")
+    
+    if not api_url or not input_file:
+        print("Missing required arguments!")
+
+    if api_url.endswith('batch-add-teachers/'):
+        print(input_file)
+        call_add_teacher_api(api_url, load_csv(input_file))
+    elif api_url.endswith('batch-add-registrations/'):
+        intput_files = input_file.split(',')
+        if len(intput_files) != 2:
+            raise ValueError(f'Invalid input file: {input_file}')
+        call_add_registration_api(api_url, intput_files[0], intput_files[1])
+    elif api_url.endswith('batch-update-students/'):
+        print(load_csv(input_file))
+        call_update_students_api(api_url, load_csv(input_file))
