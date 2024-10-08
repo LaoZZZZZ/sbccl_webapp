@@ -134,8 +134,15 @@ def call_add_registration_api(url, data):
 def call_update_students_api(url, data):
     headers = {'Content-type': 'application/json', 'Accept': 'application/json, text/plain, */*'}
 
-    registrations = {'students': data}
-    resp = requests.put(url, data=json.dumps(registrations), headers=headers, auth=HTTPBasicAuth('luzhao1986@gmail.com', 'Sandy@2013'))
+    students = {'students': data}
+    resp = requests.put(url, data=json.dumps(students), headers=headers, auth=HTTPBasicAuth('luzhao1986@gmail.com', 'Sandy@2013'))
+    print(resp.json())
+
+def call_add_payment_api(url, data):
+    headers = {'Content-type': 'application/json', 'Accept': 'application/json, text/plain, */*'}
+
+    payments = {'payments': data}
+    resp = requests.put(url, data=json.dumps(payments), headers=headers, auth=HTTPBasicAuth('luzhao1986@gmail.com', 'Sandy@2013'))
     print(resp.json())
 
 if __name__ == '__main__':
@@ -154,14 +161,10 @@ if __name__ == '__main__':
     if not api_url or not input_file:
         print("Missing required arguments!")
 
-    if api_url.endswith('batch-add-teachers/'):
-        print(input_file)
-        call_add_teacher_api(api_url, load_csv(input_file))
-    elif api_url.endswith('batch-add-registrations/'):
+    if api_url.endswith('batch-add-registrations/'):
         intput_files = input_file.split(',')
         if len(intput_files) != 2:
             raise ValueError(f'Invalid input file: {input_file}')
         call_add_registration_api(api_url, intput_files[0], intput_files[1])
-    elif api_url.endswith('batch-update-students/'):
-        print(load_csv(input_file))
-        call_update_students_api(api_url, load_csv(input_file))
+    else:
+        call_add_teacher_api(api_url, load_csv(input_file))

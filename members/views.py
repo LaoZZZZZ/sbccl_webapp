@@ -1579,7 +1579,7 @@ class MemberViewSet(ModelViewSet):
         duplicated_student = 0
         num_invalid_rows = 0
         updated_students = 0
-        total_processed_student = len(request.data['students'])
+        total_processed_payments = len(request.data['students'])
         for s in request.data['students']:
             name_parts = s['student_name'].split()
             if len(name_parts) != 2:
@@ -1632,7 +1632,60 @@ class MemberViewSet(ModelViewSet):
             authentication_classes=[SessionAuthentication, BasicAuthentication],
             permission_classes=[permissions.IsAuthenticated])
     def AddPayments(self, request):
-        if 'payments' not in request:
+        if 'payments' not in request.data:
             self.__generate_unsuccessful_response("No payments are found in the payload",
                                                   status=status.HTTP_400_BAD_REQUEST)
-        
+        duplicated_registration = 0
+        num_invalid_rows = 0
+        invalid_payment = 0
+        updated_payment = 0
+        total_processed_student = len(request.data['payments'])
+        for payment in request.data['payments']:
+            name_parts = payment['student_name'].split()
+            if len(name_parts) != 2:
+                num_invalid_rows += 1
+                continue
+            first_name = name_parts[0]
+            last_name = name_parts[1]
+            if not 'class' in payment or not 'tuition_payment' in payment:
+                num_invalid_rows += 1
+                continue               
+            gender = 'M'
+            if payment['gender'].lower() in ('male', 'M'):
+                gender = 'M'
+            else:
+                gender = 'F'
+            registration = Registration.objects.filter(
+                course__name = payment['class'],
+                student__first_name__iexact = first_name,
+                student__last_name__iexact = last_name,
+                student__gender = gender
+            )
+            if not registration or len(registration) > 1:
+                duplicated_registration += 1
+                continue
+
+            persisted_payment = Payment.objects.filter(registration = registration[0])
+            # Update payment.
+            if not persisted_payment or len(persisted_payment) > 1:
+                invalid_payment += 1
+                continue
+
+            persisted_payment[0].amount_in_dollar = payment['tuition_payment']
+            persisted_payment[0].pay_date = datetime.datetime.today()
+            persisted_payment[0].last_udpate_date = datetime.datetime.today()
+            if persisted_payment[0].original_amount > persisted_payment[0].amount_in_dollar:
+                persisted_payment[0].payment_status = 'PP'
+            else:
+                persisted_payment[0].payment_status = 'FP'
+            persisted_payment[0].payment_method = 'EL'
+            persisted_payment[0].save()
+
+            updated_payment += 1
+        msg ='Total processed payment: {total}. \n Duplicated_registration: {duplicated}. \n Invalid payment: {invalid_payment}. \n Updated payment: {updated}'.format(
+                total = total_processed_student,
+                duplicated = duplicated_registration,
+                invalid_payment = invalid_payment,
+                updated = updated_payment
+            )
+        return Response(msg, status=status.HTTP_202_ACCEPTED)
