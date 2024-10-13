@@ -117,11 +117,10 @@ def check_recovered_registration(registration_detail_file):
                 print(row)
                 continue
 
-def call_add_teacher_api(url, data):
+def call_api(url, data):
     headers = {'Content-type': 'application/json', 'Accept': 'application/json, text/plain, */*'}
 
-    teachers = {'teachers': data}
-    resp = requests.put(url, data=json.dumps(teachers), headers=headers, auth=HTTPBasicAuth('luzhao1986@gmail.com', 'Sandy@2013'))
+    resp = requests.put(url, data=json.dumps(data), headers=headers, auth=HTTPBasicAuth('luzhao1986@gmail.com', 'Sandy@2013'))
     print(resp.text)
 
 def call_add_registration_api(url, data):
@@ -167,4 +166,4 @@ if __name__ == '__main__':
             raise ValueError(f'Invalid input file: {input_file}')
         call_add_registration_api(api_url, intput_files[0], intput_files[1])
     else:
-        call_add_teacher_api(api_url, load_csv(input_file))
+        call_api(api_url, load_csv(input_file))
