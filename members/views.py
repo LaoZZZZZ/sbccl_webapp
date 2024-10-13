@@ -1632,15 +1632,20 @@ class MemberViewSet(ModelViewSet):
             authentication_classes=[SessionAuthentication, BasicAuthentication],
             permission_classes=[permissions.IsAuthenticated])
     def AddPayments(self, request):
-        if 'payments' not in request.data:
+        if not request.data:
             self.__generate_unsuccessful_response("No payments are found in the payload",
                                                   status=status.HTTP_400_BAD_REQUEST)
+        missing_registration = 0
         duplicated_registration = 0
         num_invalid_rows = 0
         invalid_payment = 0
         updated_payment = 0
-        total_processed_student = len(request.data['payments'])
-        for payment in request.data['payments']:
+        inactive_registration = 0
+        total_processed_student = len(request.data)
+        for payment in request.data:
+            if 'status' in payment and payment['status'].lower() == 'inactive':
+                inactive_registration += 1
+                continue
             name_parts = payment['student_name'].split()
             if len(name_parts) != 2:
                 num_invalid_rows += 1
@@ -1659,19 +1664,25 @@ class MemberViewSet(ModelViewSet):
                 course__name = payment['class'],
                 student__first_name__iexact = first_name,
                 student__last_name__iexact = last_name,
-                student__gender = gender
+                student__gender = gender,
+                course__course_type = 'L'
             )
-            if not registration or len(registration) > 1:
+            if not registration:
+                missing_registration += 1
+                continue
+
+            if len(registration) > 1:
+                print(registration)
                 duplicated_registration += 1
                 continue
 
-            persisted_payment = Payment.objects.filter(registration = registration[0])
+            persisted_payment = Payment.objects.filter(registration_code_id = registration[0])
             # Update payment.
             if not persisted_payment or len(persisted_payment) > 1:
                 invalid_payment += 1
                 continue
 
-            persisted_payment[0].amount_in_dollar = payment['tuition_payment']
+            persisted_payment[0].amount_in_dollar = float(payment['tuition_payment'])
             persisted_payment[0].pay_date = datetime.datetime.today()
             persisted_payment[0].last_udpate_date = datetime.datetime.today()
             if persisted_payment[0].original_amount > persisted_payment[0].amount_in_dollar:
@@ -1680,10 +1691,13 @@ class MemberViewSet(ModelViewSet):
                 persisted_payment[0].payment_status = 'FP'
             persisted_payment[0].payment_method = 'EL'
             persisted_payment[0].save()
-
             updated_payment += 1
-        msg ='Total processed payment: {total}. \n Duplicated_registration: {duplicated}. \n Invalid payment: {invalid_payment}. \n Updated payment: {updated}'.format(
+
+        msg ='Total processed payment: {total}. \n Invalid rows: {invalid_rows}. Inactive registration {inactive},\n Missing registration: {missing} \nDuplicated_registration: {duplicated}. \n Invalid payment: {invalid_payment}. \n Updated payment: {updated}'.format(
                 total = total_processed_student,
+                inactive = inactive_registration,
+                invalid_rows = num_invalid_rows,
+                missing = missing_registration,
                 duplicated = duplicated_registration,
                 invalid_payment = invalid_payment,
                 updated = updated_payment
