@@ -1681,7 +1681,8 @@ class MemberViewSet(ModelViewSet):
             if not persisted_payment or len(persisted_payment) > 1:
                 invalid_payment += 1
                 continue
-
+            if not 'tuition_payment' in payment or not payment['tuition_payment'].isnumeric():
+                continue
             persisted_payment[0].amount_in_dollar = float(payment['tuition_payment'])
             persisted_payment[0].pay_date = datetime.datetime.today()
             persisted_payment[0].last_udpate_date = datetime.datetime.today()
